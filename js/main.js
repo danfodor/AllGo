@@ -149,6 +149,8 @@ function addNode(x, y) {
     text.setAttribute("y", y);
     text.style.cursor = "default";
     text.innerHTML = state.maxIdValue;
+    
+    text.classList.add(nodeComponent);
     // TODO: Text size problem needs to be handeled.
 
     var node = document.createElement("g");
@@ -242,6 +244,29 @@ function addEdge(nodeId1, nodeId2) {
 
 function modeChange() {
     console.log(state.mode.checked); // IMPLEMENT TOMORROW
+}
+
+function switchMove() {
+    if (state.move.checked) {
+        console.log("Good life");
+        
+        var nodeComponents = document.querySelectorAll("." + nodeComponent);
+        var componentsNumber = nodeComponents.length;
+        var it;
+
+        for (it = 0; it < componentsNumber; ++it) {
+            nodeComponents[it].style.cursor = "pointer";
+        }
+    }
+    else {
+        var nodeComponents = document.querySelectorAll("." + nodeComponent);
+        var componentsNumber = nodeComponents.length;
+        var it;
+
+        for (it = 0; it < componentsNumber; ++it) {
+            nodeComponents[it].style.cursor = "default";
+        }
+    }
 }
 
 function reset() {
@@ -400,7 +425,7 @@ function clickListener() {
 function onmousedownListener() {
     document.addEventListener("mousedown", function(e) {
         if (clickedInsideElement(e, "canvas")) {
-            if (state.moveMode === false) {
+            if (state.move.checked === false) {
                 console.log("Move inactive");
             }
             else {

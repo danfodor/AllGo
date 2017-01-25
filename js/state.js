@@ -18,6 +18,7 @@ function State() {
     this.contextElementId;
     this.maxIdValue = 0;
 
+    this.move = document.getElementById("move");
     this.moveMode = false;
     this.previewMode = false;
 
@@ -36,9 +37,16 @@ function State() {
         this.selectedNodeId = false;
     	this.maxIdValue = 0;
 
-        if (this.mode.checked == false) {
+        if (this.mode.checked === false) {
+            //this.mode.checked = true;
             $('#mode').bootstrapToggle('on');
         }
+
+        if (this.move.checked === true) {
+            //this.moveMode.checked = true;
+            $('#move').bootstrapToggle('off');
+        }
+
         this.graph = new Graph();
     }
 }
