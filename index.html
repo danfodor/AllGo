@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>AllGo</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link href="css/main.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+<div class="container-fluid">
+    
+    <div class="row">
+        <div id="vis-div" class="col-sm-8 customContextMenu canvas">
+            <!-- <div id="statusBar" style="margin-left: 18px;">Hello</div> -->
+            <svg id="vis-svg" class="canvas"> 
+            </svg>
+        </div>
+        <div id="side-div" class="col-sm-4">
+            <div class = "sided odd">
+                <div style="text-align: center;">
+                    <button id="reset" type="button" class="btn btn-primary" onclick="reset()">Reset</button>  
+                </div>
+            </div>
+            <div class = "sided even">
+                <div id="modeDiv" style="text-align: center;">
+                    <input id="mode" type="checkbox" checked data-toggle="toggle" data-on="Graph Building" data-off="Algorithm Run" onchange="modeChange()">
+                </div>
+            </div>
+            <div class = "sided odd">
+                c
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div id='footer' class="col-sm-12">
+            Copyright © <script type="text/javascript">document.write(new Date().getFullYear());</script> Dan Fodor. All rights reserved.
+        </div>
+    </div>
+    
+    <nav class="contextMenu" id="contextMenu">
+      <ul class="contextMenuItems">
+        <li class="contextMenuItem">
+          <a href="#" class="contextMenuLink" data-action="Edit">
+            <i class="fa fa-edit"></i> Edit
+          </a>
+        </li>
+        <li class="contextMenuItem">
+          <a href="#" class="contextMenuLink" data-action="Delete">
+            <i class="fa fa-times"></i> Remove
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+
+</div>
+
+
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+    <script type="text/javascript" src="./js/values.js"></script>
+    <script type="text/javascript" src="./js/graph.js"></script>
+    <script type="text/javascript" src="./js/state.js"></script>
+    <script type="text/javascript" src="./js/main.js"></script>
+</body>
+</html>
