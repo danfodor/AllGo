@@ -25,7 +25,7 @@
     <div class="row">
         <div id="vis-div" class="col-sm-8 customContextMenu canvas">
             <!-- <div id="statusBar" style="margin-left: 18px;">Hello</div> -->
-            <svg id="vis-svg" class="canvas"> 
+            <svg id="svg" class="canvas"> 
             </svg>
         </div>
         <div id="side-div" class="col-sm-4">
@@ -38,8 +38,15 @@
                 <div id="modeDiv" style="text-align: center;">
                     <input id="mode" type="checkbox" checked data-toggle="toggle" data-on="Graph Building" data-off="Algorithm Run" onchange="modeChange()">
                 </div>
-                <div id="moveDiv" style="text-align: center;">
-                    <input id="move" type="checkbox" data-toggle="toggle" data-on="Move on" data-off="Move off" onchange="switchMove()">
+                <div id="controlDiv">
+
+                    <div id="moveDiv" style="text-align: center;">
+                        <input id="move" type="checkbox" data-toggle="toggle" data-on="Move on" data-off="Move off" onchange="switchMove()">
+                    </div>
+                    <div id="dirDiv" style="text-align: center;">
+                        <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()">
+                    </div>
+                    
                 </div>
             </div>
             <div class = "sided odd">
@@ -56,14 +63,19 @@
     
     <nav class="contextMenu" id="contextMenu">
       <ul class="contextMenuItems">
-        <li class="contextMenuItem">
+        <li id="edit" class="contextMenuItem">
           <a href="#" class="contextMenuLink" data-action="Edit">
             <i class="fa fa-edit"></i> Edit
           </a>
         </li>
-        <li class="contextMenuItem">
+        <li id="delete" class="contextMenuItem">
           <a href="#" class="contextMenuLink" data-action="Delete">
             <i class="fa fa-times"></i> Remove
+          </a>
+        </li>
+        <li id="resetItem" class="contextMenuItem">
+          <a href="#" class="contextMenuLink" data-action="Reset">
+            <i class="fa fa-times"></i> Reset
           </a>
         </li>
       </ul>
@@ -83,5 +95,6 @@
     <script type="text/javascript" src="./js/graph.js"></script>
     <script type="text/javascript" src="./js/state.js"></script>
     <script type="text/javascript" src="./js/main.js"></script>
+    <script type="text/javascript" src="./js/testing.js"></script>
 </body>
 </html>

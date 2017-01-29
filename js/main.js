@@ -18,7 +18,7 @@ function clickInterpret(e) {
     }
 
 
-    var clickedElement = e.target;
+    var clickedElement = e.srcElement || e.target;
     var clickedTag = clickedElement.nodeName;
 
     if (clickedInsideElement(e, "canvas")) {
@@ -30,7 +30,6 @@ function clickInterpret(e) {
         var notCircle = true;
 
         // TODO: MAKE EVENT PROPER EVENT
-        //console.log("[onmouseup," + clickedTag + "]"); 
         switch(clickedTag){
             case "svg": 
                 notSVG = false;
@@ -40,11 +39,12 @@ function clickInterpret(e) {
                 handleSelect(document.getElementById(clickedElement.id.split("circle")[1]));
                 break;
             case "text":
+                //console.log("hurray");
                 if (clickedElement.parentNode.classList.contains(nodeClass)) {
                     notCircle = false;
                     
                     var nodeElement = document.getElementById(clickedElement.id.split("name")[1]);
-                    
+                    //console.log(nodeElement);
                     handleSelect(nodeElement);
                 }
                 // TODO: Else edge weight probably
@@ -87,6 +87,10 @@ function clickInterpret(e) {
     }
 }
 
+function mouseInterpret(e) {
+    console.log("maybe change the cursor?");
+}
+
 function overlapsMargins(x, y, radius, top, right, bottom, left) {
     var leftX = x - radius;
     var rightX = x + radius;
@@ -116,9 +120,6 @@ function addNode(x, y) {
     // The Node stored as a group tag within SVG
     var node = document.createElement("g");
     node.id = state.maxIdValue;
-    
-    node.classList.add(nodeClass);
-    node.classList.add(graphComponent);
 
     // CIRCLE for the node
     var circle = document.createElement("circle");
@@ -135,6 +136,7 @@ function addNode(x, y) {
     circle.style.strokeWidth = sizes.nodeOutlineWidth;
     
     circle.classList.add(nodeComponent);
+    circle.classList.add("circle");
     
     // TEXT for the node
     var text = document.createElement("text");
@@ -151,6 +153,7 @@ function addNode(x, y) {
     text.innerHTML = state.maxIdValue;
     
     text.classList.add(nodeComponent);
+    text.classList.add("name");
     // TODO: Text size problem needs to be handeled.
 
     var node = document.createElement("g");
@@ -158,6 +161,8 @@ function addNode(x, y) {
     
     node.appendChild(circle);
     node.appendChild(text);
+    
+    node.classList.add("node" + node.id);
     
     node.classList.add(nodeClass);
     node.classList.add(graphComponent);
@@ -215,7 +220,7 @@ function addEdge(nodeId1, nodeId2) {
         edge.id = nodeId1 + "-" + nodeId2;
 
         var line = document.createElement("line");
-        line.id = "line" + circle1.id + "-" + circle2.id;
+        line.id = "line" + nodeId1 + "-" + nodeId2;
         line.setAttribute("x1", x1);
         line.setAttribute("y1", y1);
         line.setAttribute("x2", x2);
@@ -224,6 +229,7 @@ function addEdge(nodeId1, nodeId2) {
         line.style.stroke = colors.unusedEdge;
         line.style.strokeWidth = sizes.edgeWidth;
         line.classList.add(edgeComponent);
+        line.classList.add("line");
         
         edge.appendChild(line);
         
@@ -243,7 +249,13 @@ function addEdge(nodeId1, nodeId2) {
 }
 
 function modeChange() {
-    console.log(state.mode.checked); // IMPLEMENT TOMORROW
+    if (state.mode.checked === true) {
+        console.log("nemahh");
+
+    }
+    else {
+        console.log("buaia");
+    }
 }
 
 function switchMove() {
@@ -257,6 +269,8 @@ function switchMove() {
         for (it = 0; it < componentsNumber; ++it) {
             nodeComponents[it].style.cursor = "pointer";
         }
+
+        onmousemoveListener(true);
     }
     else {
         var nodeComponents = document.querySelectorAll("." + nodeComponent);
@@ -266,6 +280,17 @@ function switchMove() {
         for (it = 0; it < componentsNumber; ++it) {
             nodeComponents[it].style.cursor = "default";
         }
+
+        onmousemoveListener(false);
+    }
+}
+
+function switchDir(argument) {
+    if (document.getElementById("dir").checked) {
+        state.graph.directed = true;
+    }
+    else {
+        state.graph.directed = false;
     }
 }
 
@@ -282,6 +307,22 @@ function reset() {
 function clickedInsideElement(e, className) {
     var element = e.srcElement || e.target;
     
+    if (element.classList && element.classList.contains(className)) {
+        return element;
+    }
+    else {
+        while (element = element.parentNode) {
+            if (element.classList && element.classList.contains(className)) {
+                return element;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Check if clicked element is inside an element with class className
+function clickedInsideClass(element, className) {
     if (element.classList && element.classList.contains(className)) {
         return element;
     }
@@ -358,15 +399,22 @@ function contextListener() {
         var isInsideMenu = clickedInsideElement(e, contextMenu);
 
         state.fromRightClick = true;        
-        state.elementInContext = clickedInsideElement(e, graphComponent);
         
+        state.elementInContext = clickedInsideElement(e, graphComponent);
+        if (state.elementInContext === false) {
+            state.elementInContext = e.srcElement || e.target;
+        }
+
         if (isInsideMenu === false) {
-            //console.log(state.elementInContext);
             state.contextElementId = state.elementInContext.id;
         }
 
         if (contextMenuArea) {
             e.preventDefault();
+
+            // create the custom context menu
+            customContextMenu(state.elementInContext);
+
             toggleMenuOn();
             positionMenu(e);
         }
@@ -398,6 +446,35 @@ function contextListener() {
     });
 }
 
+function customContextMenu(clickedElement) {
+    
+    switch(clickedElement.nodeName) {
+        case "g":
+            if(clickedElement.classList.contains("node")) {
+                document.getElementById("edit").style.display = "block"; 
+                document.getElementById("delete").style.display = "block"; 
+                document.getElementById("resetItem").style.display = "none"; 
+            }
+            else {
+                if (clickedElement.classList.contains("edge")) {
+                    document.getElementById("edit").style.display = "none"; 
+                    document.getElementById("delete").style.display = "block"; 
+                    document.getElementById("resetItem").style.display = "none";                     
+                }
+            }
+            break;
+        case "svg":
+            document.getElementById("edit").style.display = "none"; 
+            document.getElementById("delete").style.display = "none"; 
+            document.getElementById("resetItem").style.display = "block";
+            break;
+        default:
+            return false;
+            break;
+    }
+    return true;
+}
+
 // Checks for click events
 function clickListener() {
     document.addEventListener("click", function(e) {
@@ -421,22 +498,39 @@ function clickListener() {
     });
 }
 
-// Checks for click events
-function onmousedownListener() {
-    document.addEventListener("mousedown", function(e) {
-        if (clickedInsideElement(e, "canvas")) {
-            if (state.move.checked === false) {
-                console.log("Move inactive");
-            }
-            else {
-                console.log("Yes, I should move!");
-            }
-        }
-    });
-}
+
 
 function menuItemListener(linkElement) {
     state.fromRightClick = false;
+    var element = document.getElementById(state.contextElementId);
+
+    var action = linkElement.getAttribute("data-action");
+    switch(action) {
+        case "Delete": 
+            switch(element.nodeName){
+                case "g":
+                    if (element.classList.contains("node")) {
+                        state.remove("node", element.id);
+                    }
+                    else if (element.classList.contains("edge")) {
+                        state.remove("edge", element.id);
+                    }
+                    break;
+                case "svg":
+                    console.log("hello");
+                    break;
+                default:
+                    console.log("nemsobot");
+                    break;
+            }
+            break;
+        case "Reset":
+            reset();
+            break;
+        default:
+            break;
+    }
+
     console.log("Task id: " + state.contextElementId + 
                 ", Task action: " + linkElement.getAttribute("data-action"));
     toggleMenuOff();
@@ -470,19 +564,177 @@ function resizeListener() {
     };
 }
 
+// Checks for click events
+function onmousedownListener() {
+    document.addEventListener("mousedown", function(e) {
+        if (clickedInsideElement(e, "canvas")) {
+            if (state.move.checked === false) {
+                console.log("What should I do? (I'm [mousedown,move=fasle])");
+            }
+            else {
+                state.posX = e.clientX; // TODO: Check here if the position is the right one
+                state.posY = e.clientY;
+                state.draggedElem = e.srcElement || e.target;
+                console.log("ElementToBeDragged: " + state.draggedElem.id);
+                if (clickedInsideClass(state.draggedElem, nodeComponent)) {
+                    state.mouseDownDrag = true;
+
+                    var auxArray = [];
+
+                    if (state.draggedElem.nodeName == "circle") {
+                        auxArray = state.svg.querySelectorAll(".node" + 
+                                    state.draggedElem.id.split("circle")[1]);
+                    }
+                    else {
+                        if (state.draggedElem.nodeName == "text") {
+                            auxArray = state.svg.querySelectorAll(".node" + 
+                                        state.draggedElem.id.split("name")[1]);
+                        }
+                    }
+                    
+                    var elemsLength = auxArray.length;
+                    state.elementsToDrag = [];
+
+                    for (var it = 0; it < elemsLength; ++it) {
+                        var child;
+                        var childrenNumber = auxArray[it].childNodes.length;
+                        
+                        for (var it2 = 0; it2 < childrenNumber; ++it2) {
+                            child = auxArray[it].childNodes[it2];
+                            if (child.tagName === "circle" || child.tagName === "text" || 
+                                child.tagName === "line" || child.tagName === "path") {
+                                state.elementsToDrag.push(child);
+                                console.log(child.id);
+                            }
+                        }
+                    }
+                }
+                else { 
+                    state.mouseDownDrag = false;
+                    state.elementsToDrag = [];
+
+                }
+            }
+        }
+    });
+}
+
+// Checks for click events
+function onmouseupListener() {
+    document.addEventListener("mouseup", function(e) {
+        if (clickedInsideElement(e, "canvas")) {
+            if (state.move.checked === false) {
+                clickInterpret(e);
+            }
+            else {
+                // PAY SOME MORE ATTENTION HERE 
+                console.log("What to do?");
+                state.draggedElem = null;
+                state.elementsToDrag = [];
+                state.mouseDownDrag = false;
+                mouseInterpret(e);
+            }
+        }
+        else {
+            var button = e.which || e.button;
+            if (button === 1 && state.fromRightClick === true) {
+                state.fromRightClick = false;
+                return;
+            }
+        }
+    });
+}
+
+function moveNode(e) {
+
+    if (state.mouseDownDrag === true) { 
+
+        var elemId = state.draggedElem.id;
+        var nodeId = elemId;
+        if (nodeId.indexOf("circle") >= 0) {
+            nodeId = nodeId.split("circle")[1];
+        }
+        if (nodeId.indexOf("name") >= 0) {
+            nodeId = nodeId.split("name")[1];
+        }
+
+        var currentX = e.clientX;
+        var currentY = e.clientY;
+        
+        var dx = currentX - state.posX;
+        var dy = currentY - state.posY;
+        
+        // console.log("Polisia!");
+        // console.log(state.elementsToDrag);
+        var elemsNumber = state.elementsToDrag.length;
+        var elem;
+
+        // TODO: MARGIN CHECKS
+        for (var it = 0; it < elemsNumber; ++it) {
+            elem = state.elementsToDrag[it];
+
+            switch(elem.nodeName) {
+                case "circle":
+                    elem.setAttribute("cx", parseInt(elem.getAttribute("cx")) + dx);
+                    elem.setAttribute("cy", parseInt(elem.getAttribute("cy")) + dy);
+
+                    var ind = state.graph.nodeIndexFromId((elem.id.split("circle")[1]));
+                    state.graph.allNodes[ind].x += dx;
+                    state.graph.allNodes[ind].y += dy;
+
+                    break;
+                case "text":
+                    elem.setAttribute("x", parseInt(elem.getAttribute("x")) + dx);
+                    elem.setAttribute("y", parseInt(elem.getAttribute("y")) + dy);
+                    break;
+                case "line":
+                    var lineId = elem.id.split("line")[1];
+
+                    if (nodeId === lineId.split("-")[0]) {
+                        elem.setAttribute("x1", parseInt(elem.getAttribute("x1")) + dx);
+                        elem.setAttribute("y1", parseInt(elem.getAttribute("y1")) + dy);
+                    }
+                    else {
+                        elem.setAttribute("x2", parseInt(elem.getAttribute("x2")) + dx);
+                        elem.setAttribute("y2", parseInt(elem.getAttribute("y2")) + dy);
+                    }
+                    break;
+                default:
+                    break;
+            }           
+        }
+
+        state.posX = currentX; 
+        state.posY = currentY;
+    }
+}
+
+function onmousemoveListener(on) {
+    if (on) {
+        document.getElementById("svg").addEventListener("mousemove", moveNode);
+
+    }
+    else {
+        console.log("Track mouse off");
+
+        document.getElementById("svg").removeEventListener("mousemove", moveNode);
+    }
+}
+
 function hireListeners() {
     contextListener();
     clickListener();
     keyupListener();
     resizeListener();
     onmousedownListener();
+    onmouseupListener();
 }
 
 // Event managing 
 window.onload = function() {
     state = new State();
 
-    window.onmouseup = function(e) {clickInterpret(e)};
+    //window.onmouseup = function(e) {};
     hireListeners();
 }
 

@@ -1,5 +1,9 @@
 "use strict";
 
+// ASSUMPTION: The list of nodes is going to be monotonic both by id and index.
+//             That is, allNodes[i].id < allNodes[j].id <=> i < j
+//             This assumption is needed because nodes can be deleted or edited.
+//             But the order should stay the same.
 function Graph() {
     this.allNodes = []; 
     this.adjacencyLists = []; 
@@ -7,25 +11,17 @@ function Graph() {
     this.selfLoops = false;
     this.weighted = false;
 
-    this.checkIfNodeExists = function(nodeId) {
-        for (var node in this.allNodes) {
-            if (nodeId === node.id) {
-                return true;
-            }
-        }
-        return false;
-    };
 
     this.addNode = function(node1) {
-        var nodeExists = this.checkIfNodeExists(node1.id);
+        var nodeExists = this.nodeIndexFromId(node1.id);
         
-        if (nodeExists) {
+        if (nodeExists >= 0) {
             return false;
         }
 
         this.allNodes.push(node1);
-        this.adjacencyLists.push({id:node1.id, neighbours:[]});
-
+        this.adjacencyLists.push({id: node1.id, neighbours: []});
+        
         return true;
     };
 
@@ -33,11 +29,15 @@ function Graph() {
     this.existsEdge = function(nodeId1, nodeId2) { // NEEDS TO BE COMPLETED
 
         var nodeAdjList = this.getNodeAdjacencyList(nodeId1);
+        
+        if (nodeAdjList !== null) {
+            var neighboursNo = nodeAdjList.neighbours.length;
 
-        for (var ind in nodeAdjList.neighbours) {
-        	if (nodeAdjList.neighbours[ind] === nodeId2) {
-        		return true;
-        	}
+            for (var ind = 0; ind < neighboursNo; ++ind) {
+                if (parseInt(nodeAdjList.neighbours[ind]) === parseInt(nodeId2)) {
+                    return true;
+                }
+            }
         }
         return false;
     };
@@ -48,11 +48,16 @@ function Graph() {
         var edgeExists = this.existsEdge(nodeId1, nodeId2);
 
         if (edgeExists === true) {
-        	return false;
+            return false;
         }
-
-        this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
-        this.getNodeAdjacencyList(nodeId2).neighbours.push(nodeId1);
+        if (this.directed) {
+            console.log("TODO: UPDATE THE ADD EDGE FOR DIRECTED GRAHPS");
+            this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
+        }
+        else {
+            this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
+            this.getNodeAdjacencyList(nodeId2).neighbours.push(nodeId1);
+        }
 
         return true;
     };
@@ -62,7 +67,7 @@ function Graph() {
         var node;
 
         for (var i in this.allNodes) {
-        	node = this.allNodes[i];
+            node = this.allNodes[i];
 
             var nodeX = parseInt(node.x);
             var nodeY = parseInt(node.y);
@@ -70,109 +75,95 @@ function Graph() {
 
             var distance = Math.sqrt((nodeX - x) * (nodeX - x) + (nodeY - y) * (nodeY - y));
 
-            if (distance < (nodeRadius + node.outlineWidth) * 2) {
-            	return true;
+            if (distance < (nodeRadius + node.outlineWidth + sizes.radius + sizes.nodeOutlineWidth)) {
+                return true;
             }
         }
         return false;
     };
 
-    this.getNodeAdjacencyList = function (circleId) {
-    	var nodeId = circleId;
+    // TOCHECK: THIS SHOULD WORK
+    this.getNodeAdjacencyList = function (nodeId) {
+        var adjList = null;
+        
+        var adjListsNo = this.adjacencyLists.length;
 
-		var adjList = null;
-    	for (var ind in this.adjacencyLists) {
+        for (var ind = 0; ind < adjListsNo; ++ind) {
 
-        	if (this.adjacencyLists[ind].id == nodeId) {
-        		adjList = this.adjacencyLists[ind];
-        	}
+            if (parseInt(this.adjacencyLists[ind].id) == parseInt(nodeId)) {
+                adjList = this.adjacencyLists[ind];
+            }
         }
-
+        
         return adjList;
     };
+
+    // TODO: Implement binary search
+    this.nodeIndexFromId = function(nodeId) {
+        var len = this.allNodes.length;
+
+        for (var ind = 0; ind < len; ++ind) {            
+            if (parseInt(nodeId) === parseInt(this.allNodes[ind].id)) {
+                return ind;
+            }
+        }
+        return -1;
+    };
+
+    this.removeNodeFromNeighbours = function(id1, id2) {
+        var neighbours = this.getNodeAdjacencyList(id2).neighbours;
+        neighbours.splice(neighbours.indexOf(id1), 1);
+    }
+
+    this.remove = function(object, id1, id2) {
+        switch(object) {
+            case "node":
+                if (this.directed === false) {
+
+                    var adjList = this.getNodeAdjacencyList(id1).neighbours;
+                    var edgesNo = adjList.length;
+                    
+                    for (var it = 0; it < edgesNo; ++it) {
+                        this.removeNodeFromNeighbours(id1, adjList[it]);
+                    }
+                }
+                else {
+                    // TODO: IMPLEMENT DELETE NODE FOR DIRECTED GRAPHS:
+                    // Involves the use of inEdges and outEdges
+                    console.log("For directed edges, delet edges");
+                }
+                this.adjacencyLists.splice(this.nodeIndexFromId(id1), 1);
+                this.allNodes.splice(this.nodeIndexFromId(id1), 1);
+
+                break;
+            case "edge":
+                if (this.directed === false) {
+                    
+                    this.removeNodeFromNeighbours(id1, id2);
+                    this.removeNodeFromNeighbours(id2, id1);
+                }
+                else {
+                    // TODO: HERE I NEED TO CHANGE THE ADJACENCY LISTS
+                    // THEY NEED TO HAVE inNeighbours and outNeighbours
+                    console.log("TO IMPLEMENT: REMOVE EDGE FOR DIRECTED");
+
+                    console.log(this.nodeIndexFromId(id1));
+                }
+                break;
+            default:
+                break;
+        }
+
+        //console.log("this: " + this.nodeIndexFromId(id));
+    }
 };
 
 
-// var graph = {
-//     allNodes: [], 
-//     adjacencyLists: [], 
-//     directed: false,
-//     selfLoops: false,
-//     weighted: false,
-//     checkIfNodeExists: function(nodeId) {
-//         for (var node in this.allNodes) {
-//             if (nodeId === node.id) {
-//                 return true;
-//             }
-//         }
-//         return false;
-//     },
-//     addNode: function(node1) {
-//         var nodeExists = this.checkIfNodeExists(node1.id);
-        
-//         if (nodeExists) {
-//             return false;
-//         }
-
-//         this.allNodes.push(node1);
-//         this.adjacencyLists.push({id:node1.id, neighbours:[]});
-
-//         return true;
-//     },
-//     existsEdge: function(circleId1, circleId2) { // NEEDS TO BE COMPLETED
-//         var nodeId1 = circleId1;
-//         var nodeId2 = circleId2;
-
-//         var nodeAdjList = this.getNodeAdjacencyList(circleId1);
-        
-//         for (var ind in nodeAdjList.neighbours) {
-//         	if (nodeAdjList.neighbours[ind] === nodeId2) {
-//         		return true;
-//         	}
-//         }
-//         return false;
-//     },
-//     addEdge: function(circleId1, circleId2) { // NEEDS TO BE COMPLETED
-//         var edgeExists = this.existsEdge(circleId1, circleId2);
-        
-//         if (edgeExists === true) {
-//         	return false;
-//         }
-
-//         this.getNodeAdjacencyList(circleId1).neighbours.push(circleId2);
-//         this.getNodeAdjacencyList(circleId2).neighbours.push(circleId1);
-
-//         return true;
-//     },
-//     intersectsNode: function (x, y) {
-//         var node;
-
-//         for (var i in this.allNodes) {
-//             node = this.allNodes[i];
-            
-//             var nodeX = node.x;
-//             var nodeY = node.y;
-//             var nodeRadius = node.r;
-
-//             var distance = Math.sqrt((nodeX - x) * (nodeX - x) + (nodeY - y) * (nodeY - y));
-
-//             if (distance < (nodeRadius + node.outlineWidth) * 2) {
-//                 return true;
-//             }
-//         }
-//         return false;
-//     },
-//     getNodeAdjacencyList: function (circleId) {
-//     	var nodeId = circleId;
-
-// 		var adjList = null;
-//     	for (var ind in this.adjacencyLists) {
-
-//         	if (this.adjacencyLists[ind].id == nodeId) {
-//         		adjList = this.adjacencyLists[ind];
-//         	}
-//         }
-
-//         return adjList;
-//     }
-// };
+    /*this.checkIfNodeExists = function(nodeId) {
+        for (var node in this.allNodes) {
+            if (nodeId === node.id) {
+                return true;
+            }
+        }
+        return false;
+    };*/
