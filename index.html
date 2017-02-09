@@ -36,17 +36,56 @@
             </div>
             <div class = "sided even">
                 <div id="modeDiv" style="text-align: center;">
-                    <input id="mode" type="checkbox" checked data-toggle="toggle" data-on="Graph Building" data-off="Algorithm Run" onchange="modeChange()">
+                    <input id="mode" type="checkbox" checked data-toggle="toggle" data-on="Graph Building" data-off="Algorithm Run" onchange="changeMode()">
                 </div>
-                <div id="controlDiv">
+                <div id="modeMenu">
+                    <div id="algMode" style="display: none;">
+                        <div id="algoList" style="text-align: center; margin-bottom: 5px;">
+                            Select algorithm: <br>
+                            <select id="algorithmsOptions" onchange="algorithmSelect()">
+                                <option value="BFS">Breadth First Search (BFS)</option>
+                                <option value="DFS">Depth First Search (DFS)</option>
+                                <option value="Dijkstra">Dijkstra (Shortest Path)</option>
+                                <option value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
+                            </select>                               
+<!--                             <input id="algorithmInput" list="algorithmsList" name="Algorithms">
+                            <datalist id="algorithmsList">
+                                <option id="BFS" data-value="BFS">Breadth First Search (BFS)</option>
+                                <option id="DFS" data-value="DFS">Depth First Search (DFS)</option>
+                                <option id="Dijkstra" data-value="Dijkstra">Dijkstra (Shortest Path)</option>
+                                <option id="Kruskal" data-value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
+                                <option id="Prim" data-value="Prim">Prim's MSP (Minimum Spanning Tree)</option>
+                                <option id="Bridges" data-value="Bridges">Bridges in Connected Graph</option>
+                                <option id="ArtPoints" data-value="ArtPoints">Articulation Points in Connected Graph</option>
+                                <option id="MaxFlow" data-value="MaxFlow">Maximum Flow</option>
+                            </datalist> -->
+                        </div>
+                        <div id="buttons" style="display: none; text-align: center;">
 
-                    <div id="moveDiv" style="text-align: center;">
-                        <input id="move" type="checkbox" data-toggle="toggle" data-on="Move on" data-off="Move off" onchange="switchMove()">
+                            <div id="startNode" style="text-align: center; margin-bottom: 5px;" >
+                                Select starting node: 
+                                <select id="nodeOptions" onchange="startNodeSelect()">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>                                
+                            </div>
+
+                            <button id="restart" onclick="restart()">Restart</button>
+                            <button id="back" onclick="backStep()">Back</button>
+                            <button id="next" onclick="nextStep()">Next</button>
+                        </div>
+
                     </div>
-                    <div id="dirDiv" style="text-align: center;">
-                        <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()">
+                    <div id="buildMode">
+                        <div id="moveDiv" style="text-align: center;">
+                            <input id="move" type="checkbox" data-toggle="toggle" data-on="Move on" data-off="Move off" onchange="switchMove()">
+                        </div>
+                        <div id="dirDiv" style="text-align: center;">
+                            <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()">
+                        </div>
                     </div>
-                    
                 </div>
             </div>
             <div class = "sided odd">
@@ -92,6 +131,7 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
     <script type="text/javascript" src="./js/values.js"></script>
+    <script type="text/javascript" src="./js/algorithms.js"></script>
     <script type="text/javascript" src="./js/graph.js"></script>
     <script type="text/javascript" src="./js/state.js"></script>
     <script type="text/javascript" src="./js/main.js"></script>

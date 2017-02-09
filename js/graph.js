@@ -110,6 +110,30 @@ function Graph() {
         return -1;
     };
 
+    // TODO: Implement binary search
+    this.nodeIndexFromName = function(nodeName) {
+        var len = this.allNodes.length;
+
+        for (var ind = 0; ind < len; ++ind) {            
+            if ("" + nodeName === "" + this.allNodes[ind].name) {
+                return ind;
+            }
+        }
+        return -1;
+    };
+
+    // TODO: Implement binary search
+    this.nodeIdFromName = function(nodeName) {
+        var len = this.allNodes.length;
+
+        for (var ind = 0; ind < len; ++ind) {            
+            if ("" + nodeName === "" + this.allNodes[ind].name) {
+                return this.allNodes[ind].id;
+            }
+        }
+        return null;
+    };
+
     this.removeNodeFromNeighbours = function(id1, id2) {
         var neighbours = this.getNodeAdjacencyList(id2).neighbours;
         neighbours.splice(neighbours.indexOf(id1), 1);
@@ -153,17 +177,14 @@ function Graph() {
             default:
                 break;
         }
+    };
 
-        //console.log("this: " + this.nodeIndexFromId(id));
-    }
-};
-
-
-    /*this.checkIfNodeExists = function(nodeId) {
-        for (var node in this.allNodes) {
-            if (nodeId === node.id) {
-                return true;
-            }
+    this.orientation = function() {
+        if (this.directed === true) {
+            return "directed";
+        }   
+        else {
+            return "undirected";
         }
-        return false;
-    };*/
+    };
+};

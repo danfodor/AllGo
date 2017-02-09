@@ -2,6 +2,7 @@
 
 function State() {
     this.svg = document.getElementById("svg");
+    this.modeMenu = document.getElementById("modeMenu");
     this.isComponentSelected = false;
     this.selectedNodeId = null;
     this.mode = document.getElementById("mode");
@@ -17,6 +18,13 @@ function State() {
     this.elementInContext = null;
     this.contextElementId;
     this.maxIdValue = 0;
+
+    this.algorithms = new Algorithms();
+    this.algorithmRuns = false;
+    this.startNode;
+    this.nextSteps;
+    this.executedSteps;
+    this.pastSelectedId = null;
 
     this.move = document.getElementById("move");
     this.moveMode = false;
@@ -44,6 +52,8 @@ function State() {
         this.selectedNodeId = false;
     	this.maxIdValue = 0;
         this.elementsToDrag = [];
+        this.algorithmStarted = false;
+        this.pastSelectedId = null;
 
         if (this.mode.checked === false) {
             //this.mode.checked = true;
@@ -76,16 +86,7 @@ function State() {
                 var edges = this.svg.querySelectorAll(".node" + id + ".edge");
                 var edgesNo = edges.length;
                 var id1;
-                var id2;                
-                
-                // TODO: DETELE THIS CODE
-                // for (var it = 0; it < edgesNo; ++it) {
-
-                //     id1 = parseInt(edges[it].id.split('-')[0]);
-                //     id2 = parseInt(edges[it].id.split('-')[1]);
-                    
-                //     this.graph.remove("edge", id1, id2);
-                // }
+                var id2;
 
                 this.graph.remove("node", id);
 

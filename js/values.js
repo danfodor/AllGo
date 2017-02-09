@@ -26,3 +26,6 @@ var nodeClass = "node";
 var nodeComponent = "nodeComponent";
 var edgeClass = "edge";
 var edgeComponent = "edgeComponent";
+
+var undirectedAlgorithms = ["BFS", "DFS", "Dijkstra", "Kruskal", "Prim", "Bridges", "ArtPoints"];
+var directedAlgorithms = ["BFS", "DFS", "Dijkstra", "Kruskal", "Prim", "Bridges", "ArtPoints", "MaxFlow"];

@@ -248,19 +248,232 @@ function addEdge(nodeId1, nodeId2) {
     return true;
 }
 
-function modeChange() {
+// TODO: RESTRCUTURE THIS CODE. Think of utils for generating html
+function changeMode() {
+
     if (state.mode.checked === true) {
-        console.log("nemahh");
+
+        document.getElementById("algMode").style.display = "none";
+        document.getElementById("buildMode").style.display = "block";
+    }
+    else {
+
+        // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
+        // generate-html part
+        var algorithmsOptions = document.getElementById("algorithmsOptions");
+        
+        var algs = state.algorithms.algorithms; 
+        var len = algs.length;
+        var optionsHTML = "";
+        var option;
+        
+        if (state.graph.directed === true) {
+            for (var it = 0; it < len; ++it) {
+                if (algs[it].worksOn.directed === true) {
+                    option = document.createElement("option");
+                    option.setAttribute("value", algs[it].name);
+                    option.innerHTML = algs[it].name;
+                    
+                    optionsHTML += option.outerHTML + "\n";
+                }
+            }
+        }
+        else {
+            for (var it = 0; it < len; ++it) {
+                console.log(algs[it].worksOn.undirected);
+                if (algs[it].worksOn.undirected === true) {
+                    option = document.createElement("option");
+                    option.setAttribute("value", algs[it].name);
+                    option.innerHTML = algs[it].name;
+                    
+                    optionsHTML += option.outerHTML + "\n";
+                }
+            }
+        }
+
+        algorithmsOptions.innerHTML = optionsHTML;
+
+
+        document.getElementById("algMode").style.display = "block";
+        document.getElementById("buildMode").style.display = "none";
+        algorithmSelect();
+        startNodeSelect();
+    }
+
+
+    // if (state.mode.checked === true) {
+
+    //     document.getElementById("algorithmInput").removeEventListener("input", algorithmSelect);
+
+    //     document.getElementById("algMode").style.display = "none";
+    //     document.getElementById("buildMode").style.display = "block";
+    // }
+    // else {
+
+    //     var dataList = document.getElementById("algorithmsList");
+    //     if (state.graph.directed === false) {
+    //         dataList.innerHTML = state.algorithms.getOptionsHTML(undirectedAlgorithms);
+    //     }
+    //     else {
+    //         dataList.innerHTML = state.algorithms.getOptionsHTML(directedAlgorithms);
+    //     }
+
+    //     document.getElementById("algorithmInput").addEventListener("input", algorithmSelect);
+
+    //     document.getElementById("algMode").style.display = "block";
+    //     document.getElementById("buildMode").style.display = "none";
+    // }
+}
+
+function algorithmSelect() {
+
+    var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
+    if (algorithm !== null) {
+        
+        // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
+        // generate-html part
+        var nodes = [];
+        var len = state.graph.allNodes.length;
+        if (len <= 0) {
+            // TODO: Think of what should happend if no node
+            alert("Nodes should be in. Handler for this case under construction.");
+        }
+        else {    
+            for (var it = 0; it < len; ++it) {
+                nodes.push({"id": state.graph.allNodes[it].id, 
+                            "name": state.graph.allNodes[it].name});
+            }
+            // Generate options.
+            var options = document.getElementById("nodeOptions");
+            var optionsHTML = "";
+            var option;
+            for (var it = 0; it < len; ++it) {
+                option = document.createElement("option");
+                option.setAttribute("value", nodes[it].id);
+                
+                option.innerHTML = nodes[it].name;
+
+                optionsHTML += option.outerHTML + "\n";
+            }
+            options.innerHTML = optionsHTML;
+
+
+            document.getElementById("buttons").style.display = "block";
+        }
 
     }
     else {
-        console.log("buaia");
+        // Remove algorithm
+        document.getElementById("buttons").style.display = "none";
     }
+
+    // var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmInput").value);
+    // if (algorithm !== null) {
+        
+    //     // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
+    //     // generate-html part
+    //     var nodes = [];
+    //     var len = state.graph.allNodes.length;
+    //     if (len <= 0) {
+    //         // TODO: Think of what should happend if no node
+    //         alert("Nodes should be in. Handler for this case under construction.");
+    //     }
+    //     else {    
+    //         for (var it = 0; it < len; ++it) {
+    //             nodes.push(state.graph.allNodes[it].id);
+    //         }
+    //         // Generate options.
+    //         var options = document.getElementById("nodeOptions");
+    //         var optionsHTML = "";
+    //         var option;
+    //         for (var it = 0; it < len; ++it) {
+    //             option = document.createElement("option");
+    //             option.setAttribute("value", nodes[it]);
+    //             option.innerHTML = nodes[it];
+    //             console.log(option.outerHTML);
+    //             optionsHTML += option.outerHTML + "\n";
+    //         }
+    //             console.log("option.outerHTML");
+    //         options.innerHTML = optionsHTML;
+
+    //         document.getElementById("buttons").style.display = "block";
+    //     }
+
+    // }
+    // else {
+    //     // Remove algorithm
+    //     document.getElementById("buttons").style.display = "none";
+    // }
+}
+
+function startNodeSelect() {
+    var nodeName = document.getElementById("nodeOptions").value; 
+    var nodeId = state.graph.nodeIdFromName(nodeName);
+    
+    if (state.pastSelectedId !== null && state.algorithmRuns === false) {
+        document.getElementById(state.pastSelectedId).style.stroke = colors.unselectedNodeOutline;
+    }
+
+    state.pastSelectedId = "circle" + nodeId;
+    var circle = document.getElementById("circle" + nodeId);
+    circle.style.stroke = "green";
+}
+
+function restart() {
+    console.log("tati");
+}
+
+function nextStep() {
+    if (state.algorithmRuns === false) {
+        state.startNode = document.getElementById("nodeOptions").value;
+        var algorithm = document.getElementById("algorithmsOptions").value;
+        
+        state.algorithmRuns = true;
+
+        state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true)// perform algorithm
+        state.executedSteps = [];
+
+        // CONTINUEHERE: The task is to make this properly work. Coloring nodes and edges.
+        console.log(state.nextSteps);
+    }
+
+    if (state.nextSteps.length > 0) {
+        var executeStep = state.nextSteps.shift();
+
+        // EXECUTE IT
+        console.log("On edge: " + executeStep.edge);
+        var node = executeStep.edge.split('-')[1];
+        var edge = document.getElementById("line" + executeStep.edge);
+        if (edge === null) {
+            edge = document.getElementById("line" + executeStep.edge.split('-')[1] + "-" + 
+                                            executeStep.edge.split('-')[0]);
+        }
+        
+        node = document.getElementById("circle" + node);
+        var color = "green";
+        if (executeStep.extended === false) {
+            color = "red";
+        }
+        console.log(edge);
+        edge.style.stroke = color;
+        node.style.stroke = "green";
+        // CONTINUE HERE: Also COLOR THE NEXT NODE. CHECK IF IT WORKS.
+
+
+        state.executedSteps.push(executeStep);
+    }
+    else {
+        alert("Stop the next button when in this case");
+    }
+}
+
+function backStep() {
+    console.log("Not yet implmented");
+    alert("Not yet implmented");
 }
 
 function switchMove() {
     if (state.move.checked) {
-        console.log("Good life");
         
         var nodeComponents = document.querySelectorAll("." + nodeComponent);
         var componentsNumber = nodeComponents.length;
@@ -520,7 +733,7 @@ function menuItemListener(linkElement) {
                     console.log("hello");
                     break;
                 default:
-                    console.log("nemsobot");
+                    console.log("What should the default behaviour be?");
                     break;
             }
             break;
@@ -604,7 +817,7 @@ function onmousedownListener() {
                             if (child.tagName === "circle" || child.tagName === "text" || 
                                 child.tagName === "line" || child.tagName === "path") {
                                 state.elementsToDrag.push(child);
-                                console.log(child.id);
+                                //console.log(child.id);
                             }
                         }
                     }
@@ -712,7 +925,6 @@ function moveNode(e) {
 function onmousemoveListener(on) {
     if (on) {
         document.getElementById("svg").addEventListener("mousemove", moveNode);
-
     }
     else {
         console.log("Track mouse off");
