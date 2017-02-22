@@ -393,6 +393,8 @@ function addEdge(nodeId1, nodeId2) {
             edge.classList.add(edgeClass);
             edge.classList.add(graphComponent);
 
+            //pointOnLine({"x1": x1, "y1": y1, "x2": x2, "y2": y2}, 0.6);
+
             state.svg.insertBefore(edge, state.svg.firstChild);
         }
         else {
@@ -504,20 +506,27 @@ function cubicBezierPointsToSVG(points) {
     return d;
 }
 
-function quadBezierPoints(x1, y1, x2, y2, dir = 1, dfp = 0.4, ratio = 0.5) {
-    if (dir === 1) {
-        if (y1 > y2) {
+function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.3) {
+    if (y1 === y2) {
+        if ((x1 < x2 && dir === 1) || (x2 < x1 && dir === -1)) {
             dir = -dir;
         }
     }
     else {
-        if (y1 < y2) {
-            dir = -dir;
+        if (dir === 1) {
+            if (y2 < y1) {
+                dir = -dir;
+            }
+        }
+        else {
+            if (y1 < y2) {
+                dir = -dir;
+            }
         }
     }
 
-    var xp = (1 - dfp) * x1 + dfp * x2;  
-    var yp = (1 - dfp) * y1 + dfp * y2;
+    var xp = (1 - distFromP1) * x1 + distFromP1 * x2;  
+    var yp = (1 - distFromP1) * y1 + distFromP1 * y2;
     var dist = Math.sqrt((xp - x1) * (xp - x1) + (yp - y1) * (yp - y1));
 
 
@@ -539,28 +548,24 @@ function quadBezierPoints(x1, y1, x2, y2, dir = 1, dfp = 0.4, ratio = 0.5) {
         }
     }
 
-    // var m;
-    // var mp, rx, ry;
-    // if (xp === x1) {
-    //     rx = 1;
-    //     ry = 0;
-    // } 
-    // else {
-    //     if (yp === y1) {
-    //         rx = 0;
-    //         ry = 1;
-    //     }
-    //     else {
-    //         m = (y1 - yp) / (x1 - xp);
-    //         mp = -1 / m;
-    //         rx = 1 / Math.sqrt(1 + mp * mp);
-    //         ry = mp / Math.sqrt(1 + mp * mp);            
-    //     }
-    // }
+    xp = xp + dir * height * dist * rx;
+    yp = yp + dir * height * dist * ry;
 
-    xp = xp + dir * ratio * dist * rx;
-    yp = yp + dir * ratio * dist * ry;
+    // var cir = document.createElement("circle");
+    // var cir2 = document.createElement("circle");
 
+    // cir.setAttribute("cx", xp);
+    // cir.setAttribute("cy", yp);
+    // cir.setAttribute("r", 3);
+    // cir2.setAttribute("cx", (x1+x2)/2);
+    // cir2.setAttribute("cy", (y1+y2)/2);
+    // cir2.setAttribute("r", 3);
+
+    // cir.style.fill = "RED";
+    // cir2.style.fill = "BLUE";
+
+    // state.svg.insertBefore(cir, state.svg.firstChild);
+    // state.svg.insertBefore(cir2, state.svg.firstChild);
 
     return {"x1": x1, "y1": y1, "xp": xp, "yp": yp,
             "x2": x2, "y2": y2};
@@ -572,13 +577,30 @@ function quadBezierPointsToSVG(points) {
     d += "M " + points.x1 + " " + points.y1 + " ";
     d += "Q " + points.xp + " " + points.yp + ", ";   
     d += points.x2 + " " + points.y2;   
-    // console.log(d);
+
     return d;
 }
 
-function pointOnBezierCurve(p, t = 0.5) {
-    var x = (1 - t) * (1 - t) * p.x1 + 2 * (1 - t) * t * p.xp + t * t * p.x2;
-    var y = (1 - t) * (1 - t) * p.y1 + 2 * (1 - t) * t * p.yp + t * t * p.y2;
+function pointOnBezierCurve(curve, t = 0.5) {
+    var x = (1 - t) * (1 - t) * curve.x1 + 2 * (1 - t) * t * curve.xp + t * t * curve.x2;
+    var y = (1 - t) * (1 - t) * curve.y1 + 2 * (1 - t) * t * curve.yp + t * t * curve.y2;
+
+    return {"x": x, "y": y};
+}
+
+function pointOnLine(line, t = 0.5) {
+    var x = (1 - t) * line.x1 + t * line.x2;
+    var y = (1 - t) * line.y1 + t * line.y2;
+
+    // var cir = document.createElement("circle");
+
+    // cir.setAttribute("cx", x);
+    // cir.setAttribute("cy", y);
+    // cir.setAttribute("r", 3);
+
+    // cir.style.fill = "red";
+
+    // state.svg.insertBefore(cir, state.svg.firstChild);
 
     return {"x": x, "y": y};
 }
@@ -602,6 +624,7 @@ function lineGradient(p1, p2) {
 
 function inverseGradient(m) {
     var invM;
+
     if (m === 0) {
         invM = "Infinity";
     } 
@@ -813,6 +836,18 @@ function switchDir(argument) {
     }
     state.reset(state.graph.directed);
     console.log("Graph directed: " + state.graph.directed);
+}
+
+function switchWeighted(argument) {
+
+    if (document.getElementById("dir").checked) {
+        state.graph.setWeighted(true);
+        // addWeights();
+    }
+    else {
+        state.graph.setWeighted(false);
+        // removeWeights();
+    }
 }
 
 function reset() {
@@ -1171,6 +1206,8 @@ function moveNode(e) {
         if (state.lock === false) {
             state.lock = true;
         }
+        console.log("===================");
+        console.log("===================");
         e.stopPropagation();
 
         var nodeId, elemId = state.draggedElem.id;
@@ -1237,24 +1274,24 @@ function moveNode(e) {
                     var d;
                     var dir = 1;
 
-                    if (parseInt(nodeId) === parseInt(lineId.split("-")[0])) {
-                        if (parseInt(nodeId) > parseInt(lineId.split("-")[1])) {
-                            dir = -1;
-                        }                        
-                        var node2 = state.graph.allNodes[state.graph.nodeIndexFromId(node2Id)];
+                    if (parseInt(node1Id) > parseInt(node2Id)) {
+                        dir = -1;
+                    }
+                    else {
+                        dir = 1;
+                    }
 
+                    if (parseInt(nodeId) === parseInt(node1Id)) {          
+
+                        var node2 = state.graph.allNodes[state.graph.nodeIndexFromId(node2Id)];
 
                         var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -10);
                         var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, 10);
 
-
                         d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
                     }
                     else {
-                        dir = 1;
-                        if (parseInt(nodeId) > parseInt(lineId.split("-")[0])) {
-                            dir = -1;
-                        }
+
                         var node1 = state.graph.allNodes[state.graph.nodeIndexFromId(node1Id)];
 
                         var p1 = pointOnCircle(node1.x, node1.y, newX, newY, sizes.radius + sizes.edgeWidth, -10);
@@ -1265,43 +1302,6 @@ function moveNode(e) {
 
                     elem.setAttribute("d", d);
                     break;
-                // case "path":
-                //     var lineId = elem.id.split("line")[1];
-                //     console.log(lineId);
-
-                //     var node1Id = lineId.split("-")[0];
-                //     var node2Id = lineId.split("-")[1];
-
-                //     // TODO: TRANSPOSE THIS WITH THE CIRCLE MOVE FUNCTION.
-
-                //     var d;
-                //     var dir = 1;
-
-                //     if (parseInt(nodeId) === parseInt(lineId.split("-")[0])) {
-                //         if (parseInt(nodeId) > parseInt(lineId.split("-")[1])) {
-                //             dir = -1;
-                //         }                        
-                //         var node2 = state.graph.allNodes[state.graph.nodeIndexFromId(node2Id)];
-
-
-                //         // var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -10);
-                //         // var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, 10);
-
-
-                //         d = quadBezierPointsToSVG(quadBezierPoints(newX, newY, node2.x, node2.y, dir));
-                //     }
-                //     else {
-                //         dir = 1;
-                //         if (parseInt(nodeId) > parseInt(lineId.split("-")[0])) {
-                //             dir = -1;
-                //         }
-                //         var node1 = state.graph.allNodes[state.graph.nodeIndexFromId(node1Id)];
-
-                //         d = quadBezierPointsToSVG(quadBezierPoints(node1.x, node1.y, newX, newY, dir));
-                //     }
-
-                //     elem.setAttribute("d", d);
-                //     break;
                 default:
                     break;
             }           

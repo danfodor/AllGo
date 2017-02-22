@@ -48,17 +48,6 @@
                                 <option value="Dijkstra">Dijkstra (Shortest Path)</option>
                                 <option value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
                             </select>                               
-<!--                             <input id="algorithmInput" list="algorithmsList" name="Algorithms">
-                            <datalist id="algorithmsList">
-                                <option id="BFS" data-value="BFS">Breadth First Search (BFS)</option>
-                                <option id="DFS" data-value="DFS">Depth First Search (DFS)</option>
-                                <option id="Dijkstra" data-value="Dijkstra">Dijkstra (Shortest Path)</option>
-                                <option id="Kruskal" data-value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
-                                <option id="Prim" data-value="Prim">Prim's MSP (Minimum Spanning Tree)</option>
-                                <option id="Bridges" data-value="Bridges">Bridges in Connected Graph</option>
-                                <option id="ArtPoints" data-value="ArtPoints">Articulation Points in Connected Graph</option>
-                                <option id="MaxFlow" data-value="MaxFlow">Maximum Flow</option>
-                            </datalist> -->
                         </div>
                         <div id="buttons" style="display: none; text-align: center;">
 
@@ -84,6 +73,9 @@
                         </div>
                         <div id="dirDiv" style="text-align: center;">
                             <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()">
+                        </div>
+                        <div id="weightDiv" style="text-align: center;">
+                            <input id="weight" type="checkbox" data-toggle="toggle" data-on="Weighted on" data-off="Weighted off" onchange="switchWeighted()">
                         </div>
                     </div>
                 </div>

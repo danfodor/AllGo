@@ -248,4 +248,15 @@ function Graph(directed = false) {
         }
         return true;
     };
+
+    this.setWeighted = function(weighted) {
+        this.weighted = weighted
+        if (weighted === true) {
+            // Add weights
+        }   
+        else {
+            // Remove weights
+        }
+        return true;
+    };
 };
