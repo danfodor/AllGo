@@ -12,7 +12,9 @@ var colors = {
 var sizes = {
     radius: 17,
     edgeWidth: 3,
-    nodeOutlineWidth: 3
+    nodeOutlineWidth: 3,
+ 	stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
+ 	defPolygonPoints: "-2,0 -5,5 5,0 -5,-5"
 };
 
 var newSVGInnerHTML = "";

@@ -4,14 +4,15 @@
 //             That is, allNodes[i].id < allNodes[j].id <=> i < j
 //             This assumption is needed because nodes can be deleted or edited.
 //             But the order should stay the same.
-function Graph() {
+function Graph(directed = false) {
     this.allNodes = []; 
     this.adjacencyLists = []; 
-    this.directed = false;
+    this.directed = directed;
     this.selfLoops = false;
     this.weighted = false;
 
 
+    // TO BE CHECKED
     this.addNode = function(node1) {
         var nodeExists = this.nodeIndexFromId(node1.id);
         
@@ -20,30 +21,51 @@ function Graph() {
         }
 
         this.allNodes.push(node1);
-        this.adjacencyLists.push({id: node1.id, neighbours: []});
+        if(this.directed === false) {
+            this.adjacencyLists.push({id: node1.id, neighbours: []});
+        }
+        else {
+            this.adjacencyLists.push({id: node1.id, 
+                                      inNeighbours: [],
+                                      outNeighbours: []});
+        }
         
         return true;
     };
 
-    // FUNCTION REVISED
+    // TO BE CHECKED 
     this.existsEdge = function(nodeId1, nodeId2) { // NEEDS TO BE COMPLETED
 
         var nodeAdjList = this.getNodeAdjacencyList(nodeId1);
         
-        if (nodeAdjList !== null) {
-            var neighboursNo = nodeAdjList.neighbours.length;
+        if (this.directed === false) {
+            if (nodeAdjList !== null) {
+                var neighbours = nodeAdjList.neighbours;
+                var neighboursNo = neighbours.length;
 
-            for (var ind = 0; ind < neighboursNo; ++ind) {
-                if (parseInt(nodeAdjList.neighbours[ind]) === parseInt(nodeId2)) {
-                    return true;
+                for (var ind = 0; ind < neighboursNo; ++ind) {
+                    if (parseInt(neighbours[ind]) === parseInt(nodeId2)) {
+                        return true;
+                    }
+                }
+            }    
+        }
+        else {
+            if (nodeAdjList !== null) {
+                var outNeighbours = nodeAdjList.outNeighbours;
+                var neighboursNo = outNeighbours.length;
+
+                for (var ind = 0; ind < neighboursNo; ++ind) {
+                    if (parseInt(outNeighbours[ind]) === parseInt(nodeId2)) {
+                        return true;
+                    }
                 }
             }
         }
         return false;
     };
 
-    // FUNCTION REVISED
-    // TODO: UPDATE FOR DIRECTED GRAPH
+    // TO BE CHECKED
     this.addEdge = function(nodeId1, nodeId2) { // NEEDS TO BE COMPLETED
         var edgeExists = this.existsEdge(nodeId1, nodeId2);
 
@@ -51,8 +73,8 @@ function Graph() {
             return false;
         }
         if (this.directed) {
-            console.log("TODO: UPDATE THE ADD EDGE FOR DIRECTED GRAHPS");
-            this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
+            this.getNodeAdjacencyList(nodeId1).outNeighbours.push(nodeId2);
+            this.getNodeAdjacencyList(nodeId2).inNeighbours.push(nodeId1);
         }
         else {
             this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
@@ -134,12 +156,36 @@ function Graph() {
         return null;
     };
 
-    this.removeNodeFromNeighbours = function(id1, id2) {
-        var neighbours = this.getNodeAdjacencyList(id2).neighbours;
-        neighbours.splice(neighbours.indexOf(id1), 1);
+    // Updated for directed. Slightly checked
+    this.removeNodeFromNeighbours = function(id1, id2, edgeType = "none") {
+        if (this.directed === false) {
+            if(edgeType === "none") {
+                var neighbours = this.getNodeAdjacencyList(id2).neighbours;
+                neighbours.splice(neighbours.indexOf(id1), 1);
+                return true;
+            }
+        }
+        else {
+            // removeNodeFromNeighbours(1,2,"in") means
+            // remove node 1 from the in neighbours of node 2 (so, there's a 1->2 edge)
+            if (edgeType === "in") {
+                var inNeighbours = this.getNodeAdjacencyList(id2).inNeighbours;
+                inNeighbours.splice(inNeighbours.indexOf(id1), 1);
+                return true;
+            }
+            else {
+                if (edgeType === "out") {
+                    var outNeighbours = this.getNodeAdjacencyList(id2).outNeighbours;
+                    outNeighbours.splice(outNeighbours.indexOf(id1), 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    this.remove = function(object, id1, id2) {
+    // Updated for directed. To be checked
+    this.remove = function(object, id1, id2 = null) {
         switch(object) {
             case "node":
                 if (this.directed === false) {
@@ -152,9 +198,16 @@ function Graph() {
                     }
                 }
                 else {
-                    // TODO: IMPLEMENT DELETE NODE FOR DIRECTED GRAPHS:
-                    // Involves the use of inEdges and outEdges
-                    console.log("For directed edges, delet edges");
+                    var adjList = this.getNodeAdjacencyList(id1);
+                    var inEdgesNo = adjList.inNeighbours.length;
+                    var outEdgesNo = adjList.outNeighbours.length;
+                    
+                    for (var it = 0; it < inEdgesNo; ++it) {
+                        this.removeNodeFromNeighbours(id1, adjList.inNeighbours[it], "out");
+                    }
+                    for (var it = 0; it < outEdgesNo; ++it) {
+                        this.removeNodeFromNeighbours(id1, adjList.outNeighbours[it], "in");
+                    }
                 }
                 this.adjacencyLists.splice(this.nodeIndexFromId(id1), 1);
                 this.allNodes.splice(this.nodeIndexFromId(id1), 1);
@@ -167,11 +220,8 @@ function Graph() {
                     this.removeNodeFromNeighbours(id2, id1);
                 }
                 else {
-                    // TODO: HERE I NEED TO CHANGE THE ADJACENCY LISTS
-                    // THEY NEED TO HAVE inNeighbours and outNeighbours
-                    console.log("TO IMPLEMENT: REMOVE EDGE FOR DIRECTED");
-
-                    console.log(this.nodeIndexFromId(id1));
+                    this.removeNodeFromNeighbours(id1, id2, "in");
+                    this.removeNodeFromNeighbours(id2, id1, "out");
                 }
                 break;
             default:
@@ -186,5 +236,16 @@ function Graph() {
         else {
             return "undirected";
         }
+    };
+
+    this.setDirected = function(directed) {
+        this.directed = directed
+        if (directed === true) {
+            return "directed";
+        }   
+        else {
+            return "undirected";
+        }
+        return true;
     };
 };

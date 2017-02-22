@@ -18,6 +18,7 @@ function State() {
     this.elementInContext = null;
     this.contextElementId;
     this.maxIdValue = 0;
+    this.lock = false;
 
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
@@ -46,7 +47,7 @@ function State() {
     }
 
     // TODO: REVIEW THE FUNCTION
-    this.reset = function() {
+    this.reset = function(directed = false) {
         this.svg.innerHTML = newSVGInnerHTML;
         this.isComponentSelected = false;
         this.selectedNodeId = false;
@@ -64,8 +65,9 @@ function State() {
             //this.moveMode.checked = true;
             $('#move').bootstrapToggle('off');
         }
+        this.lock = false;
 
-        this.graph = new Graph();
+        this.graph = new Graph(directed);
     }
 
     // TODO: REVIEW THE FUNCTION
