@@ -101,6 +101,15 @@ function State() {
                     this.svg.removeChild(edge); 
                 }                
                 break;
+            case "weight": 
+                var gId = id.split("weight")[1];
+                var g = this.svg.getElementById(gId);
+                console.log(g);
+                var weight = this.svg.getElementById(id);
+
+                this.graph.remove("weight", id);
+                g.removeChild(weight);
+                break;
             default:
                 break;
         }

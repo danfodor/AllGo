@@ -43,12 +43,11 @@ function clickInterpret(e) {
                 handleSelect(document.getElementById(clickedElement.id.split("circle")[1]));
                 break;
             case "text":
-                //console.log("hurray");
                 if (clickedElement.parentNode.classList.contains(nodeClass)) {
                     notCircle = false;
                     
                     var nodeElement = document.getElementById(clickedElement.id.split("name")[1]);
-                    //console.log(nodeElement);
+
                     handleSelect(nodeElement);
                 }
                 // TODO: Else edge weight probably
@@ -146,7 +145,7 @@ function addNode(x, y) {
     var text = document.createElement("text");
     
     text.id = "name" + state.maxIdValue;
-    text.style.fontSize = "18px";
+    text.style.fontSize = sizes.stdFontSize;
     text.style.alignmentBaseline = "central";
     text.style.textAnchor = "middle";
     text.style.fontWeight = "bold";
@@ -216,10 +215,7 @@ function addEdge(nodeId1, nodeId2) {
             var circle1 = document.getElementById("circle" + nodeId1);
             var circle2 = document.getElementById("circle" + nodeId2);
 
-            var dir = 1;
-            if (parseInt(nodeId1) > parseInt(nodeId2)) {
-                dir = -1;
-            }
+
 
             var x1 = circle1.cx.baseVal.value;
             var y1 = circle1.cy.baseVal.value;
@@ -236,6 +232,21 @@ function addEdge(nodeId1, nodeId2) {
             var path = document.createElement("path");
 
             path.id = "line" + nodeId1 + "-" + nodeId2;
+
+            // var dir = 1;
+            // if (parseInt(nodeId1) > parseInt(nodeId2)) {
+            //     dir = -1;
+            // }
+
+            // var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+            //                           parseFloat(p2.x), parseFloat(p2.y), dir);
+            // var pathD = quadBezierPointsToSVG(pt);
+
+            var dir = computeDir(nodeId1, nodeId2, p1, p2);
+            // if (parseInt(nodeId1) > parseInt(nodeId2)) {
+            //     dir = -1;
+            // }
+            
             var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
                                       parseFloat(p2.x), parseFloat(p2.y), dir);
             var pathD = quadBezierPointsToSVG(pt);
@@ -243,6 +254,7 @@ function addEdge(nodeId1, nodeId2) {
             path.setAttribute("d", pathD);
             
             path.style.stroke = colors.unusedEdge;
+            // TEMPORARY HERE:
             if (dir === -1) {
                 path.style.stroke = "#1234F6";
             }
@@ -304,61 +316,6 @@ function addEdge(nodeId1, nodeId2) {
             return false;
         }
     }
-    // if (state.graph.directed === true) {
-
-    //     // DEAL WITH THIS svgHandler
-    //     if (state.graph.addEdge(nodeId1, nodeId2)) {
-    //         var circle1 = document.getElementById("circle" + nodeId1);
-    //         var circle2 = document.getElementById("circle" + nodeId2);
-
-    //         var dir = 1;
-    //         if (parseInt(nodeId1) > parseInt(nodeId2)) {
-    //             dir = -1;
-    //         }
-
-    //         var x1 = circle1.cx.baseVal.value;
-    //         var y1 = circle1.cy.baseVal.value;
-
-    //         var x2 = circle2.cx.baseVal.value;
-    //         var y2 = circle2.cy.baseVal.value;
-
-    //         // var p1 = pointOnCircle(x1, y1, x2, y2, sizes.radius + sizes.edgeWidth, -10);
-    //         // var p2 = pointOnCircle(x2, y2, x1, y1, sizes.radius + sizes.edgeWidth, 10);
-
-    //         var edge = document.createElement("g");
-    //         edge.id = nodeId1 + "-" + nodeId2;
-
-    //         var path = document.createElement("path");
-
-    //         path.id = "line" + nodeId1 + "-" + nodeId2;
-
-    //         var pathD = quadBezierPointsToSVG(quadBezierPoints(x1, y1, x2, y2, dir));
-
-    //         path.setAttribute("d", pathD);
-            
-    //         path.style.stroke = colors.unusedEdge;
-    //         if (dir === -1) {
-    //             path.style.stroke = "#1234F6";
-    //         }
-    //         path.style.strokeWidth = sizes.edgeWidth;
-    //         path.style.fill= "transparent";
-    //         path.classList.add(edgeComponent);
-    //         path.classList.add("line");
-            
-    //         edge.appendChild(path);
-            
-    //         edge.classList.add("node" + nodeId1);      
-    //         edge.classList.add("node" + nodeId2);   
-
-    //         edge.classList.add(edgeClass);
-    //         edge.classList.add(graphComponent);
-
-    //         state.svg.insertBefore(edge, state.svg.firstChild);
-    //     }
-    //     else {
-    //         return false;
-    //     }
-    // }
     else {
         if (state.graph.addEdge(nodeId1, nodeId2)) {
             var circle1 = document.getElementById("circle" + nodeId1);
@@ -384,16 +341,38 @@ function addEdge(nodeId1, nodeId2) {
             line.style.strokeWidth = sizes.edgeWidth;
             line.classList.add(edgeComponent);
             line.classList.add("line");
-            
+
             edge.appendChild(line);
+
+            if (state.graph.weighted === true) {
+                var text = document.createElement("text");
+                
+                text.id = "weight" + nodeId1 + "-" + nodeId2;
+                text.style.fontSize = sizes.stdFontSize;
+                text.style.alignmentBaseline = "central";
+                text.style.textAnchor = "middle";
+                text.style.fontWeight = "bold";
+
+                var p = rightAnglePoint(nodeId1, nodeId2, {"x": x1, "y": y1}, {"x": x2, "y": y2});
+
+                text.setAttribute("x", p.x);
+                text.setAttribute("y", p.y);
+                text.style.cursor = "text";
+                // GET THE WEIGHT FROM graph
+                var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
+                text.innerHTML = weight;
+                
+                text.classList.add(edgeComponent);
+                text.classList.add("weight");
+
+                edge.appendChild(text);  
+            }
             
             edge.classList.add("node" + nodeId1);      
             edge.classList.add("node" + nodeId2);   
 
             edge.classList.add(edgeClass);
             edge.classList.add(graphComponent);
-
-            //pointOnLine({"x1": x1, "y1": y1, "x2": x2, "y2": y2}, 0.6);
 
             state.svg.insertBefore(edge, state.svg.firstChild);
         }
@@ -405,11 +384,54 @@ function addEdge(nodeId1, nodeId2) {
     return true;
 }
 
+// This function is used by directed graphs so that 
+// no matter the id of the edge is, the output is the 
+// same all the time (1-2 and 2-1 will both be considered
+// as 1-2)
+function computeSortedDir(node1Id, node2Id, p1, p2) {
+    var dir = null;
+
+    if (parseInt(node1Id) < parseInt(node2Id)) {
+        dir = computeDir(node1Id, node2Id, p1, p2);
+    } 
+    else {
+        dir = computeDir(node2Id, node1Id, p2, p1);
+    }
+
+    return dir;
+}
+
+// Computes the direction for placing 
+function computeDir(node1Id, node2Id, p1, p2) {
+    var dir = 1;
+    if (parseInt(node1Id) > parseInt(node2Id)) {
+        dir = -1;
+    }
+
+    if (parseFloat(p1.y) === parseFloat(p2.y)) {
+        if ((parseFloat(p1.x) < parseFloat(p2.x) && parseInt(dir) === 1) || 
+            (parseFloat(p2.x) < parseFloat(p1.x) && parseInt(dir) === -1)) {
+            dir = -dir;
+        }
+    }
+    else {
+        if (parseInt(dir) === 1) {
+            if (parseFloat(p2.y) < parseFloat(p1.y)) {
+                dir = -dir;
+            }
+        }
+        else {
+            if (parseFloat(p1.y) < parseFloat(p2.y)) {
+                dir = -dir;
+            }
+        }
+    } 
+    return dir;   
+}
+
 function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
     var dx = x2 - x1;
     var dy = y2 - y1; // top-right is the (0,0) point
-
-    // console.log("dx: " + dx + ", dy: " + dy);
     
     var a = Math.atan2(dy, dx);
     var angle = a * 180 / Math.PI;
@@ -506,50 +528,28 @@ function cubicBezierPointsToSVG(points) {
     return d;
 }
 
-function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.3) {
-    if (y1 === y2) {
-        if ((x1 < x2 && dir === 1) || (x2 < x1 && dir === -1)) {
-            dir = -dir;
-        }
-    }
-    else {
-        if (dir === 1) {
-            if (y2 < y1) {
-                dir = -dir;
-            }
-        }
-        else {
-            if (y1 < y2) {
-                dir = -dir;
-            }
-        }
-    }
+function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.3, dist = null) {
 
     var xp = (1 - distFromP1) * x1 + distFromP1 * x2;  
     var yp = (1 - distFromP1) * y1 + distFromP1 * y2;
     var dist = Math.sqrt((xp - x1) * (xp - x1) + (yp - y1) * (yp - y1));
 
+    var p1 = {"x": xp, "y": yp};
+    var p2 = {"x": x1, "y": y1};
 
-    var m = lineGradient({"x": xp, "y": yp}, {"x": x1, "y": y1});
-    var mp = inverseGradient(m);
-    var rx, ry;
-    if (mp === "Infinity") {
-        rx = 1;
-        ry = 0;
-    } 
-    else {
-        if (mp === 0) {
-            rx = 0;
-            ry = 1;
-        }
-        else {
-            rx = 1 / Math.sqrt(1 + mp * mp);
-            ry = mp / Math.sqrt(1 + mp * mp);            
-        }
-    }
 
-    xp = xp + dir * height * dist * rx;
-    yp = yp + dir * height * dist * ry;
+    var v = orthogonalVector(p1, p2);
+
+    var controlX = xp + dir * height * dist * v.x;
+    var controlY = yp + dir * height * dist * v.y;
+
+
+    // var controlX = xp + dir * height * dist * rx;
+    // var controlY = yp + dir * height * dist * ry;
+
+
+    // console.log("xp: " + xp + ", controlX: " + controlX);
+    // console.log("yp: " + yp + ", controlY: " + controlY);
 
     // var cir = document.createElement("circle");
     // var cir2 = document.createElement("circle");
@@ -567,7 +567,8 @@ function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.
     // state.svg.insertBefore(cir, state.svg.firstChild);
     // state.svg.insertBefore(cir2, state.svg.firstChild);
 
-    return {"x1": x1, "y1": y1, "xp": xp, "yp": yp,
+
+    return {"x1": x1, "y1": y1, "xp": controlX, "yp": controlY,
             "x2": x2, "y2": y2};
 }
 
@@ -592,27 +593,41 @@ function pointOnLine(line, t = 0.5) {
     var x = (1 - t) * line.x1 + t * line.x2;
     var y = (1 - t) * line.y1 + t * line.y2;
 
-    // var cir = document.createElement("circle");
+    return {"x": x, "y": y};
+}
 
-    // cir.setAttribute("cx", x);
-    // cir.setAttribute("cy", y);
-    // cir.setAttribute("r", 3);
-
-    // cir.style.fill = "red";
-
-    // state.svg.insertBefore(cir, state.svg.firstChild);
+function pointBetweenPoints(p1, p2, t = 0.5) {
+    var x = (1 - t) * p1.x + t * p2.x;
+    var y = (1 - t) * p1.y + t * p2.y;
 
     return {"x": x, "y": y};
 }
 
-function lineGradient(p1, p2) {
+function lineGradient(line) {
+    var m;
+    if (line.x1 === line.x2) {
+        m = "Infinity";
+    } 
+    else {
+        if (line.y1 === line.y2) {
+            m = 0;
+        }
+        else {
+            m = (line.y2 - line.y1) / (line.x2 - line.x1);            
+        }
+    }
+
+    return m;
+}
+
+function pointsGradient(p1, p2) {
     var m;
     if (p1.x === p2.x) {
-        m = 0;
+        m = "Infinity";
     } 
     else {
         if (p1.y === p2.y) {
-            m = "Infinity";
+            m = 0;
         }
         else {
             m = (p2.y - p1.y) / (p2.x - p1.x);            
@@ -638,6 +653,48 @@ function inverseGradient(m) {
     }
 
     return invM;
+}
+
+
+function orthogonalVector(p1, p2) {
+    var v = {"x": 0, "y": 0};
+
+    var slope = pointsGradient(p1, p2);
+    var invSlope = inverseGradient(slope);
+
+    if (invSlope === "Infinity") {
+        v.x = 0;
+        v.y = 1;
+    } 
+    else {
+        if (invSlope === 0) {
+            v.x = 1;
+            v.y = 0;
+        }
+        else {
+            v.x = 1 / Math.sqrt(1 + invSlope * invSlope);
+            v.y = invSlope / Math.sqrt(1 + invSlope * invSlope);            
+        }
+    }
+    return v;
+}
+
+function rightAnglePoint(node1Id, node2Id, p1, p2, dist = sizes.weightDistance, distFromP1 = 0.5, sorted = true) {
+    var midPoint = pointBetweenPoints(p1, p2, distFromP1);
+    var v = orthogonalVector(p1, p2);
+    var dir;
+    if (sorted === true) {
+        dir = computeSortedDir(node1Id, node2Id, p1, p2);
+    }
+    else {
+        dir = computeDir(node1Id, node2Id, p1, p2);
+    }
+    var p = {"x": midPoint.x, "y": midPoint.y};
+
+    p.x = p.x + dir * dist * v.x;
+    p.y = p.y + dir * dist * v.y;
+
+    return p;
 }
 
 // TODO: RESTRCUTURE THIS CODE. Think of utils for generating html
@@ -703,7 +760,7 @@ function algorithmSelect() {
         var nodes = [];
         var len = state.graph.allNodes.length;
         if (len <= 0) {
-            // TODO: Think of what should happend if no node
+            // TODO: Think of what should happen if no node
             alert("Nodes should be in. Handler for this case under construction.");
         }
         else {    
@@ -750,7 +807,7 @@ function startNodeSelect() {
 }
 
 function restart() {
-    console.log("tati");
+    console.log("restart() called. Is this really useful???");
 }
 
 function nextStep() {
@@ -762,8 +819,6 @@ function nextStep() {
 
         state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true)// perform algorithm
         state.executedSteps = [];
-
-        //console.log(state.nextSteps);
     }
 
     if (state.nextSteps.length > 0) {
@@ -840,19 +895,126 @@ function switchDir(argument) {
 
 function switchWeighted(argument) {
 
-    if (document.getElementById("dir").checked) {
+    if (document.getElementById("weight").checked) {
         state.graph.setWeighted(true);
-        // addWeights();
+        addSVGWeights();
     }
     else {
         state.graph.setWeighted(false);
-        // removeWeights();
+        removeSVGWeights();
     }
+}
+
+function addSVGWeights() {
+
+    if (state.graph.directed === true) {
+        // Implement after undirected.   
+    }
+    else {
+        var svgLine, svgEdge, svgEdges = document.querySelectorAll(".edge");
+        var len = svgEdges.length;
+        var gId, lineId, x1, y1, x2, y2;
+
+        for (var i = 0; i < len; ++i) {
+            svgEdge = svgEdges[i];
+            gId = svgEdge.id;
+            lineId = "line" + gId;
+            svgLine = document.getElementById(lineId);
+
+            x1 = parseFloat(svgLine.getAttribute("x1"));
+            y1 = parseFloat(svgLine.getAttribute("y1"));
+            x2 = parseFloat(svgLine.getAttribute("x2"));
+            y2 = parseFloat(svgLine.getAttribute("y2"));
+
+            var p1 = {"x": x1, "y": y1};
+            var p2 = {"x": x2, "y": y2};
+            var node1Id = gId.split("-")[0];
+            var node2Id = gId.split("-")[1];
+
+            var p = rightAnglePoint(node1Id, node2Id, p1, p2);
+
+            var text = document.createElement("text");
+            
+            text.id = "weight" + gId;
+            text.style.fontSize = sizes.stdFontSize;
+            text.style.alignmentBaseline = "central";
+            text.style.textAnchor = "middle";
+            text.style.fontWeight = "bold";
+
+            text.setAttribute("x", p.x);
+            text.setAttribute("y", p.y);
+            text.style.cursor = "text";
+            // GET THE WEIGHT FROM graph
+            var weight = state.graph.getEdgeWeight(parseInt(node1Id), parseInt(node2Id));
+            text.innerHTML = weight;
+            
+            text.classList.add(edgeComponent);
+            text.classList.add("weight");
+
+            svgEdge.appendChild(text);     
+
+        }
+    }
+    state.svg.innerHTML = state.svg.innerHTML; 
+}
+
+function removeSVGWeights(argument) {
+
+    if (state.graph.directed === true) {
+        // Implement after undirected.   
+    }
+    else {
+        var svgWeight, svgWeights = document.querySelectorAll(".weight");
+        var len = svgWeights.length;
+        // var gId, lineId, x1, y1, x2, y2;
+
+        for (var i = 0; i < len; ++i) {
+            svgWeight = svgWeights[i];
+            state.remove("weight", svgWeight.id);
+
+            // gId = svgWeight.id;
+            // lineId = "line" + gId;
+            // svgLine = document.getElementById(lineId);
+
+            // x1 = parseFloat(svgLine.getAttribute("x1"));
+            // y1 = parseFloat(svgLine.getAttribute("y1"));
+            // x2 = parseFloat(svgLine.getAttribute("x2"));
+            // y2 = parseFloat(svgLine.getAttribute("y2"));
+
+            // var p1 = {"x": x1, "y": y1};
+            // var p2 = {"x": x2, "y": y2};
+            // var node1Id = gId.split("-")[0];
+            // var node2Id = gId.split("-")[1];
+
+            // var p = rightAnglePoint(node1Id, node2Id, p1, p2);
+
+            // var text = document.createElement("text");
+            
+            // text.id = "weight" + gId;
+            // text.style.fontSize = sizes.stdFontSize;
+            // text.style.alignmentBaseline = "central";
+            // text.style.textAnchor = "middle";
+            // text.style.fontWeight = "bold";
+
+            // text.setAttribute("x", p.x);
+            // text.setAttribute("y", p.y);
+            // text.style.cursor = "text";
+            // // GET THE WEIGHT FROM graph
+            // var weight = state.graph.getEdgeWeight(parseInt(node1Id), parseInt(node2Id));
+            // text.innerHTML = weight;
+            
+            // text.classList.add(edgeComponent);
+            // text.classList.add("weight");
+
+            // svgEdge.appendChild(text);     
+
+        }
+    }
+    state.svg.innerHTML = state.svg.innerHTML; 
 }
 
 function reset() {
     state.reset();
-    //console.log("haha"); // IMPLEMENT TOMORROW
 }
 
 // The Code for the context menu, starting here, has been done with the help of the 
@@ -1054,8 +1216,6 @@ function clickListener() {
     });
 }
 
-
-
 function menuItemListener(linkElement) {
     state.fromRightClick = false;
     var element = document.getElementById(state.contextElementId);
@@ -1073,10 +1233,10 @@ function menuItemListener(linkElement) {
                     }
                     break;
                 case "svg":
-                    console.log("hello");
+                    console.log("This should never happen");
                     break;
                 default:
-                    console.log("What should the default behaviour be?");
+                    console.log("What should the default behaviour be? Probably none.");
                     break;
             }
             break;
@@ -1131,7 +1291,7 @@ function onmousedownListener() {
                 state.posX = e.clientX; // TODO: Check here if the position is the right one
                 state.posY = e.clientY;
                 state.draggedElem = e.srcElement || e.target;
-                console.log("ElementToBeDragged: " + state.draggedElem.id);
+
                 if (clickedInsideClass(state.draggedElem, nodeComponent)) {
                     state.mouseDownDrag = true;
 
@@ -1206,20 +1366,16 @@ function moveNode(e) {
         if (state.lock === false) {
             state.lock = true;
         }
-        console.log("===================");
-        console.log("===================");
         e.stopPropagation();
 
         var nodeId, elemId = state.draggedElem.id;
 
-        // console.log(elemId);
         if (elemId.indexOf("circle") >= 0) {
             nodeId = elemId.split("circle")[1];
         }
         if (elemId.indexOf("name") >= 0) {
             nodeId = elemId.split("name")[1];
         }
-        // console.log(nodeId);
 
         var currentX = e.clientX;
         var currentY = e.clientY;
@@ -1264,22 +1420,12 @@ function moveNode(e) {
                     break;
                 case "path":
                     var lineId = elem.id.split("line")[1];
-                    console.log(lineId);
 
                     var node1Id = lineId.split("-")[0];
                     var node2Id = lineId.split("-")[1];
 
-                    // TODO: TRANSPOSE THIS WITH THE CIRCLE MOVE FUNCTION.
-
                     var d;
-                    var dir = 1;
-
-                    if (parseInt(node1Id) > parseInt(node2Id)) {
-                        dir = -1;
-                    }
-                    else {
-                        dir = 1;
-                    }
+                    var dir = null; 
 
                     if (parseInt(nodeId) === parseInt(node1Id)) {          
 
@@ -1287,8 +1433,6 @@ function moveNode(e) {
 
                         var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -10);
                         var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, 10);
-
-                        d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
                     }
                     else {
 
@@ -1296,11 +1440,41 @@ function moveNode(e) {
 
                         var p1 = pointOnCircle(node1.x, node1.y, newX, newY, sizes.radius + sizes.edgeWidth, -10);
                         var p2 = pointOnCircle(newX, newY, node1.x, node1.y, sizes.radius + sizes.edgeWidth, 10);
+                    }                    
+                    dir = computeDir(parseInt(node1Id), parseInt(node2Id), p1, p2);
 
-                        d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
-                    }
-
+                    d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
                     elem.setAttribute("d", d);
+                    break;
+                case "text":
+                    if (elem.id.indexOf("weight") >= 0) {
+                        var weightId = elem.id;
+                        var lineId = weightId.split("weight")[1];
+                        var node1Id = lineId.split("-")[0];
+                        var node2Id = lineId.split("-")[1];
+
+                        if (state.graph.directed === true) {
+                            // TODO: LATER, AFTER CHOOSING THE SHAPES FOR THE DIRECTED EDGES (CASE STUDY)
+                        }
+                        else {
+                            var p1, p2;
+                            if (parseInt(nodeId) === parseInt(node1Id)) {
+                                var node2 = document.getElementById("circle" + node2Id);
+
+                                p1 = {"x": newX, "y": newY};
+                                p2 = {"x": node2.getAttribute("cx"), "y": node2.getAttribute("cy")};
+                            }
+                            else {
+                                var node1 = document.getElementById("circle" + node1Id);
+
+                                p1 = {"x": node1.getAttribute("cx"), "y": node1.getAttribute("cy")};
+                                p2 = {"x": newX, "y": newY};
+                            }
+                            var p = rightAnglePoint(node1Id, node2Id, p1, p2);
+                            elem.setAttribute("x", p.x);
+                            elem.setAttribute("y", p.y);
+                        }
+                    } 
                     break;
                 default:
                     break;

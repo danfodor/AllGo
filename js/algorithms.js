@@ -105,66 +105,6 @@ function Algorithms() {
 
                 }
                 return null;
-
-
-                // var nodes = graph.allNodes;
-                // var adjLists = graph.adjacencyLists;
-                
-                // var sequenceExec = [];
-                // var fullSequenceExec = [];
-                // var len = graph.allNodes.length;
-                // var visited = [];
-                // var extended = [];
-
-                // for (var it = 0; it < len; ++it) {
-                //     visited.push(false);
-                //     extended.push(false);
-                // }
-                // if (graph.nodeIndexFromId(startNode) >= 0) {
-                //     visited[graph.nodeIndexFromId(startNode)] = true;
-                    
-                //     var queue = [startNode];
-
-                //     if (graph.directed === false) {
-                //         var currentNode;
-
-                //         while (queue.length > 0) {
-
-                //             currentNode = queue.shift();
-                        
-                //             var neighbours = graph.adjacencyLists[graph.nodeIndexFromId(currentNode)].neighbours;
-                            
-                //             var nLen = neighbours.length;
-
-                //             for (var it = 0; it < nLen; ++it) {
-                //                 var ind = graph.nodeIndexFromId(neighbours[it]);
-                //                 if (visited[ind] === false) {
-                //                     visited[ind] = true;
-                //                     queue.push(graph.allNodes[ind].id);
-                //                     sequenceExec.push(graph.allNodes[ind].id);
-                //                     fullSequenceExec.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
-                //                 }
-                //                 else {
-                //                     if (extended[graph.allNodes[ind].id] === false) {
-                //                         fullSequenceExec.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-                //                     } 
-                //                 }
-                //             }
-                //             extended[currentNode] = true;
-                //         }
-                //     }
-                //     else {
-                //         console.log("Needs some thought");
-                //     }
-                //     if (fullList === false) {
-                //         return sequenceExec;
-                //     }
-                //     else {
-                //         return fullSequenceExec;
-                //     }
-
-                // }
-                // return null;
             }
         },
         {

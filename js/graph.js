@@ -22,12 +22,14 @@ function Graph(directed = false) {
 
         this.allNodes.push(node1);
         if(this.directed === false) {
-            this.adjacencyLists.push({id: node1.id, neighbours: []});
+            this.adjacencyLists.push({id: node1.id, neighbours: [], weights: []});
         }
         else {
             this.adjacencyLists.push({id: node1.id, 
                                       inNeighbours: [],
-                                      outNeighbours: []});
+                                      inWeights: [],
+                                      outNeighbours: [],
+                                      outWeights: []});
         }
         
         return true;
@@ -73,12 +75,25 @@ function Graph(directed = false) {
             return false;
         }
         if (this.directed) {
-            this.getNodeAdjacencyList(nodeId1).outNeighbours.push(nodeId2);
-            this.getNodeAdjacencyList(nodeId2).inNeighbours.push(nodeId1);
+            var node1AdjList = this.getNodeAdjacencyList(nodeId1);
+            node1AdjList.outNeighbours.push(nodeId2);
+            node1AdjList.outWeights.push(0);
+
+            var node1AdjList = this.getNodeAdjacencyList(nodeId2);
+            node1AdjList.inNeighbours.push(nodeId1);
+            node1AdjList.inWeights.push(0);
         }
         else {
-            this.getNodeAdjacencyList(nodeId1).neighbours.push(nodeId2);
-            this.getNodeAdjacencyList(nodeId2).neighbours.push(nodeId1);
+            var node1AdjList = this.getNodeAdjacencyList(nodeId1);
+            node1AdjList.neighbours.push(nodeId2);
+            node1AdjList.weights.push(0);   
+
+            var node1AdjList = this.getNodeAdjacencyList(nodeId2);
+            node1AdjList.neighbours.push(nodeId1);
+            node1AdjList.weights.push(0);
+                     
+            // this.getNodeAdjacencyList(nodeId1).neighbours.push({"id": nodeId2, "weight": 0});
+            // this.getNodeAdjacencyList(nodeId2).neighbours.push({"id": nodeId1, "weight": 0});
         }
 
         return true;
@@ -156,45 +171,62 @@ function Graph(directed = false) {
         return null;
     };
 
-    // Updated for directed. Slightly checked
+    // CHECKNEEDED:
     this.removeNodeFromNeighbours = function(id1, id2, edgeType = "none") {
         if (this.directed === false) {
             if(edgeType === "none") {
-                var neighbours = this.getNodeAdjacencyList(id2).neighbours;
-                neighbours.splice(neighbours.indexOf(id1), 1);
-                return true;
+                var id2AdjList = this.getNodeAdjacencyList(id2);
+                var neighbours = id2AdjList.neighbours;
+                var weights = id2AdjList.weights;
+
+                var ind = neighbours.indexOf(id1);
+
+                neighbours.splice(ind, 1);
+                weights.splice(ind, 1);
             }
         }
+        // Should normally work. Worth checking.
         else {
             // removeNodeFromNeighbours(1,2,"in") means
             // remove node 1 from the in neighbours of node 2 (so, there's a 1->2 edge)
+
+            var done = false;
             if (edgeType === "in") {
-                var inNeighbours = this.getNodeAdjacencyList(id2).inNeighbours;
-                inNeighbours.splice(inNeighbours.indexOf(id1), 1);
-                return true;
+                var node2AdjList = this.getNodeAdjacencyList(id2);
+                var inNeighbours = node2AdjList.inNeighbours;
+                var inWeights = node2AdjList.inWeights;
+
+                var ind = inNeighbours.indexOf(id1);
+
+                inNeighbours.splice(ind, 1);
+                inWeights.splice(ind, 1);
             }
             else {
                 if (edgeType === "out") {
-                    var outNeighbours = this.getNodeAdjacencyList(id2).outNeighbours;
-                    outNeighbours.splice(outNeighbours.indexOf(id1), 1);
-                    return true;
+                    var node2AdjList = this.getNodeAdjacencyList(id2);
+                    var outNeighbours = node2AdjList.outNeighbours;
+                    var outWeights = node2AdjList.outWeights;
+
+                    var ind = outNeighbours.indexOf(id1);
+
+                    outNeighbours.splice(ind, 1);
+                    outWeights.splice(ind, 1);
                 }
             }
         }
-        return false;
+        return done;
     }
 
-    // Updated for directed. To be checked
     this.remove = function(object, id1, id2 = null) {
         switch(object) {
             case "node":
                 if (this.directed === false) {
 
-                    var adjList = this.getNodeAdjacencyList(id1).neighbours;
-                    var edgesNo = adjList.length;
+                    var neighbours = this.getNodeAdjacencyList(id1).neighbours;
+                    var edgesNo = neighbours.length;
                     
                     for (var it = 0; it < edgesNo; ++it) {
-                        this.removeNodeFromNeighbours(id1, adjList[it]);
+                        this.removeNodeFromNeighbours(id1, neighbours[it]);
                     }
                 }
                 else {
@@ -222,6 +254,14 @@ function Graph(directed = false) {
                 else {
                     this.removeNodeFromNeighbours(id1, id2, "in");
                     this.removeNodeFromNeighbours(id2, id1, "out");
+                }
+                break;
+            case "wieght":
+                if (this.directed === false) {
+                    // TODO: LATER, SET WEIGHT TO 0.
+                }
+                else {
+                    // TODO: LATER, SET WEIGHT TO 0.
                 }
                 break;
             default:
@@ -259,4 +299,65 @@ function Graph(directed = false) {
         }
         return true;
     };
+
+    this.getEdgeWeight = function(nodeId1, nodeId2) {
+
+        var weight = null;
+        var node1AdjList = this.getNodeAdjacencyList(nodeId1);
+
+        var ind = this.getIndexFromIdInAdjList(nodeId2, node1AdjList);
+        if (ind >= 0) {
+            weight = node1AdjList.weights[ind];
+        }
+
+        return weight;
+    }
+
+    this.getIndexFromIdInAdjList = function(nodeId, adjList, dir="none") {
+        var ind = -1;
+
+        // DOUBLECHECK THE CASE FOR DIRECTED GRAPHS
+        if (this.directed === true) {
+            switch(dir) {
+                case "in":
+                    var inNeighbours = adjList.inNeighbours;
+                    var len = inNeighbours.length;
+
+                    for (var i = 0; i < len; ++i) {
+                        if (parseInt(inNeighbours[i]) === parseInt(nodeId)) {
+                            ind = i;
+                            break;
+                        }
+                    }
+                    break;
+                case "out":
+                    var outNeighbours = adjList.outNeighbours;
+                    var len = outNeighbours.length;
+
+                    for (var i = 0; i < len; ++i) {
+                        if (parseInt(outNeighbours[i]) === parseInt(nodeId)) {
+                            ind = i;
+                            break;
+                        }
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
+        else {
+            var neighbours = adjList.neighbours;
+            var len = neighbours.length;
+
+            for (var i = 0; i < len; ++i) {
+                if (parseInt(neighbours[i]) === parseInt(nodeId)) {
+                    ind = i;
+                    break;
+                }
+            }
+        }
+        return ind;
+    }
+
 };

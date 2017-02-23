@@ -14,7 +14,9 @@ var sizes = {
     edgeWidth: 3,
     nodeOutlineWidth: 3,
  	stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
- 	defPolygonPoints: "-2,0 -5,5 5,0 -5,-5"
+ 	defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
+ 	weightDistance: 12,
+ 	stdFontSize: "18px"
 };
 
 var newSVGInnerHTML = "";
