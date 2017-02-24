@@ -113,7 +113,7 @@ function Graph(directed = false) {
             var distance = Math.sqrt((nodeX - x) * (nodeX - x) + (nodeY - y) * (nodeY - y));
 
             if (distance < (nodeRadius + node.outlineWidth + sizes.radius + sizes.nodeOutlineWidth)) {
-                return true;
+                return {"x": nodeX, "y": nodeY};
             }
         }
         return false;

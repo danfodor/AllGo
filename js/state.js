@@ -12,13 +12,14 @@ function State() {
     this.contextMenuPosition;
     this.contextMenuWidth;
     this.contextMenuHeight;
-    this.fromRightClick = false;
+    this.contextMenuOn = false;
     this.windowWidth;
     this.windowHeight;
     this.elementInContext = null;
     this.contextElementId;
     this.maxIdValue = 0;
     this.lock = false;
+
 
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
@@ -27,22 +28,18 @@ function State() {
     this.executedSteps;
     this.pastSelectedId = null;
 
-    this.move = document.getElementById("move");
-    this.moveMode = false;
-    this.posX;
-    this.posY;
-    this.draggedElem;
-    this.elementsToDrag = [];
-    this.mouseDownDrag;
+    this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
+                  "movedX": -1, "movedY": -1, "upX": -1, "upY": -1, "down": false, 
+                  "selectedNode": false, "elem": null, "dragOnMove": false, "moveElements": []};
 
 
     this.previewMode = false;
 
     this.nodeIdToCircleId = function() {
+
     	if (this.selectedNodeId !== false) {
         	return "circle" + this.selectedNodeId;
     	}
-
     	return false;
     }
 
@@ -52,19 +49,24 @@ function State() {
         this.isComponentSelected = false;
         this.selectedNodeId = false;
     	this.maxIdValue = 0;
-        this.elementsToDrag = [];
-        this.algorithmStarted = false;
+
+        this.algorithms = new Algorithms();
+        this.algorithmRuns = false;
         this.pastSelectedId = null;
+
+        this.createPreviewCircle();
+        this.createForbiddenCircle();
+        this.createPreviewLine();
+        this.createForbiddenLine();
+
+        this.createPreviewPath();
+        this.createForbiddenPath();
 
         if (this.mode.checked === false) {
             //this.mode.checked = true;
             $('#mode').bootstrapToggle('on');
         }
 
-        if (this.move.checked === true) {
-            //this.moveMode.checked = true;
-            $('#move').bootstrapToggle('off');
-        }
         this.lock = false;
 
         this.graph = new Graph(directed);
@@ -114,6 +116,213 @@ function State() {
                 break;
         }
     }
+
+    this.createPreviewCircle = function(x = 0, y = 0, r = sizes.radius, fill = colors.unselectedNode, opacity = 0.4,
+                                stroke = colors.unselectedNodeOutline, strokeWidth = sizes.nodeOutlineWidth) {
+        var circle = document.createElement("circle");
+        
+        circle.id = "previewCircle";
+
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", r);
+        circle.setAttribute("visibility", "hidden");
+        circle.setAttribute("opacity", opacity);
+
+        circle.style.fill = fill;
+        circle.style.stroke = stroke;
+        circle.style.strokeWidth = strokeWidth;
+
+        this.svg.appendChild(circle);
+
+        this.svg.innerHTML = this.svg.innerHTML;
+    }
+
+    this.createForbiddenCircle = function(x = 0, y = 0, r = sizes.radius + 5, fill = colors.unselectedNode, fillOpacity = 0,
+                                stroke = "red", strokeWidth = sizes.nodeOutlineWidth) {
+        var circle = document.createElement("circle");
+        
+        circle.id = "forbiddenCircle";
+
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", r);
+        circle.setAttribute("visibility", "hidden");
+        circle.setAttribute("fill-opacity", fillOpacity);
+
+        circle.style.fill = fill;
+        circle.style.stroke = stroke;
+        circle.style.strokeWidth = strokeWidth;
+
+        this.svg.appendChild(circle);
+
+        this.svg.innerHTML = this.svg.innerHTML;
+    }
+
+    this.createPreviewLine = function(x1 = 0, y1 = 0, x2 = 0, y2 = 0, opacity = 0.25,
+                                stroke = colors.unusedEdge, strokeWidth = sizes.edgeWidth) {
+        
+        var line = document.createElement("line");
+        line.id = "previewLine";
+
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+
+        line.setAttribute("opacity", opacity);
+        
+        line.style.stroke = stroke;
+        line.style.strokeWidth = strokeWidth; 
+
+        line.setAttribute("visibility", "hidden");
+ 
+        this.svg.appendChild(line);
+
+        this.svg.innerHTML = this.svg.innerHTML;
+    }
+
+    this.createForbiddenLine = function(x1 = 0, y1 = 0, x2 = 0, y2 = 0, opacity = 1,
+                                stroke = "red", strokeWidth = sizes.edgeWidth + 1) {
+        
+        var line = document.createElement("line");
+        line.id = "forbiddenLine";
+
+        line.setAttribute("x1", x1);
+        line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y2", y2);
+
+        line.setAttribute("opacity", opacity);
+        
+        line.style.stroke = stroke;
+        line.style.strokeWidth = strokeWidth; 
+
+        line.setAttribute("visibility", "hidden");
+ 
+        this.svg.appendChild(line);
+
+        this.svg.innerHTML = this.svg.innerHTML;
+    }
+
+    this.createPreviewPath = function(d = "M 0 0 Q 0 0, 0 0", opacity = 0.4, stroke = colors.unusedEdge, 
+                                        strokeWidth = sizes.edgeWidth) {
+        var edge = document.createElement("g");
+        edge.id = "previewEdge";
+
+        var path = document.createElement("path");
+
+        path.id = "previewPath";
+
+        path.setAttribute("d", d);
+        
+        path.style.stroke = stroke;
+
+        path.style.strokeWidth = strokeWidth;
+        path.style.fill= "transparent";
+        path.setAttribute("opacity", opacity);
+
+        path.setAttribute("visibility", "hidden");
+    
+        var defs = document.createElement("defs");
+        var marker = document.createElement("marker");
+
+        marker.id = "previewArrow";
+        marker.setAttribute("markerWidth", 5);
+        marker.setAttribute("markerHeight", 5);
+        marker.setAttribute("viewBox", "-10 -4 12 12");
+        marker.setAttribute("refX", -2);
+        marker.setAttribute("refY", 0);
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
+        
+        var polygon = document.createElement("polygon");
+        polygon.setAttribute("points", sizes.stdPolygonPoints);
+        polygon.setAttribute("fill", colors.unusedEdge);
+        polygon.setAttribute("stroke", colors.unusedEdge);
+        polygon.setAttribute("stroke-width", "1px");
+
+        marker.innerHTML = polygon.outerHTML;
+
+        defs.appendChild(marker);
+        path.setAttribute("marker-end", 'url(#' + marker.id + ')');
+
+        edge.appendChild(defs);
+        edge.appendChild(path);    
+ 
+        this.svg.appendChild(edge);
+
+        this.svg.innerHTML = this.svg.innerHTML;        
+    }
+    //     var path = document.createElement("path");
+
+    //     path.id = "previewPath";
+
+    //     path.setAttribute("d", d);
+        
+    //     path.style.stroke = stroke;
+
+    //     path.style.strokeWidth = strokeWidth;
+    //     path.style.fill= "transparent";
+    //     path.setAttribute("opacity", opacity);
+
+    //     path.setAttribute("visibility", "hidden");
+ 
+    //     this.svg.appendChild(path);
+
+    //     this.svg.innerHTML = this.svg.innerHTML;        
+    // }    
+
+    this.createForbiddenPath = function(d = "M 0 0 Q 0 0, 0 0", opacity = 1, stroke = "red", 
+                                        strokeWidth = sizes.edgeWidth) {
+        var edge = document.createElement("g");
+        edge.id = "forbiddenEdge";
+
+        var path = document.createElement("path");
+        path.id = "forbiddenPath";
+
+        path.setAttribute("d", d);
+        path.setAttribute("opacity", opacity);
+        
+        path.style.stroke = stroke;
+        path.style.strokeWidth = strokeWidth; 
+        path.style.fill= "transparent";
+
+        path.setAttribute("visibility", "hidden");
+ 
+
+        var defs = document.createElement("defs");
+        var marker = document.createElement("marker");
+
+        marker.id = "forbiddenArrow";
+        marker.setAttribute("markerWidth", 5);
+        marker.setAttribute("markerHeight", 5);
+        marker.setAttribute("viewBox", "-10 -4 12 12");
+        marker.setAttribute("refX", -2);
+        marker.setAttribute("refY", 0);
+        marker.setAttribute("orient", "auto");
+        marker.setAttribute("markerUnits", "strokeWidth");
+        
+        var polygon = document.createElement("polygon");
+        polygon.setAttribute("points", sizes.stdPolygonPoints);
+        polygon.setAttribute("fill", stroke);
+        polygon.setAttribute("stroke", stroke);
+        polygon.setAttribute("stroke-width", "1px");
+
+        marker.innerHTML = polygon.outerHTML;
+
+        defs.appendChild(marker);
+        path.setAttribute("marker-end", 'url(#' + marker.id + ')');
+
+        edge.appendChild(defs);
+        edge.appendChild(path);    
+
+
+        this.svg.appendChild(edge);
+
+        this.svg.innerHTML = this.svg.innerHTML;        
+    }
+   
 }
 
 var state;
