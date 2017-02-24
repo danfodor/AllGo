@@ -1477,20 +1477,6 @@ function mouseMove(e) {
             line.setAttribute("y2", currentY);
             
             var path = state.svg.getElementById("previewPath");
-            var pt1 = {"x": parseFloat(line.getAttribute("x1")), 
-                       "y": parseFloat(line.getAttribute("y1"))};
-            var pt2 = {"x": currentX, "y": currentY};
-
-
-            var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -10);
-            var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, 10);
-
-            var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
-            var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                      parseFloat(p2.x), parseFloat(p2.y), dir);
-            var d = quadBezierPointsToSVG(pt);         
-
-            path.setAttribute("d", d);
 
             if (state.contextMenuOn === false) {
 
@@ -1537,6 +1523,22 @@ function mouseMove(e) {
                 }
                 if (state.isComponentSelected) {
                     if (state.graph.directed === true) {
+                        var pt1 = {"x": parseFloat(line.getAttribute("x1")), 
+                                   "y": parseFloat(line.getAttribute("y1"))};
+                        var pt2 = {"x": parseFloat(line.getAttribute("x2")), 
+                                   "y": parseFloat(line.getAttribute("y2"))};
+
+
+                        var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -10);
+                        var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, 10);
+
+                        var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
+                        var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                  parseFloat(p2.x), parseFloat(p2.y), dir);
+                        var d = quadBezierPointsToSVG(pt);         
+
+                        path.setAttribute("d", d);
+            
                         path.setAttribute("visibility", "visible");
                     }
                     else {
