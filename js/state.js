@@ -20,6 +20,9 @@ function State() {
     this.maxIdValue = 0;
     this.lock = false;
 
+    this.left = this.svg.getBoundingClientRect().left;
+    this.top = this.svg.getBoundingClientRect().top;
+
 
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
@@ -30,7 +33,8 @@ function State() {
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
                   "movedX": -1, "movedY": -1, "upX": -1, "upY": -1, "down": false, 
-                  "selectedNode": false, "elem": null, "dragOnMove": false, "moveElements": []};
+                  "selectedNode": false, "elem": null, "dragOnMove": false, "moveElements": [],
+                  "fromOutsideSVG": false};
 
 
     this.previewMode = false;
@@ -53,6 +57,9 @@ function State() {
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
         this.pastSelectedId = null;
+
+        this.left = this.svg.getBoundingClientRect().left;
+        this.top = this.svg.getBoundingClientRect().top;
 
         this.createPreviewCircle();
         this.createForbiddenCircle();

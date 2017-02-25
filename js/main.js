@@ -26,9 +26,6 @@ function clickInterpret(e) {
     var clickedTag = clickedElement.nodeName;
 
     if (clickedInsideElement(e, "canvas")) {
-
-        // TODO: REFACTOR. Implement to get the class that was clicked;
-        // code comes here...
         
         var notSVG = true;
         var notNode = true;
@@ -66,11 +63,6 @@ function clickInterpret(e) {
             return;
         }
 
-        // TODO: ADD PREVIEW CHECK 
-
-
-        // ENDS HERE
-
         var clientX = e.clientX;
         var clientY = e.clientY;
         
@@ -86,13 +78,13 @@ function clickInterpret(e) {
         }
 
         if (state.isComponentSelected === true) {
-            state.isComponentSelected = false;
-            var svgCircle = document.getElementById(state.nodeIdToCircleId());
             
             if (addedNode !== false) {
+                var svgCircle = document.getElementById(state.nodeIdToCircleId());
+                state.isComponentSelected = false;
                 addEdge(state.selectedNodeId, addedNode.id);
+                svgCircle.style.fill = colors.unselectedNode;
             }
-            svgCircle.style.fill = colors.unselectedNode;
         }        
         state.svg.innerHTML = state.svg.innerHTML;
     }
@@ -221,12 +213,20 @@ function handleSelect(node) {
         state.selectedNodeId = node.id;
     }
     else {
-        var svgCircle = document.getElementById(state.nodeIdToCircleId());
-        svgCircle.style.fill = colors.unselectedNode;
+
+        var addedEdge;
 
         if (state.selectedNodeId !== node.id)
         {
-            addEdge(state.selectedNodeId, node.id);
+            addedEdge = addEdge(state.selectedNodeId, node.id);
+        }
+
+        if (addedEdge !== false) {
+            var svgCircle = document.getElementById(state.nodeIdToCircleId());
+            svgCircle.style.fill = colors.unselectedNode;
+        }
+        else {
+            state.isComponentSelected = !state.isComponentSelected;
         }
 
         state.svg.innerHTML = state.svg.innerHTML;
@@ -267,10 +267,7 @@ function addEdge(nodeId1, nodeId2) {
             path.setAttribute("d", pathD);
             
             path.style.stroke = colors.unusedEdge;
-            // TEMPORARY HERE:
-            if (dir === -1) {
-                path.style.stroke = "#1234F6";
-            }
+
             path.style.strokeWidth = sizes.edgeWidth;
             path.style.fill= "transparent";
             path.classList.add(edgeComponent);
@@ -1317,17 +1314,18 @@ function mouseDown(e) {
     }
 }
 
+
 function mouseMove(e) {
     if (clickedInsideElement(e, "canvas")) {
+        
+        var currentX = e.clientX - state.left;
+        var currentY = e.clientY - state.top;
+
         if (state.mouse.downInsideSVG === true) {
-            
-            var currentX = e.clientX;
-            var currentY = e.clientY;
-            
+
             if (parseFloat(currentX) !== parseFloat(state.mouse.downX) || 
                 parseFloat(currentY) !== parseFloat(state.mouse.downY)) {
                 state.mouse.moved = true;
-                console.log("It has been moved.");
             }
             if (state.mouse.dragOnMove === true) {
                 if (state.lock === false) {
@@ -1465,9 +1463,6 @@ function mouseMove(e) {
         }
         else {
 
-            var currentX = e.clientX;
-            var currentY = e.clientY;
-
             var circle = state.svg.getElementById("previewCircle");
             circle.setAttribute("cx", currentX);
             circle.setAttribute("cy", currentY);
@@ -1538,7 +1533,7 @@ function mouseMove(e) {
                         var d = quadBezierPointsToSVG(pt);         
 
                         path.setAttribute("d", d);
-            
+
                         path.setAttribute("visibility", "visible");
                     }
                     else {
@@ -1550,6 +1545,7 @@ function mouseMove(e) {
         }
     }
     else {
+
         // TODO: Use Pointer Lock API to hide previewCircle when outside canvas.
         state.svg.getElementById("previewCircle").setAttribute("visibility", "hidden");
         state.svg.getElementById("previewLine").setAttribute("visibility", "hidden");
@@ -1569,7 +1565,7 @@ function mouseUp(e) {
         if (state.mouse.moved === false) {     
             clickInterpret(e);
         }
-        else {
+        else {         
             console.log("MOUSE UP. SHOULD I DO ANYTHING HERE? MAYBE SOME CLEAN UP ON state.mouse?");
         }
 
@@ -1583,6 +1579,11 @@ function mouseUp(e) {
         // }
     }
     else {
+        if (state.isComponentSelected === true) {
+            var svgCircle = document.getElementById(state.nodeIdToCircleId());
+            svgCircle.style.fill = colors.unselectedNode;
+            state.isComponentSelected = !state.isComponentSelected;
+        } 
         var button = e.which || e.button;
         if (button === 1 && state.contextMenuOn === true) {
             state.contextMenuOn = false;
@@ -1607,6 +1608,18 @@ function onmouseupListener() {
     document.addEventListener("mouseup", mouseUp);
 }
 
+function scroll(e) {
+    
+    var dim = state.svg.getBoundingClientRect();
+    
+    state.left = dim.left;
+    state.top = dim.top;
+}
+
+function onscrollListener() {
+    document.addEventListener("scroll", scroll);
+}
+
 function hireListeners() {
     contextListener();
     clickListener();
@@ -1616,6 +1629,7 @@ function hireListeners() {
     onmousedownListener();
     onmousemoveListener();
     onmouseupListener();
+    onscrollListener();
 }
 
 // Event managing 
