@@ -26,6 +26,7 @@ function State() {
 
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
+    this.runningAlgorithm = null;
     this.startNode;
     this.nextSteps;
     this.executedSteps;
@@ -38,6 +39,7 @@ function State() {
 
 
     this.previewMode = false;
+
 
     this.nodeIdToCircleId = function() {
 
@@ -56,6 +58,7 @@ function State() {
 
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
+        this.runningAlgorithm = null;
         this.pastSelectedId = null;
 
         this.left = this.svg.getBoundingClientRect().left;
@@ -65,7 +68,6 @@ function State() {
         this.createForbiddenCircle();
         this.createPreviewLine();
         this.createForbiddenLine();
-
         this.createPreviewPath();
         this.createForbiddenPath();
 
@@ -261,24 +263,6 @@ function State() {
 
         this.svg.innerHTML = this.svg.innerHTML;        
     }
-    //     var path = document.createElement("path");
-
-    //     path.id = "previewPath";
-
-    //     path.setAttribute("d", d);
-        
-    //     path.style.stroke = stroke;
-
-    //     path.style.strokeWidth = strokeWidth;
-    //     path.style.fill= "transparent";
-    //     path.setAttribute("opacity", opacity);
-
-    //     path.setAttribute("visibility", "hidden");
- 
-    //     this.svg.appendChild(path);
-
-    //     this.svg.innerHTML = this.svg.innerHTML;        
-    // }    
 
     this.createForbiddenPath = function(d = "M 0 0 Q 0 0, 0 0", opacity = 1, stroke = "red", 
                                         strokeWidth = sizes.edgeWidth) {
@@ -329,6 +313,13 @@ function State() {
 
         this.svg.innerHTML = this.svg.innerHTML;        
     }
+
+    this.createPreviewCircle();
+    this.createForbiddenCircle();
+    this.createPreviewLine();
+    this.createForbiddenLine();
+    this.createPreviewPath();
+    this.createForbiddenPath();    
    
 }
 

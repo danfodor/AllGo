@@ -63,10 +63,10 @@ function Algorithms() {
 
                                         if (visitedNodes[ind] !== true) {
                                             ++visitedNodesNo;
-                                            fullSequenceExec.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
                                         }
                                         else {
-                                            fullSequenceExec.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
                                         }
                                         visitedNodes[ind] = true;
 
@@ -83,7 +83,10 @@ function Algorithms() {
                                 for (var it = 0; it < len; ++it) {
                                     if (visitedNodes[it] === false) {
                                         queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
-                                        visitedNodes[ind] = true;
+                                        fullSequenceExec.push({"type": "node", 
+                                                               "id": graph.allNodes[it].id, 
+                                                               "extended": true});
+                                        visitedNodes[it] = true;
                                         ++visitedNodesNo;
                                         break;
                                     }

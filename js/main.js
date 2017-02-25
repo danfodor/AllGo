@@ -723,7 +723,7 @@ function rightAnglePoint(node1Id, node2Id, p1, p2, dist = sizes.weightDistance, 
 function changeMode() {
 
     if (state.mode.checked === true) {
-
+        // TODO: CLEAN UP. 
         document.getElementById("algMode").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
     }
@@ -768,7 +768,7 @@ function changeMode() {
         document.getElementById("algMode").style.display = "block";
         document.getElementById("buildMode").style.display = "none";
         algorithmSelect();
-        startNodeSelect();
+        selectStartNode();
     }
 }
 
@@ -815,7 +815,11 @@ function algorithmSelect() {
     }
 }
 
-function startNodeSelect() {
+function selectStartNode() {
+    if (state.algorithmRuns === true) {
+        // TOOD: Add confirm box.
+        restart();
+    }
     var nodeName = document.getElementById("nodeOptions").value; 
     var nodeId = state.graph.nodeIdFromName(nodeName);
     
@@ -828,18 +832,22 @@ function startNodeSelect() {
     circle.style.stroke = "green";
 }
 
-function restart() {
-    console.log("restart() called. Is this really useful???");
-}
-
 function nextStep() {
+    var algorithm = document.getElementById("algorithmsOptions").value;
     if (state.algorithmRuns === false) {
-        state.startNode = document.getElementById("nodeOptions").value;
-        var algorithm = document.getElementById("algorithmsOptions").value;
-        
-        state.algorithmRuns = true;
 
-        state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true)// perform algorithm
+        state.startNode = document.getElementById("nodeOptions").value;
+        state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
+        console.log(state.nextSteps);
+        state.runningAlgorithm = algorithm;
+
+        // TODO: CONSIDER THIS LATER: Optimisation when nothing changed fromprevious run.
+        // if (state.runningAlgorithm !== algorithm || parseInt(state.startNode) !== parseInt(startNode)) {
+        //     state.runningAlgorithm = algorithm;
+        //     state.startNode = startNode;
+        //     state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
+        // }
+        state.algorithmRuns = true;
         state.executedSteps = [];
     }
 
@@ -847,33 +855,170 @@ function nextStep() {
         var executeStep = state.nextSteps.shift();
 
         // EXECUTE IT
-        console.log("On edge: " + executeStep.edge);
-        var node = executeStep.edge.split('-')[1];
-        var edge = document.getElementById("line" + executeStep.edge);
-        if (edge === null) {
-            edge = document.getElementById("line" + executeStep.edge.split('-')[1] + "-" + 
-                                            executeStep.edge.split('-')[0]);
-        }
-        
-        node = document.getElementById("circle" + node);
-        var color = "green";
-        if (executeStep.extended === false) {
-            color = "red";
-        }
-        console.log(edge);
-        edge.style.stroke = color;
-        node.style.stroke = "green";
+        // console.log("On edge: " + executeStep.edge);
+        switch(executeStep.type) {
+            case "edge":
+                var node = executeStep.id.split('-')[1];
+                var edge = document.getElementById("line" + executeStep.id);
+                if (edge === null) {
+                    edge = document.getElementById("line" + executeStep.id.split('-')[1] + "-" + 
+                                                    executeStep.id.split('-')[0]);
+                }
+                
+                node = document.getElementById("circle" + node);
+                var color = "green";
+                if (executeStep.extended === false) {
+                    color = "red";
+                }
+                console.log(edge);
+                edge.style.stroke = color;
+                node.style.stroke = "green";
 
-        state.executedSteps.push(executeStep);
+                state.executedSteps.push(executeStep);
+                break;
+            case "node": 
+                var nodeId = executeStep.id;
+                
+                document.getElementById("circle" + nodeId).style.stroke = "green";
+                
+                state.executedSteps.push(executeStep);
+                break; 
+            default:
+                break;
+        }
     }
     else {
+        // console.log(state.nextSteps);
+        console.log(state.executedSteps);
+        // document.getElementById("next").disabled = true;
         alert("Stop the next button when in this case");
     }
 }
 
 function backStep() {
-    console.log("Not yet implmented");
-    alert("Not yet implmented");
+
+    if (state.executedSteps.length > 0) {
+        var backStep = state.executedSteps.splice(-1,1)[0];
+        // NICIUN PUSH
+        state.nextSteps.unshift(backStep);
+        // EXECUTE IT
+        console.log(backStep);
+        switch(backStep.type) {
+            case "edge":
+                var node = document.getElementById("circle" + backStep.id.split('-')[1]);
+
+                var edge = document.getElementById("line" + backStep.id);
+                if (edge === null) {
+                    edge = document.getElementById("line" + backStep.id.split('-')[1] + "-" + 
+                                                    backStep.id.split('-')[0]);
+                }
+                
+                if (backStep.extended === true) {
+                    node.style.stroke = colors.unselectedNodeOutline;
+                }
+
+                edge.style.stroke = colors.unusedEdge;
+
+                break;
+            case "node": 
+                var nodeId = backStep.id;
+                console.log("Hulla");
+                
+                document.getElementById("circle" + nodeId).style.stroke = colors.unselectedNodeOutline;
+                break; 
+            default:
+                break;
+        }
+    }
+    else {
+        // console.log(state.nextSteps);
+        console.log(state.executedSteps);
+        // document.getElementById("next").disabled = true;
+        alert("Stop the next button when in this case");
+    }
+
+    // if (state.algorithmRuns === false) {
+    //     // disable button.
+    // }
+}
+
+function restart() {
+    // // --- Pseudocode ---
+    // clean all the colouring
+    // make select algorithm available again
+    // make select starting node available again
+    // color the starting node 
+    // consider that algorithm does not run
+    
+    state.startNode = document.getElementById("nodeOptions").value;
+    state.algorithmRuns = false;
+
+    // color back:
+    var node, nodes = state.graph.allNodes, len = nodes.length;
+    var circle;
+
+    for (var i = 0; i < len; ++i) {
+        node = nodes[i];
+        circle = document.getElementById("circle" + node.id);
+
+        // TODO: Use node colour instead of default colour
+        circle.style.stroke = colors.unselectedNodeOutline;
+    }
+
+
+    var edgeType = "line", line, step;
+    var len = state.executedSteps.length;
+    console.log(state.executedSteps);
+    for (var i = 0; i < len; ++i) {
+        step = state.executedSteps[i];
+        if (step.type === "edge") {
+            console.log(edgeType + step.id);
+            line = document.getElementById(edgeType + step.id);
+            if (line === null) {
+                line = document.getElementById("line" + step.id.split('-')[1] + "-" + 
+                                                step.id.split('-')[0]);
+            }
+            // console.log(line);
+            line.style.stroke = colors.unusedEdge;
+        }
+    }
+
+
+    // color back:
+    // var adjacencyLists = state.graph.adjacencyLists;
+    // var adjListsLen = adjacencyLists.length;
+    // var adjacencyList, nodeId, neighbours, neighboursLen;
+    // var line;
+
+    // if (state.graph.directed === true) {
+
+    // }
+    // else {
+    //     for (var i = 0; i < adjListsLen; ++i) {
+    //         nodeId = adjacencyLists[i].id;
+    //         neighbours = adjacencyLists[i].neighbours;
+    //         neighboursLen = neighbours.length;
+
+    //         for (var j = 0; j < neighboursLen; ++j) {
+    //             line = document.getElementById("line" + nodeId + "-" + neighbours[j]);
+    //             if (line !== null) {
+    //                 line.style.stroke = colors.unusedEdge;
+    //             }
+    //         }
+    //     }
+    // }
+    // state.svg.innerHTML = state.svg.innerHTML;
+
+    state.nextSteps = state.executedSteps;
+
+    for (var i = 0; i < len; ++i) {
+
+    }
+    state.executedSteps = [];
+    
+    selectStartNode();
+
+    console.log("restart() called. Is this really useful???");
 }
 
 function switchDir(argument) {
@@ -1496,7 +1641,8 @@ function mouseMove(e) {
                     default: 
                         break;
                 }
-
+                // CONTINUEHERE: How to make it know it's going over a line
+                // console.log(clickedTag);
                 if (insideNode === false) {
                     circle.setAttribute("visibility", "visible");
                 }
@@ -1550,7 +1696,7 @@ function mouseMove(e) {
         state.svg.getElementById("previewCircle").setAttribute("visibility", "hidden");
         state.svg.getElementById("previewLine").setAttribute("visibility", "hidden");
         state.svg.getElementById("previewPath").setAttribute("visibility", "hidden");
-        console.log("I moved the mouse outside the canvas. What should happen?");
+        // console.log("I moved the mouse outside the canvas. What should happen?");
     }
 }
 
@@ -1572,9 +1718,7 @@ function mouseUp(e) {
         // else {
         //     // PAY SOME MORE ATTENTION HERE 
         //     console.log("What to do?");
-        //     state.draggedElem = null;
         //     state.mouse.moveElements = [];
-        //     state.mouse.dragOnMove = false;
         //     mouseInterpret(e);
         // }
     }
@@ -1598,8 +1742,6 @@ function onmousedownListener() {
 }
 
 function onmousemoveListener() {
-    // TODO: Consider adding it for the whole body.
-    // document.getElementById("svg").addEventListener("mousemove", mouseMove);
     document.addEventListener("mousemove", mouseMove);
 
 }
@@ -1635,13 +1777,6 @@ function hireListeners() {
 // Event managing 
 window.onload = function() {
     state = new State();
-    state.createPreviewCircle();
-    state.createForbiddenCircle();
-    state.createPreviewLine();
-    state.createForbiddenLine();
-    state.createPreviewPath();
-    state.createForbiddenPath();
-
 
     hireListeners();
 }
