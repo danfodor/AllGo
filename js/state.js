@@ -23,7 +23,8 @@ function State() {
     this.left = this.svg.getBoundingClientRect().left;
     this.top = this.svg.getBoundingClientRect().top;
 
-
+    this.directedBezier = false;
+    
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
     this.runningAlgorithm = null;
@@ -55,6 +56,7 @@ function State() {
         this.isComponentSelected = false;
         this.selectedNodeId = false;
     	this.maxIdValue = 0;
+        this.directedBezier = false;
 
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;

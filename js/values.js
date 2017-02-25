@@ -16,7 +16,8 @@ var sizes = {
  	stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
  	defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
  	weightDistance: 12,
- 	stdFontSize: "18px"
+ 	stdFontSize: "18px",
+ 	angleDev: 15
 };
 
 var newSVGInnerHTML = "";

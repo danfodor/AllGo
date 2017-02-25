@@ -121,7 +121,7 @@ function addNode(x, y) {
         forbiddenCircle.setAttribute("cx", intersectsNode.x);
         forbiddenCircle.setAttribute("cy", intersectsNode.y);
         forbiddenCircle.setAttribute("visibility", "visible");
-        // timeout 100ms 
+        // 200ms 
         setTimeout(function() {
             var forbiddenCircle = state.svg.getElementById("forbiddenCircle");
             forbiddenCircle.setAttribute("visibility", "hidden");
@@ -246,13 +246,21 @@ function addEdge(nodeId1, nodeId2) {
         var x2 = circle2.cx.baseVal.value;
         var y2 = circle2.cy.baseVal.value;
 
-        var p1 = pointOnCircle(x1, y1, x2, y2, sizes.radius + sizes.edgeWidth, -10);
-        var p2 = pointOnCircle(x2, y2, x1, y1, sizes.radius + sizes.edgeWidth, 10);
+        var p1 = pointOnCircle(x1, y1, x2, y2, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+        var p2 = pointOnCircle(x2, y2, x1, y1, sizes.radius + sizes.edgeWidth, sizes.angleDev);
         var dir = computeDir(nodeId1, nodeId2, p1, p2);
         
-        var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                  parseFloat(p2.x), parseFloat(p2.y), dir);
-        var pathD = quadBezierPointsToSVG(pt);        
+        var pathD;
+        if (state.directedBezier === true) {
+            var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                      parseFloat(p2.x), parseFloat(p2.y), dir);
+            pathD = quadBezierPointsToSVG(pt);           
+        }
+        else {
+            var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                      parseFloat(p2.x), parseFloat(p2.y));
+            pathD = lineToSVGPath(line);        
+        }
 
         // DEAL WITH THIS svgHandler
         if (state.graph.addEdge(nodeId1, nodeId2)) {
@@ -468,7 +476,6 @@ function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
 
     var pt = {"x": newX, "y": newY};
 
-
     // var circle = document.createElement("circle");
     
     // circle.id = "circle";
@@ -479,8 +486,7 @@ function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
 
     // circle.style.fill = "red";
 
-    // state.svg.appendChild(circle);   
-
+    // state.svg.appendChild(circle); 
 
     return pt;
 }
@@ -565,41 +571,30 @@ function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.
     var controlX = xp + dir * height * dist * v.x;
     var controlY = yp + dir * height * dist * v.y;
 
-
-    // var controlX = xp + dir * height * dist * rx;
-    // var controlY = yp + dir * height * dist * ry;
-
-
-    // console.log("xp: " + xp + ", controlX: " + controlX);
-    // console.log("yp: " + yp + ", controlY: " + controlY);
-
-    // var cir = document.createElement("circle");
-    // var cir2 = document.createElement("circle");
-
-    // cir.setAttribute("cx", xp);
-    // cir.setAttribute("cy", yp);
-    // cir.setAttribute("r", 3);
-    // cir2.setAttribute("cx", (x1+x2)/2);
-    // cir2.setAttribute("cy", (y1+y2)/2);
-    // cir2.setAttribute("r", 3);
-
-    // cir.style.fill = "RED";
-    // cir2.style.fill = "BLUE";
-
-    // state.svg.insertBefore(cir, state.svg.firstChild);
-    // state.svg.insertBefore(cir2, state.svg.firstChild);
-
-
     return {"x1": x1, "y1": y1, "xp": controlX, "yp": controlY,
             "x2": x2, "y2": y2};
 }
 
-function quadBezierPointsToSVG(points) {
+function quadBezierPointsToSVG(quadBezier) {
     var d = "";
 
-    d += "M " + points.x1 + " " + points.y1 + " ";
-    d += "Q " + points.xp + " " + points.yp + ", ";   
-    d += points.x2 + " " + points.y2;   
+    d += "M " + quadBezier.x1 + " " + quadBezier.y1 + " ";
+    d += "Q " + quadBezier.xp + " " + quadBezier.yp + ", ";   
+    d += quadBezier.x2 + " " + quadBezier.y2;   
+
+    return d;
+}
+
+function lineFromPoints(x1, y1, x2, y2) {
+
+    return {"x1": x1, "y1": y1, "x2": x2, "y2": y2};
+}
+
+function lineToSVGPath(line) {
+    var d = "";
+
+    d += "M " + line.x1 + " " + line.y1 + " ";
+    d += "L " + line.x2 + " " + line.y2;
 
     return d;
 }
@@ -1544,19 +1539,27 @@ function mouseMove(e) {
 
                                 var node2 = state.graph.allNodes[state.graph.nodeIndexFromId(node2Id)];
 
-                                var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -10);
-                                var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, 10);
+                                var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+                                var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, sizes.angleDev);
                             }
                             else {
 
                                 var node1 = state.graph.allNodes[state.graph.nodeIndexFromId(node1Id)];
 
-                                var p1 = pointOnCircle(node1.x, node1.y, newX, newY, sizes.radius + sizes.edgeWidth, -10);
-                                var p2 = pointOnCircle(newX, newY, node1.x, node1.y, sizes.radius + sizes.edgeWidth, 10);
+                                var p1 = pointOnCircle(node1.x, node1.y, newX, newY, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+                                var p2 = pointOnCircle(newX, newY, node1.x, node1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
                             }                    
                             dir = computeDir(parseInt(node1Id), parseInt(node2Id), p1, p2);
 
-                            d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
+
+                            if (state.directedBezier === true) {
+                                d = quadBezierPointsToSVG(quadBezierPoints(p1.x, p1.y, p2.x, p2.y, dir));
+                            }
+                            else {
+                                var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                          parseFloat(p2.x), parseFloat(p2.y));
+                                d = lineToSVGPath(line);  
+                            }
                             elem.setAttribute("d", d);
                             break;
                         case "text":
@@ -1670,13 +1673,21 @@ function mouseMove(e) {
                                    "y": parseFloat(line.getAttribute("y2"))};
 
 
-                        var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -10);
-                        var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, 10);
+                        var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+                        var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
 
                         var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
-                        var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                                  parseFloat(p2.x), parseFloat(p2.y), dir);
-                        var d = quadBezierPointsToSVG(pt);         
+                        var d;
+                        if (state.directedBezier === true) {
+                            var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
+                            d = quadBezierPointsToSVG(pt);         
+                        }
+                        else {
+                            var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
+                            d = lineToSVGPath(line);
+                        }
 
                         path.setAttribute("d", d);
 
