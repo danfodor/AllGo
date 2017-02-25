@@ -1400,10 +1400,10 @@ function mouseDown(e) {
         var path = state.svg.getElementById("previewPath");
         path.setAttribute("visibility", "hidden");        
 
-        state.mouse.downX = e.clientX;
-        state.mouse.downY = e.clientY;
-        state.mouse.movedX = e.clientX;
-        state.mouse.movedY = e.clientY;
+        state.mouse.downX = e.clientX - state.left;
+        state.mouse.downY = e.clientY - state.top;
+        state.mouse.movedX = e.clientX - state.left;
+        state.mouse.movedY = e.clientY - state.top;
         state.mouse.moved = false;
         
         state.mouse.elem = e.srcElement || e.target;
@@ -1725,10 +1725,7 @@ function mouseUp(e) {
         else {         
             console.log("MOUSE UP. SHOULD I DO ANYTHING HERE? MAYBE SOME CLEAN UP ON state.mouse?");
         }
-
         // else {
-        //     // PAY SOME MORE ATTENTION HERE 
-        //     console.log("What to do?");
         //     state.mouse.moveElements = [];
         //     mouseInterpret(e);
         // }
