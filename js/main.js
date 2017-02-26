@@ -716,71 +716,11 @@ function rightAnglePoint(node1Id, node2Id, p1, p2, dist = sizes.weightDistance, 
     return p;
 }
 
-// TODO: RESTRCUTURE THIS CODE. Think of utils for generating html
-// function changeMode() {
-
-//     if (state.mode.checked === true) {
-//         // TODO: CLEAN UP. 
-//         document.getElementById("algMode").style.display = "none";
-//         document.getElementById("buildMode").style.display = "block";
-//     }
-//     else {
-
-//         // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
-//         // generate-html part
-//         var algorithmsOptions = document.getElementById("algorithmsOptions");
-        
-//         var algs = state.algorithms.algorithms; 
-//         var len = algs.length;
-//         var optionsHTML = "";
-//         var option;
-        
-//         // DIRECTCASE: DONE - NEEDS CHECK
-//         if (state.graph.directed === true) {
-//             for (var it = 0; it < len; ++it) {
-//                 if (algs[it].worksOn.directed === true) {
-//                     option = document.createElement("option");
-//                     option.setAttribute("value", algs[it].name);
-//                     option.innerHTML = algs[it].name;
-                    
-//                     optionsHTML += option.outerHTML + "\n";
-//                 }
-//             }
-//         }
-//         else {
-//             for (var it = 0; it < len; ++it) {
-//                 if (algs[it].worksOn.undirected === true) {
-//                     option = document.createElement("option");
-//                     option.setAttribute("value", algs[it].name);
-//                     option.innerHTML = algs[it].name;
-                    
-//                     optionsHTML += option.outerHTML + "\n";
-//                 }
-//             }
-//         }
-
-//         algorithmsOptions.innerHTML = optionsHTML;
-
-
-//         document.getElementById("algMode").style.display = "block";
-//         document.getElementById("buildMode").style.display = "none";
-//         algorithmSelect();
-//         selectStartNode();
-//     }
-// }
-
-function toBuild() {
-    switchMode("build");
-}
-
-function toAlgorithm() {
-    switchMode("algorithm");
-}
-
 function switchMode(mode) {
 
     if (mode === "build") {
         // TODO: CLEAN UP. 
+        cleanUp();
         document.getElementById("algMode").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
 
@@ -1039,14 +979,7 @@ function backStep() {
     // }
 }
 
-function restart() {
-    // // --- Pseudocode ---
-    // clean all the colouring
-    // make select algorithm available again
-    // make select starting node available again
-    // color the starting node 
-    // consider that algorithm does not run
-    
+function cleanUp(argument) {
     state.startNode = document.getElementById("nodeOptions").value;
     state.algorithmRuns = false;
 
@@ -1062,60 +995,40 @@ function restart() {
         circle.style.stroke = colors.unselectedNodeOutline;
     }
 
+    if (state.executedSteps) {
+        var edgeType = "line", line, step;
+        var len = state.executedSteps.length;
 
-    var edgeType = "line", line, step;
-    var len = state.executedSteps.length;
-    console.log(state.executedSteps);
-    for (var i = 0; i < len; ++i) {
-        step = state.executedSteps[i];
-        if (step.type === "edge") {
-            console.log(edgeType + step.id);
-            line = document.getElementById(edgeType + step.id);
-            if (line === null) {
-                line = document.getElementById("line" + step.id.split('-')[1] + "-" + 
-                                                step.id.split('-')[0]);
+        for (var i = 0; i < len; ++i) {
+            step = state.executedSteps[i];
+            if (step.type === "edge") {
+
+                line = document.getElementById(edgeType + step.id);
+                if (line === null) {
+                    line = document.getElementById("line" + step.id.split('-')[1] + "-" + 
+                                                    step.id.split('-')[0]);
+                }
+
+                line.style.stroke = colors.unusedEdge;
             }
-            // console.log(line);
-            line.style.stroke = colors.unusedEdge;
         }
     }
+}
 
-
-    // color back:
-    // var adjacencyLists = state.graph.adjacencyLists;
-    // var adjListsLen = adjacencyLists.length;
-    // var adjacencyList, nodeId, neighbours, neighboursLen;
-    // var line;
-
-    // if (state.graph.directed === true) {
-
-    // }
-    // else {
-    //     for (var i = 0; i < adjListsLen; ++i) {
-    //         nodeId = adjacencyLists[i].id;
-    //         neighbours = adjacencyLists[i].neighbours;
-    //         neighboursLen = neighbours.length;
-
-    //         for (var j = 0; j < neighboursLen; ++j) {
-    //             line = document.getElementById("line" + nodeId + "-" + neighbours[j]);
-    //             if (line !== null) {
-    //                 line.style.stroke = colors.unusedEdge;
-    //             }
-    //         }
-    //     }
-    // }
-    // state.svg.innerHTML = state.svg.innerHTML;
+function restart() {
+    // // --- Pseudocode ---
+    // clean all the colouring
+    // make select algorithm available again
+    // make select starting node available again
+    // color the starting node 
+    // consider that algorithm does not run
+    
+    cleanUp();
 
     state.nextSteps = state.executedSteps;
-
-    for (var i = 0; i < len; ++i) {
-
-    }
     state.executedSteps = [];
     
     selectStartNode();
-
-    console.log("restart() called. Is this really useful???");
 }
 
 function switchDirection(directed, noModal = false) {
@@ -1938,7 +1851,7 @@ function onscrollListener() {
 
 function cssSetUp() {
 
-    toBuild();
+    switchMode("build");
     state.graph.directed = true;
     switchDirection(false, true);
     buttonNotAllowed("algorithm");
