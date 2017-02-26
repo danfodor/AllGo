@@ -31,7 +31,7 @@ function State() {
     this.startNode;
     this.nextSteps;
     this.executedSteps;
-    this.pastSelectedId = null;
+    this.pastStartingNode = null;
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
                   "movedX": -1, "movedY": -1, "upX": -1, "upY": -1, "down": false, 
@@ -61,7 +61,7 @@ function State() {
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
         this.runningAlgorithm = null;
-        this.pastSelectedId = null;
+        this.pastStartingNode = null;
 
         this.left = this.svg.getBoundingClientRect().left;
         this.top = this.svg.getBoundingClientRect().top;
@@ -73,9 +73,10 @@ function State() {
         this.createPreviewPath();
         this.createForbiddenPath();
 
-        if (this.mode.checked === false) {
+        if (this.mode === "algorithm") {
+            alert("go back build");
             //this.mode.checked = true;
-            $('#mode').bootstrapToggle('on');
+            //$('#mode').bootstrapToggle('on');
         }
 
         this.lock = false;

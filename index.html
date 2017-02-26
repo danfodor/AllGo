@@ -36,7 +36,14 @@
             </div>
             <div class = "sided even">
                 <div id="modeDiv" style="text-align: center;">
-                    <input id="mode" type="checkbox" checked data-toggle="toggle" data-on="Graph Building" data-off="Algorithm Run" onchange="changeMode()">
+                    <div id="buildDiv" class="col-sm-6 buttonDiv"> 
+                        <!-- <button id="build" class="modeButton" onclick="toBuild()">Build Graph</button> -->
+                        <div id="build" class="button" onclick="toBuild()">Build Graph</div>
+                    </div>
+                    <div id="algorithmDiv" class="col-sm-6 buttonDiv">
+                        <!-- <button id="algorithm" class="button" onclick="toAlgorithm()">Algorithms</button> -->
+                        <div id="algorithm" class="button" onclick="toAlgorithm()">Algorithms</div>
+                    </div>
                 </div>
                 <div id="modeMenu">
                     <div id="algMode" style="display: none;">
@@ -69,10 +76,31 @@
                     </div>
                     <div id="buildMode">
                         <div id="dirDiv" style="text-align: center;">
-                            <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()">
+                            <div class="col-sm-6 buttonDiv leftDiv"> 
+                                <div id="undirected" class="button" onclick="switchDirection(false)">
+                                    Undirected Graph
+                                </div>
+                            </div>
+                            <div class="col-sm-6 buttonDiv rightDiv">
+                                <div id="directed" class="button" onclick="switchDirection(true)">
+                                    Directed Graph
+                                </div>
+                            </div>
+                            <!-- <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()"> -->
                         </div>
                         <div id="weightDiv" style="text-align: center;">
-                            <input id="weight" type="checkbox" data-toggle="toggle" data-on="Weighted on" data-off="Weighted off" onchange="switchWeighted()">
+                            <div class="col-sm-6 buttonDiv leftDiv"> 
+                                <div id="unweighted" class="button" onclick="switchWeighted(false)">
+                                    Unweighted Graph
+                                </div>
+                            </div>
+                            <div class="col-sm-6 buttonDiv rightDiv">
+                                <div id="weighted" class="button" onclick="switchWeighted(true)">
+                                    Weighted Graph
+                                </div>
+                            </div>
+
+                            <!-- <input id="weight" type="checkbox" data-toggle="toggle" data-on="Weighted on" data-off="Weighted off" onchange="switchWeighted()"> -->
                         </div>
                     </div>
                 </div>
@@ -108,6 +136,15 @@
         </li>
       </ul>
     </nav>
+
+<!--     <div id="myModal" class="modal">
+
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>Some text in the Modal..</p>
+      </div>
+
+    </div> -->    
 
 </div>
 

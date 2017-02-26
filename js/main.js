@@ -191,6 +191,8 @@ function addNode(x, y) {
     state.svg.appendChild(node);   
     state.svg.innerHTML = state.svg.innerHTML;
 
+    buttonNotAllowed("algorithm", true);
+
     return node;
 }
 
@@ -715,15 +717,84 @@ function rightAnglePoint(node1Id, node2Id, p1, p2, dist = sizes.weightDistance, 
 }
 
 // TODO: RESTRCUTURE THIS CODE. Think of utils for generating html
-function changeMode() {
+// function changeMode() {
 
-    if (state.mode.checked === true) {
+//     if (state.mode.checked === true) {
+//         // TODO: CLEAN UP. 
+//         document.getElementById("algMode").style.display = "none";
+//         document.getElementById("buildMode").style.display = "block";
+//     }
+//     else {
+
+//         // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
+//         // generate-html part
+//         var algorithmsOptions = document.getElementById("algorithmsOptions");
+        
+//         var algs = state.algorithms.algorithms; 
+//         var len = algs.length;
+//         var optionsHTML = "";
+//         var option;
+        
+//         // DIRECTCASE: DONE - NEEDS CHECK
+//         if (state.graph.directed === true) {
+//             for (var it = 0; it < len; ++it) {
+//                 if (algs[it].worksOn.directed === true) {
+//                     option = document.createElement("option");
+//                     option.setAttribute("value", algs[it].name);
+//                     option.innerHTML = algs[it].name;
+                    
+//                     optionsHTML += option.outerHTML + "\n";
+//                 }
+//             }
+//         }
+//         else {
+//             for (var it = 0; it < len; ++it) {
+//                 if (algs[it].worksOn.undirected === true) {
+//                     option = document.createElement("option");
+//                     option.setAttribute("value", algs[it].name);
+//                     option.innerHTML = algs[it].name;
+                    
+//                     optionsHTML += option.outerHTML + "\n";
+//                 }
+//             }
+//         }
+
+//         algorithmsOptions.innerHTML = optionsHTML;
+
+
+//         document.getElementById("algMode").style.display = "block";
+//         document.getElementById("buildMode").style.display = "none";
+//         algorithmSelect();
+//         selectStartNode();
+//     }
+// }
+
+function toBuild() {
+    switchMode("build");
+}
+
+function toAlgorithm() {
+    switchMode("algorithm");
+}
+
+function switchMode(mode) {
+
+    if (mode === "build") {
         // TODO: CLEAN UP. 
         document.getElementById("algMode").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
+
+        document.getElementById("build").classList.remove("off");
+        document.getElementById("build").classList.add("on");
+        document.getElementById("build").classList.remove("hoverShadow");
+        document.getElementById("algorithm").classList.add("hoverShadow");
+        document.getElementById("algorithm").classList.remove("on");
+        document.getElementById("algorithm").classList.add("off");
     }
     else {
-
+        if (!(state.graph.allNodes.length > 0) === true) {
+            return;
+        }
         // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
         // generate-html part
         var algorithmsOptions = document.getElementById("algorithmsOptions");
@@ -762,8 +833,32 @@ function changeMode() {
 
         document.getElementById("algMode").style.display = "block";
         document.getElementById("buildMode").style.display = "none";
+
+        document.getElementById("build").classList.remove("on");
+        document.getElementById("build").classList.add("off");
+        document.getElementById("build").classList.add("hoverShadow");
+        document.getElementById("algorithm").classList.remove("hoverShadow");
+        document.getElementById("algorithm").classList.remove("off");
+        document.getElementById("algorithm").classList.add("on");
+
         algorithmSelect();
         selectStartNode();
+    }
+}
+
+function setCursor(id, cursor) {
+    document.getElementById(id).style.cursor = cursor;
+}
+function buttonNotAllowed(id, allowed = false) {
+    if (allowed === false) {
+        setCursor(id, "not-allowed");
+        document.getElementById(id).classList.remove("hoverShadow");
+        document.getElementById(id).classList.add("disabled");
+    }
+    else {
+        setCursor(id, "pointer");
+        document.getElementById(id).classList.add("hoverShadow");
+        document.getElementById(id).classList.remove("disabled");
     }
 }
 
@@ -818,11 +913,15 @@ function selectStartNode() {
     var nodeName = document.getElementById("nodeOptions").value; 
     var nodeId = state.graph.nodeIdFromName(nodeName);
     
-    if (state.pastSelectedId !== null && state.algorithmRuns === false) {
-        document.getElementById(state.pastSelectedId).style.stroke = colors.unselectedNodeOutline;
+    var pastNode;
+    if (state.pastStartingNode !== null && state.algorithmRuns === false) {
+        pastNode = document.getElementById(state.pastStartingNode)
+        if (pastNode !== null) {
+            pastNode.style.stroke = colors.unselectedNodeOutline;
+        }
     }
 
-    state.pastSelectedId = "circle" + nodeId;
+    state.pastStartingNode = "circle" + nodeId;
     var circle = document.getElementById("circle" + nodeId);
     circle.style.stroke = "green";
 }
@@ -891,45 +990,48 @@ function nextStep() {
 }
 
 function backStep() {
+    if (state.algorithmRuns === true) {
+        if (state.executedSteps.length > 0) {
+            var backStep = state.executedSteps.splice(-1,1)[0];
+            // NICIUN PUSH
+            state.nextSteps.unshift(backStep);
+            // EXECUTE IT
+            console.log(backStep);
+            switch(backStep.type) {
+                case "edge":
+                    var node = document.getElementById("circle" + backStep.id.split('-')[1]);
 
-    if (state.executedSteps.length > 0) {
-        var backStep = state.executedSteps.splice(-1,1)[0];
-        // NICIUN PUSH
-        state.nextSteps.unshift(backStep);
-        // EXECUTE IT
-        console.log(backStep);
-        switch(backStep.type) {
-            case "edge":
-                var node = document.getElementById("circle" + backStep.id.split('-')[1]);
+                    var edge = document.getElementById("line" + backStep.id);
+                    if (edge === null) {
+                        edge = document.getElementById("line" + backStep.id.split('-')[1] + "-" + 
+                                                        backStep.id.split('-')[0]);
+                    }
+                    
+                    if (backStep.extended === true) {
+                        node.style.stroke = colors.unselectedNodeOutline;
+                    }
 
-                var edge = document.getElementById("line" + backStep.id);
-                if (edge === null) {
-                    edge = document.getElementById("line" + backStep.id.split('-')[1] + "-" + 
-                                                    backStep.id.split('-')[0]);
-                }
-                
-                if (backStep.extended === true) {
-                    node.style.stroke = colors.unselectedNodeOutline;
-                }
+                    edge.style.stroke = colors.unusedEdge;
 
-                edge.style.stroke = colors.unusedEdge;
-
-                break;
-            case "node": 
-                var nodeId = backStep.id;
-                console.log("Hulla");
-                
-                document.getElementById("circle" + nodeId).style.stroke = colors.unselectedNodeOutline;
-                break; 
-            default:
-                break;
+                    break;
+                case "node": 
+                    var nodeId = backStep.id;
+                    
+                    document.getElementById("circle" + nodeId).style.stroke = colors.unselectedNodeOutline;
+                    break; 
+                default:
+                    break;
+            }
         }
-    }
+        else {
+            // console.log(state.nextSteps);
+            console.log(state.executedSteps);
+            // document.getElementById("next").disabled = true;
+            alert("Stop the next button when in this case");
+        }
+    } 
     else {
-        // console.log(state.nextSteps);
-        console.log(state.executedSteps);
-        // document.getElementById("next").disabled = true;
-        alert("Stop the next button when in this case");
+        console.log("Bai");
     }
 
     // if (state.algorithmRuns === false) {
@@ -1016,28 +1118,88 @@ function restart() {
     console.log("restart() called. Is this really useful???");
 }
 
-function switchDir(argument) {
+function switchDirection(directed, noModal = false) {
     // URGENT TASK: DO A CHANGER FROM DIRECTED TO UNDIRECTED 
     // AND THE OTHER WAY AROUND!!!!!
-    if (document.getElementById("dir").checked) {
-        state.graph.directed = true;
+    var openModal = false;
+    var mode = null;
+
+    if (directed === true) {
+        if (state.graph.directed === false) {
+            state.graph.directed = true;
+            openModal = true;
+            mode = "directed";
+
+            document.getElementById("undirected").classList.add("off");
+            document.getElementById("undirected").classList.remove("on");
+            document.getElementById("undirected").classList.add("hoverShadow");
+            document.getElementById("directed").classList.remove("hoverShadow");
+            document.getElementById("directed").classList.add("on");
+            document.getElementById("directed").classList.remove("off");
+        }
     }
     else {
-        state.graph.directed = false;
+        if (state.graph.directed === true) {
+            state.graph.directed = false;
+            openModal = true;
+            mode = "undirected";
+
+            document.getElementById("directed").classList.add("off");
+            document.getElementById("directed").classList.remove("on");
+            document.getElementById("undirected").classList.remove("hoverShadow");
+            document.getElementById("directed").classList.add("hoverShadow");
+            document.getElementById("undirected").classList.add("on");
+            document.getElementById("undirected").classList.remove("off");
+        }
     }
-    state.reset(state.graph.directed);
-    console.log("Graph directed: " + state.graph.directed);
+    if (openModal === true) {
+        if (noModal === true) {
+            reset(state.graph.directed);
+        }
+        else {
+            reset(state.graph.directed);
+            console.log("add modal!!!");
+            // directionModal(mode); // this should be deleted.
+        }
+    }
 }
 
-function switchWeighted(argument) {
+// function switchDirection(directed) {
+//     // URGENT TASK: DO A CHANGER FROM DIRECTED TO UNDIRECTED 
+//     // AND THE OTHER WAY AROUND!!!!!
+//     if (document.getElementById("dir").checked) {
+//         state.graph.directed = true;
+//     }
+//     else {
+//         state.graph.directed = false;
+//     }
+//     reset(state.graph.directed);
+//     console.log("Graph directed: " + state.graph.directed);
+// }
 
-    if (document.getElementById("weight").checked) {
+function switchWeighted(weighted) {
+
+    if (weighted === true) {
         state.graph.setWeighted(true);
         addSVGWeights();
+
+        document.getElementById("unweighted").classList.add("off");
+        document.getElementById("unweighted").classList.remove("on");
+        document.getElementById("unweighted").classList.add("hoverShadow");
+        document.getElementById("weighted").classList.remove("hoverShadow");
+        document.getElementById("weighted").classList.add("on");
+        document.getElementById("weighted").classList.remove("off");
     }
     else {
         state.graph.setWeighted(false);
         removeSVGWeights();
+
+        document.getElementById("unweighted").classList.add("on");
+        document.getElementById("unweighted").classList.remove("off");
+        document.getElementById("unweighted").classList.remove("hoverShadow");
+        document.getElementById("weighted").classList.add("hoverShadow");
+        document.getElementById("weighted").classList.add("off");
+        document.getElementById("weighted").classList.remove("on");
     }
 }
 
@@ -1111,8 +1273,9 @@ function removeSVGWeights(argument) {
     state.svg.innerHTML = state.svg.innerHTML; 
 }
 
-function reset() {
-    state.reset();
+function reset(orientation = false) {
+    state.reset(orientation);
+    buttonNotAllowed("algorithm");
 }
 
 // The Code for the context menu, starting here, has been done with the help of the 
@@ -1333,6 +1496,9 @@ function menuItemListener(linkElement) {
                 case "g":
                     if (element.classList.contains("node")) {
                         state.remove("node", element.id);
+                        if (state.graph.allNodes.length === 0) {
+                            buttonNotAllowed("algorithm");
+                        }
                     }
                     else if (element.classList.contains("edge")) {
                         state.remove("edge", element.id);
@@ -1770,6 +1936,16 @@ function onscrollListener() {
     document.addEventListener("scroll", scroll);
 }
 
+function cssSetUp() {
+
+    toBuild();
+    state.graph.directed = true;
+    switchDirection(false, true);
+    buttonNotAllowed("algorithm");
+    state.graph.weighted = true;
+    switchWeighted(false);
+}
+
 function hireListeners() {
     contextListener();
     clickListener();
@@ -1787,4 +1963,6 @@ window.onload = function() {
     state = new State();
 
     hireListeners();
+
+    cssSetUp();
 }

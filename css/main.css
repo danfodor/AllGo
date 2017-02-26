@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
@@ -45,6 +47,10 @@ q:before, q:after {
 table {
     border-collapse: collapse;
     border-spacing: 0;
+}
+
+body  {
+  font-family: 'Source Sans Pro', sans-serif;
 }
 
 #vis-div {
@@ -144,9 +150,187 @@ table {
 #side-div {
     padding-left: 0;
 }
-/*.circle {
-    opacity: 0.2;
+
+.buttonDiv {
+  padding: 0;
+  padding-bottom: 10px;
 }
-.line {
-    opacity: 0.2;
+
+.button {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 100%;
+
+  cursor: pointer;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */  
+}
+
+
+
+.leftDiv {
+  padding-right: 2px;
+}
+.rightDiv {
+  padding-left: 2px;
+}
+
+#buildDiv {
+  padding-right: 2px;
+}
+#algorithmDiv {
+  padding-left: 2px;
+}
+#build {
+
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+
+  cursor: pointer;
+  background: rgb(254,232,200);
+}
+
+/*#build:active {
+  border-left: 2px solid rgb(137, 137, 137);
+  border-top: 2px solid rgb(137, 137, 137);
+  border-right: 2px solid rgb(221, 221, 221);
+  border-bottom: 2px solid rgb(221, 221, 221);
+
 }*/
+
+
+/*#build:hover {
+  border-style: none;
+  box-shadow: -1px 3px 4px #999;
+}*/
+/*#build:active {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+  box-shadow: -1px 2px 2px #666;
+  transform: translateY(1px);
+
+}*/
+/*#build:focus {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+  box-shadow: -1px 2px 2px #666;
+  transform: translateY(1px);
+}*/
+
+#algorithm {
+
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+
+  cursor: pointer;
+  background: rgb(254,232,200);
+}
+
+/*#algorithm:hover {
+  box-shadow: 1px 3px 4px #999;
+}*/
+/*#algorithm:active {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+  box-shadow: 1px 2px 2px #666;
+  transform: translateY(1px);
+}
+#algorithm:focus {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+  box-shadow: 1px 2px 2px #666;
+  transform: translateY(1px);
+}*/
+.hoverShadow:hover {
+  box-shadow: 1px 3px 4px #999;
+}
+
+#directed {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+
+}
+#undirected {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+}
+
+
+
+#weighted {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+
+}
+#unweighted {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+}
+
+.button {
+/*  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;*/
+
+  cursor: pointer;
+}
+
+.on {
+  border-left: 2px solid rgb(137, 137, 137);
+  border-top: 2px solid rgb(137, 137, 137);
+  border-right: 2px solid rgb(221, 221, 221);
+  border-bottom: 2px solid rgb(221, 221, 221);
+}
+
+.off {
+  border-left: 2px solid rgb(221, 221, 221);
+  border-top: 2px solid rgb(221, 221, 221);
+  border-right: 2px solid rgb(137, 137, 137);
+  border-bottom: 2px solid rgb(137, 137, 137);
+}
+
+.disabled {
+  opacity: 0.65; 
+}
+
