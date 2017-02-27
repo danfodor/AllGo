@@ -24,6 +24,9 @@ function State() {
     this.top = this.svg.getBoundingClientRect().top;
 
     this.directedBezier = false;
+
+    this.newDirection = null;
+    this.newGraph = null;
     
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
@@ -57,6 +60,8 @@ function State() {
         this.selectedNodeId = false;
     	this.maxIdValue = 0;
         this.directedBezier = false;
+
+        this.newDirection = null;
 
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;

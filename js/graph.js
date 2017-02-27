@@ -71,6 +71,9 @@ function Graph(directed = false) {
     this.addEdge = function(nodeId1, nodeId2) { // NEEDS TO BE COMPLETED
         var edgeExists = this.existsEdge(nodeId1, nodeId2);
 
+        nodeId1 = parseInt(nodeId1);
+        nodeId2 = parseInt(nodeId2);
+
         if (edgeExists === true) {
             return false;
         }
@@ -361,3 +364,75 @@ function Graph(directed = false) {
     }
 
 };
+
+// TEST THIS METHOD MORE.
+function makeGraphDirected(graph) {
+    var newAdjLists = [], newAdjList, oldAdjList;
+    var nodesNo, neighbours, neighboursNo, newNeighbours;
+
+    if (graph.directed === false) {
+
+        graph.directed = true;
+        nodesNo = graph.adjacencyLists.length;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            oldAdjList = graph.adjacencyLists[i];
+            newAdjList = {"id": oldAdjList.id, "inNeighbours": [], "inWeights": [], 
+                          "outNeighbours": [], "outWeights": []};
+            neighboursNo = oldAdjList.neighbours.length;
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                newAdjList.inNeighbours.push(oldAdjList.neighbours[j]);
+                newAdjList.inWeights.push(oldAdjList.weights[j]);
+                newAdjList.outNeighbours.push(oldAdjList.neighbours[j]);
+                newAdjList.outWeights.push(oldAdjList.weights[j]);
+            }
+            newAdjLists.push(newAdjList);
+        }
+
+        graph.adjacencyLists = newAdjLists;
+    }
+
+    return graph;
+}
+
+// TEST THIS METHOD MORE.
+function makeGraphUndirected(graph) {
+    var newGraph = new Graph(false);
+    var newAdjLists = [], newAdjList, oldAdjList;
+    var node, nodesNo, neighbours, neighboursNo, newNeighbours;
+    var nodeId1, nodeId2;
+
+    if (graph.directed === true) {
+
+        nodesNo = graph.adjacencyLists.length;
+
+        for (var i = 0; i < nodesNo; ++i) {
+
+            node = graph.allNodes[i];
+            newGraph.addNode({id: node.id, name: node.name, 
+                         x: node.x, y: node.y, r: node.r, 
+                         outlineWidth: node.outlineWidth});            
+        }
+
+        for (var i = 0; i < nodesNo; ++i) {
+
+            oldAdjList = graph.adjacencyLists[i].outNeighbours;
+            nodeId1 = graph.adjacencyLists[i].id;
+            newGraph.adjacencyLists[i].id = nodeId1;
+            neighboursNo = oldAdjList.length;
+
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                nodeId2 = oldAdjList[j];
+                // console.log(nodeId1, nodeId2)
+                newGraph.addEdge(nodeId1, nodeId2);
+            }
+        }
+    }
+    else {
+        newGraph = graph;
+    }
+
+    return newGraph;
+}

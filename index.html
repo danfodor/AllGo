@@ -67,22 +67,32 @@
                                     <option value="4">4</option>
                                 </select>                                
                             </div>
-
-                            <button id="restart" onclick="restart()">Restart</button>
+                            <div class="row controlSeqRow">
+                                <div class="col-sm-4 leftDiv controlSeq" onclick="restart()">
+                                    <div id="restart" class="button" onclick="restart()">Restart</div>
+                                </div>
+                                <div class="col-sm-4 controlSeq">
+                                    <div id="back" class="button" onclick="backStep()">Back</div>
+                                </div>
+                                <div class="col-sm-4 rightDiv controlSeq">
+                                    <div id="next" class="button" onclick="nextStep()">Next</div>
+                                </div>
+                            </div>
+<!--                             <button id="restart" onclick="restart()">Restart</button>
                             <button id="back" onclick="backStep()">Back</button>
-                            <button id="next" onclick="nextStep()">Next</button>
+                            <button id="next" onclick="nextStep()">Next</button> -->
                         </div>
 
                     </div>
                     <div id="buildMode">
                         <div id="dirDiv" style="text-align: center;">
                             <div class="col-sm-6 buttonDiv leftDiv"> 
-                                <div id="undirected" class="button" onclick="switchDirection(false)">
+                                <div id="undirected" class="button" onclick="openDirModal(false)">
                                     Undirected Graph
                                 </div>
                             </div>
                             <div class="col-sm-6 buttonDiv rightDiv">
-                                <div id="directed" class="button" onclick="switchDirection(true)">
+                                <div id="directed" class="button" onclick="openDirModal(true)">
                                     Directed Graph
                                 </div>
                             </div>
@@ -137,14 +147,39 @@
       </ul>
     </nav>
 
-<!--     <div id="myModal" class="modal">
+    <div id="directionModal" class="mymodal">
+        <div class="mymodal-content">
+            <!-- <span class="close">&times;</span> -->
+            <div class="row">
+                <div class="col-sm-12">
+                    Changing direction of the graph.
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <svg id="dirSVG" class=""> 
+                    </svg>
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="applyDirModal" class="modalButton" onclick="applyDirChanges()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                </div>
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="cancelDirModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
 
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <p>Some text in the Modal..</p>
-      </div>
-
-    </div> -->    
+        </div>
+    </div>    
 
 </div>
 

@@ -162,16 +162,24 @@ body  {
   width: 100%;
 
   cursor: pointer;
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */  
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;  
 }
 
+.controlSeq {
+  padding-right: 0px;
+  padding-left: 0px;
+  /*width: 30%;*/
+  margin: auto;
+}
 
+.controlSeqRow {
+  margin: 0;
+}
 
 .leftDiv {
   padding-right: 2px;
@@ -188,13 +196,12 @@ body  {
 }
 #build {
 
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome and Opera */
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
 
   cursor: pointer;
   background: rgb(254,232,200);
@@ -305,15 +312,33 @@ body  {
   background: linear-gradient(white, rgb(254,232,200));
 }
 
-.button {
-/*  -webkit-touch-callout: none;
-    -webkit-user-select: none;
-     -khtml-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;*/
+#restart {
+  background: rgba(255, 0, 0, 0.1);
+/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+*/
+}
 
-  cursor: pointer;
+
+#back {
+  background: rgba(255, 0, 0, 0.1);
+/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+*/
+}
+
+
+#next {
+  background: rgba(255, 0, 0, 0.1);
+/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+*/
 }
 
 .on {
@@ -334,3 +359,114 @@ body  {
   opacity: 0.65; 
 }
 
+
+/* MODAL INFO */
+.mymodal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.mymodal-content {
+    background-color: #fefefe;
+    margin: 30px auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+/*.close {
+    color: #111;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}*/
+
+
+#dirSVG {
+  height: 65vh;
+  width: 100%;
+  margin: auto;
+  /*background-color: red;*/
+    
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;    
+}
+
+hr {
+  margin-top: 7px;
+  margin-bottom: 7px; 
+}
+
+.modalButtonDiv {
+  padding: 0;
+}
+
+.modalButton {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 100%;
+  margin: auto;
+  text-align: center;
+  cursor: pointer;
+  -webkit-touch-callout: none;
+    -webkit-user-select: none;
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
+}
+
+#cancelDirModal {
+  background: rgb(255, 0, 0);
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
+  background: linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
+}
+
+#cancelDirModal:active, 
+#cancelDirModal:hover {
+  background: rgb(255, 0, 0);
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
+  background: linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
+}
+
+#applyDirModal {
+  background: rgb(0,255,0);
+  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
+  background: -o-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
+  background: -moz-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
+  background: linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
+}
+
+#applyDirModal:active, 
+#applyDirModal:hover {
+  background: rgb(0,255,0);
+  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
+  background: -o-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
+  background: -moz-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
+  background: linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
+}
