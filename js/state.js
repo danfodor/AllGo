@@ -27,6 +27,7 @@ function State() {
 
     this.newDirection = null;
     this.newGraph = null;
+    this.modalTransform = null;
     
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
@@ -62,6 +63,7 @@ function State() {
         this.directedBezier = false;
 
         this.newDirection = null;
+        this.modalTransform = null;
 
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
@@ -123,7 +125,7 @@ function State() {
             case "weight": 
                 var gId = id.split("weight")[1];
                 var g = this.svg.getElementById(gId);
-                console.log(g);
+                // console.log(g);
                 var weight = this.svg.getElementById(id);
 
                 this.graph.remove("weight", id);

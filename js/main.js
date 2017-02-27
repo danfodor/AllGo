@@ -93,7 +93,7 @@ function clickInterpret(e) {
 function addNode(x, y) {
     var intersectsNode = state.graph.intersectsNode(x, y);
     if (intersectsNode !== false) {
-        runForbiddenCircle(state.svg, "forbiddenCircle", intersectsNode.x, intersectsNode.y, 200)
+        runForbiddenCircle(state.svg, "forbiddenCircle", intersectsNode.x, intersectsNode.y, 200);
 
         return false;
     }
@@ -219,11 +219,27 @@ function addEdge(nodeId1, nodeId2) {
     return true;
 }
 
+function min(array) {
+    var minVal = null;
+
+    if (array.length > 0) {
+        minVal = array[0];
+
+        for (var i = 1; i < array.length; ++i) {
+            if (minVal > array[i]) {
+                minVal = array[i];
+            }
+        }
+    }
+
+    return minVal;
+}
+
 function switchMode(mode) {
 
     if (mode === "build") {
         // TODO: CLEAN UP. 
-        cleanUp();
+        cleanSVGGraphColors();
         document.getElementById("algMode").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
 
@@ -284,8 +300,33 @@ function switchMode(mode) {
         document.getElementById("algorithm").classList.remove("off");
         document.getElementById("algorithm").classList.add("on");
 
+        seqControlMenuSetUp();
+
         algorithmSelect();
         selectStartNode();
+    }
+}
+
+function seqControlMenuSetUp() {        
+    document.getElementById("restart").classList.add("off");
+    document.getElementById("restart").classList.add("hoverShadow");
+    document.getElementById("back").classList.add("off");
+    document.getElementById("back").classList.add("disabled");
+    document.getElementById("back").classList.remove("on");
+    document.getElementById("back").classList.remove("hoverShadow");
+
+    document.getElementById("next").classList.add("off");
+    document.getElementById("next").classList.add("hoverShadow");
+    document.getElementById("next").classList.remove("disabled");
+    document.getElementById("next").classList.remove("on");
+
+    if (state.graph.noEdge() === true) {
+        if (state.graph.allNodes.length <= 1) {
+            console.log("baai");
+            document.getElementById("next").classList.remove("hoverShadow");
+            document.getElementById("next").classList.add("disabled");
+
+        }
     }
 }
 
@@ -359,6 +400,7 @@ function selectStartNode() {
     
     var pastNode;
     if (state.pastStartingNode !== null && state.algorithmRuns === false) {
+
         pastNode = document.getElementById(state.pastStartingNode)
         if (pastNode !== null) {
             pastNode.style.stroke = colors.unselectedNodeOutline;
@@ -372,11 +414,11 @@ function selectStartNode() {
 
 function nextStep() {
     var algorithm = document.getElementById("algorithmsOptions").value;
+
     if (state.algorithmRuns === false) {
 
         state.startNode = document.getElementById("nodeOptions").value;
         state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
-        console.log(state.nextSteps);
         state.runningAlgorithm = algorithm;
 
         // TODO: CONSIDER THIS LATER: Optimisation when nothing changed fromprevious run.
@@ -385,6 +427,7 @@ function nextStep() {
         //     state.startNode = startNode;
         //     state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
         // }
+
         state.algorithmRuns = true;
         state.executedSteps = [];
     }
@@ -392,8 +435,22 @@ function nextStep() {
     if (state.nextSteps.length > 0) {
         var executeStep = state.nextSteps.shift();
 
+        document.getElementById("back").classList.remove("disabled");
+        document.getElementById("back").classList.add("hoverShadow");
+
+
+        document.getElementById("next").classList.add("on");
+        document.getElementById("next").classList.remove("off");
+        document.getElementById("next").classList.remove("hoverShadow");
+
+        setTimeout(function() {
+            document.getElementById("next").classList.remove("on");
+            document.getElementById("next").classList.add("off");
+            document.getElementById("next").classList.add("hoverShadow"); 
+        }, 100);     
+
+
         // EXECUTE IT
-        // console.log("On edge: " + executeStep.edge);
         switch(executeStep.type) {
             case "edge":
                 var node = executeStep.id.split('-')[1];
@@ -408,7 +465,7 @@ function nextStep() {
                 if (executeStep.extended === false) {
                     color = "red";
                 }
-                console.log(edge);
+                
                 edge.style.stroke = color;
                 node.style.stroke = "green";
 
@@ -425,17 +482,33 @@ function nextStep() {
                 break;
         }
     }
-    else {
-        // console.log(state.nextSteps);
-        console.log(state.executedSteps);
-        // document.getElementById("next").disabled = true;
-        alert("Stop the next button when in this case");
-    }
+
+    if (state.nextSteps.length === 0) {
+        document.getElementById("next").classList.add("disabled");
+        setTimeout(function() {
+            document.getElementById("next").classList.remove("hoverShadow"); 
+        }, 120); 
+    }    
 }
 
 function backStep() {
     if (state.algorithmRuns === true) {
+        if (state.nextSteps.length === 0 && state.executedSteps.length > 0) {
+            document.getElementById("next").classList.add("hoverShadow");        
+            document.getElementById("next").classList.remove("disabled");
+        }
         if (state.executedSteps.length > 0) {
+
+            document.getElementById("back").classList.add("on");
+            document.getElementById("back").classList.remove("off");
+            document.getElementById("back").classList.remove("hoverShadow");
+
+            setTimeout(function() {
+                document.getElementById("back").classList.remove("on");
+                document.getElementById("back").classList.add("off");
+                document.getElementById("back").classList.add("hoverShadow"); 
+            }, 100);             
+
             var backStep = state.executedSteps.splice(-1,1)[0];
             // NICIUN PUSH
             state.nextSteps.unshift(backStep);
@@ -468,22 +541,49 @@ function backStep() {
             }
         }
         else {
-            // console.log(state.nextSteps);
-            console.log(state.executedSteps);
-            // document.getElementById("next").disabled = true;
-            alert("Stop the next button when in this case");
+            document.getElementById("back").classList.remove("hoverShadow");
+            document.getElementById("back").classList.add("disabled");
+        }
+        if (state.executedSteps.length === 0) { 
+            setTimeout(function() {
+                document.getElementById("back").classList.remove("hoverShadow"); 
+            }, 120);             
+            
+            document.getElementById("back").classList.add("disabled");
+
         }
     } 
-    else {
-        console.log("Bai");
-    }
-
-    // if (state.algorithmRuns === false) {
-    //     // disable button.
-    // }
 }
 
-function cleanUp(argument) {
+function restart() {
+    // // --- Pseudocode ---
+    // clean all the colouring
+    // make select algorithm available again
+    // make select starting node available again
+    // color the starting node 
+    // consider that algorithm does not run
+    
+    cleanSVGGraphColors();
+    seqControlMenuSetUp();
+
+    document.getElementById("restart").classList.add("on");
+    document.getElementById("restart").classList.remove("off");
+    document.getElementById("restart").classList.remove("hoverShadow");
+
+    setTimeout(function() {
+        document.getElementById("restart").classList.remove("on");
+        document.getElementById("restart").classList.add("off");
+        document.getElementById("restart").classList.add("hoverShadow"); 
+    }, 100); 
+    // document.getElementById; 
+
+    state.nextSteps = state.executedSteps;
+    state.executedSteps = [];
+    
+    selectStartNode();
+}
+
+function cleanSVGGraphColors() {
     state.startNode = document.getElementById("nodeOptions").value;
     state.algorithmRuns = false;
 
@@ -519,23 +619,7 @@ function cleanUp(argument) {
     }
 }
 
-function restart() {
-    // // --- Pseudocode ---
-    // clean all the colouring
-    // make select algorithm available again
-    // make select starting node available again
-    // color the starting node 
-    // consider that algorithm does not run
-    
-    cleanUp();
-
-    state.nextSteps = state.executedSteps;
-    state.executedSteps = [];
-    
-    selectStartNode();
-}
-
-function switchDirection(directed) {
+function switchDirButtons(directed) {
 
     if (directed === true) {
 
@@ -558,23 +642,65 @@ function switchDirection(directed) {
     }
 }
 
+function switchDirected(directed) {
+    if (directed !== state.graph.directed) {
+        if (state.graph.noEdge() === false) {
+            openDirModal(directed);
+        }
+        else {
+            if (directed === true) {
+                state.graph = makeGraphDirected(state.graph);
+                switchDirButtons(directed);
+            }
+            else {
+                state.graph = makeGraphUndirected(state.graph);
+                switchDirButtons(directed);
+            }
+        }
+    }    
+}
+
+
 function openDirModal(directed) {
     var dirModal = document.getElementById('directionModal');
     var dirSVG = document.getElementById('dirSVG');
     
-    state.newDirection = directed;
+    dirModal.style.visibility = "hidden";
+    dirModal.style.display = "block";
 
-    state.newGraph = state.graph;
+    state.newDirection = directed;
+    state.newGraph = cloneGraph(state.graph);
+
     if (directed === true) {
         state.newGraph = makeGraphDirected(state.newGraph); // if this is the case
     }
     else {
         state.newGraph = makeGraphUndirected(state.newGraph);
-        console.log("Implement makeGraphUndirected");
     }
-    dirSVG.innerHTML = graphToSVG(state.newGraph).innerHTML;
 
-    dirModal.style.display = "block";
+
+    var y = -(graphMinY(state.graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
+    
+
+    // Check for xRatio of the 2 SVGs. 
+    var graphWidth = graphMaxX(state.graph) - graphMinX(state.graph) + 
+                    2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
+    var graphHeight = graphMaxY(state.graph) - graphMinY(state.graph) + 
+                    2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
+
+    var modalSVGWidth = dirSVG.getClientRects()[0].width;
+    var modalSVGHeight = dirSVG.getClientRects()[0].height;
+
+    var xRatio = min([parseFloat(modalSVGWidth) / parseFloat(graphWidth), 1]);
+    var yRatio = min([parseFloat(modalSVGHeight) / parseFloat(graphHeight), 1]);
+    
+    state.modalTransform = {"x": 0, "y": y, "xRatio": xRatio, "yRatio": yRatio};
+    // CONTINUEHERE: Make sure graph is transposed back correctly.
+    state.newGraph = transposeGraphCoordinates(state.newGraph, 0, y, xRatio, yRatio);
+
+    dirSVG.innerHTML = graphToSVG(state.newGraph).innerHTML;
+    dirModal.style.visibility = "visible";
+    // console.log("atentiune");
 }
 
 function applyDirChanges() {
@@ -582,37 +708,46 @@ function applyDirChanges() {
     var dirSVG = document.getElementById('dirSVG');
 
     state.svg.innerHTML = "";
+
+    state.newGraph = transposeGraphCoordinates(state.newGraph, 0, 
+                    -state.modalTransform.y, 1 / state.modalTransform.xRatio, 
+                    1 / state.modalTransform.yRatio);
+
     state = updateGraphToState(state.newGraph, state);
 
     modal.style.display = "none";
 
+    dirSVG.innerHTML = "";
+
     state.svg.innerHTML = state.svg.innerHTML;
-    switchDirection(state.newDirection);
+    switchDirButtons(state.newDirection);
 }
 
 function switchWeighted(weighted) {
 
-    if (weighted === true) {
-        state.graph.setWeighted(true);
-        addSVGWeights();
+    if (weighted !== state.graph.weighted) {
+        if (weighted === true) {
+            state.graph.setWeighted(true);
+            addSVGWeights();
 
-        document.getElementById("unweighted").classList.add("off");
-        document.getElementById("unweighted").classList.remove("on");
-        document.getElementById("unweighted").classList.add("hoverShadow");
-        document.getElementById("weighted").classList.remove("hoverShadow");
-        document.getElementById("weighted").classList.add("on");
-        document.getElementById("weighted").classList.remove("off");
-    }
-    else {
-        state.graph.setWeighted(false);
-        removeSVGWeights();
+            document.getElementById("unweighted").classList.add("off");
+            document.getElementById("unweighted").classList.remove("on");
+            document.getElementById("unweighted").classList.add("hoverShadow");
+            document.getElementById("weighted").classList.remove("hoverShadow");
+            document.getElementById("weighted").classList.add("on");
+            document.getElementById("weighted").classList.remove("off");
+        }
+        else {
+            state.graph.setWeighted(false);
+            removeSVGWeights();
 
-        document.getElementById("unweighted").classList.add("on");
-        document.getElementById("unweighted").classList.remove("off");
-        document.getElementById("unweighted").classList.remove("hoverShadow");
-        document.getElementById("weighted").classList.add("hoverShadow");
-        document.getElementById("weighted").classList.add("off");
-        document.getElementById("weighted").classList.remove("on");
+            document.getElementById("unweighted").classList.add("on");
+            document.getElementById("unweighted").classList.remove("off");
+            document.getElementById("unweighted").classList.remove("hoverShadow");
+            document.getElementById("weighted").classList.add("hoverShadow");
+            document.getElementById("weighted").classList.add("off");
+            document.getElementById("weighted").classList.remove("on");
+        }
     }
 }
 
@@ -623,12 +758,15 @@ function addSVGWeights() {
         // Implement after undirected.   
     }
     else {
-        var svgLine, svgEdge, svgEdges = document.querySelectorAll(".edge");
+        var svgLine, svgEdge, svgEdges = state.svg.querySelectorAll(".edge");
         var len = svgEdges.length;
         var gId, lineId, x1, y1, x2, y2;
 
+        // console.log("LEN: " + len);
+
         for (var i = 0; i < len; ++i) {
             svgEdge = svgEdges[i];
+            console.log(svgEdge);
             gId = svgEdge.id;
             lineId = "line" + gId;
             svgLine = document.getElementById(lineId);
@@ -676,11 +814,13 @@ function removeSVGWeights(argument) {
         // Implement after undirected.   
     }
     else {
-        var svgWeight, svgWeights = document.querySelectorAll(".weight");
+        var svgWeight, svgWeights = state.svg.querySelectorAll(".weight");
         var len = svgWeights.length;
 
+        // console.log(svgWeights);
         for (var i = 0; i < len; ++i) {
             svgWeight = svgWeights[i];
+            // console.log(svgWeight);
             state.remove("weight", svgWeight.id);   
         }
     }
@@ -1353,7 +1493,7 @@ function cssSetUp() {
 
     switchMode("build");
     state.graph.directed = false;
-    switchDirection(false);
+    switchDirButtons(false);
     buttonNotAllowed("algorithm");
     state.graph.weighted = false;
     switchWeighted(false);
@@ -1364,8 +1504,11 @@ function windowClickListener() {
 }
 
 function handleClick(e) {
-    var modal = document.getElementById('directionModal');
     if (event.target == modal || event.target.id === "cancelDirModal") {
+        var modal = document.getElementById('directionModal');
+        var dirSVG = document.getElementById('dirSVG');
+
+        dirSVG.innerHTML = "";
         modal.style.display = "none";
     }
 }
@@ -1392,5 +1535,3 @@ window.onload = function() {
 
     cssSetUp();
 }
-
-

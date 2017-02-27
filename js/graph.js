@@ -11,7 +11,6 @@ function Graph(directed = false) {
     this.selfLoops = false;
     this.weighted = false;
 
-
     // TO BE CHECKED
     this.addNode = function(node1) {
         var nodeExists = this.nodeIndexFromId(node1.id);
@@ -218,7 +217,7 @@ function Graph(directed = false) {
             }
         }
         return done;
-    }
+    };
 
     this.remove = function(object, id1, id2 = null) {
         switch(object) {
@@ -314,7 +313,7 @@ function Graph(directed = false) {
         }
 
         return weight;
-    }
+    };
 
     this.getIndexFromIdInAdjList = function(nodeId, adjList, dir="none") {
         var ind = -1;
@@ -361,9 +360,66 @@ function Graph(directed = false) {
             }
         }
         return ind;
+    };
+
+    this.noEdge = function() {
+        var noEdge = true;
+
+        var len = this.adjacencyLists.length;
+        var neighbours;
+
+        if (this.directed === true) {
+            for (var i = 0; i < len; ++i) {
+                neighbours = this.adjacencyLists[i].outNeighbours;
+                if (neighbours.length !== 0) {
+                    noEdge = false;
+                    break;
+                }
+            }
+        }
+        else {
+            for (var i = 0; i < len; ++i) {
+                neighbours = this.adjacencyLists[i].neighbours;
+                if (neighbours.length !== 0) {
+                    noEdge = false;
+                    break;
+                }
+            }
+        }
+
+        return noEdge;
     }
 
 };
+
+function cloneGraph(graph) {
+    var newGraph = new Graph();
+
+    // newGraph.allNodes = [];
+
+    // var len = graph.allNodes.length;
+    // var node; 
+    // for (var i = 0; i < len; ++i) {
+    //     node = graph.allNodes[i];
+    //     newGraph.addNode({id: node.id, name: node.name, 
+    //                  x: node.x, y: node.y, r: node.r, 
+    //                  outlineWidth: node.outlineWidth});  
+    // }
+
+    // newGraph.directed = directed;
+    // newGraph.selfLoops = false;
+    // newGraph.weighted = false;
+
+    // newGraph.adjacencyLists = []; 
+
+    newGraph.allNodes = graph.allNodes;
+    newGraph.adjacencyLists = graph.adjacencyLists;
+    newGraph.directed = graph.directed;
+    newGraph.weighted = graph.weighted;
+    newGraph.selfLoops = graph.selfLoops;
+
+    return newGraph;
+}
 
 // TEST THIS METHOD MORE.
 function makeGraphDirected(graph) {
@@ -435,4 +491,86 @@ function makeGraphUndirected(graph) {
     }
 
     return newGraph;
+}
+
+
+function graphMinY(graph) {
+    var minY = null;
+    if (graph.allNodes.length > 0) {
+        minY = graph.allNodes[0].y;
+        
+        var len = graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            if (minY > graph.allNodes[i].y) {
+                minY = graph.allNodes[i].y;
+            }
+        }
+    }
+
+    return minY;
+} 
+
+function graphMinX(graph) {
+    var minX = null;
+    if (graph.allNodes.length > 0) {
+        minX = graph.allNodes[0].x;
+        
+        var len = graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            if (minX > graph.allNodes[i].x) {
+                minX = graph.allNodes[i].x;
+            }
+        }
+    }
+
+    return minX;
+} 
+
+function graphMaxY(graph) {
+    var maxY = null;
+    if (graph.allNodes.length > 0) {
+        maxY = graph.allNodes[0].y;
+        
+        var len = graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            if (maxY < graph.allNodes[i].y) {
+                maxY = graph.allNodes[i].y;
+            }
+        }
+    }
+
+    return maxY;
+} 
+
+function graphMaxX(graph) {
+    var maxX = null;
+    if (graph.allNodes.length > 0) {
+        maxX = graph.allNodes[0].x;
+        
+        var len = graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            if (maxX < graph.allNodes[i].x) {
+                maxX = graph.allNodes[i].x;
+            }
+        }
+    }
+
+    return maxX;
+}
+
+function transposeGraphCoordinates(graph, x = 0, y = 0, xRatio = 1, yRatio = 1) {
+    var node, nodes = graph.allNodes;
+    var len = nodes.length;
+
+    for (var i = 0; i < len; ++i) {
+        node = nodes[i];
+        node.x += x;
+        node.x *= xRatio;
+        node.y += y;
+        node.y *= yRatio;
+    }
+
+    graph.allNodes = nodes;
+
+    return graph;
 }

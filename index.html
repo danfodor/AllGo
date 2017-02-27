@@ -87,12 +87,12 @@
                     <div id="buildMode">
                         <div id="dirDiv" style="text-align: center;">
                             <div class="col-sm-6 buttonDiv leftDiv"> 
-                                <div id="undirected" class="button" onclick="openDirModal(false)">
+                                <div id="undirected" class="button" onclick="switchDirected(false)">
                                     Undirected Graph
                                 </div>
                             </div>
                             <div class="col-sm-6 buttonDiv rightDiv">
-                                <div id="directed" class="button" onclick="openDirModal(true)">
+                                <div id="directed" class="button" onclick="switchDirected(true)">
                                     Directed Graph
                                 </div>
                             </div>
@@ -100,12 +100,12 @@
                         </div>
                         <div id="weightDiv" style="text-align: center;">
                             <div class="col-sm-6 buttonDiv leftDiv"> 
-                                <div id="unweighted" class="button" onclick="switchWeighted(false)">
+                                <div id="unweighted" class="button on" onclick="switchWeighted(false)">
                                     Unweighted Graph
                                 </div>
                             </div>
                             <div class="col-sm-6 buttonDiv rightDiv">
-                                <div id="weighted" class="button" onclick="switchWeighted(true)">
+                                <div id="weighted" class="button off hoverShadow" onclick="switchWeighted(true)">
                                     Weighted Graph
                                 </div>
                             </div>
