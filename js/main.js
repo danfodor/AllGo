@@ -669,7 +669,7 @@ function openDirModal(directed) {
     dirModal.style.display = "block";
 
     state.newDirection = directed;
-    state.newGraph = cloneGraph(state.graph);
+    state.newGraph = clone(state.graph);
 
     if (directed === true) {
         state.newGraph = makeGraphDirected(state.newGraph); // if this is the case
@@ -680,7 +680,6 @@ function openDirModal(directed) {
 
 
     var y = -(graphMinY(state.graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
-    
 
     // Check for xRatio of the 2 SVGs. 
     var graphWidth = graphMaxX(state.graph) - graphMinX(state.graph) + 
@@ -695,10 +694,10 @@ function openDirModal(directed) {
     var yRatio = min([parseFloat(modalSVGHeight) / parseFloat(graphHeight), 1]);
     
     state.modalTransform = {"x": 0, "y": y, "xRatio": xRatio, "yRatio": yRatio};
-    // CONTINUEHERE: Make sure graph is transposed back correctly.
     state.newGraph = transposeGraphCoordinates(state.newGraph, 0, y, xRatio, yRatio);
 
-    dirSVG.innerHTML = graphToSVG(state.newGraph).innerHTML;
+    // dirSVG.innerHTML = graphToDirSVG(state.newGraph).innerHTML;
+    dirSVG.innerHTML = graphToDirSVG(state.newGraph).innerHTML;
     dirModal.style.visibility = "visible";
     // console.log("atentiune");
 }

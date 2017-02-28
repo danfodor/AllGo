@@ -362,7 +362,7 @@ body  {
 
 
 /* MODAL INFO */
-.mymodal {
+.dirModal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -376,7 +376,7 @@ body  {
 }
 
 /* Modal Content/Box */
-.mymodal-content {
+.dirModal-content {
     background-color: #fefefe;
     margin: 30px auto; 
     padding: 20px;

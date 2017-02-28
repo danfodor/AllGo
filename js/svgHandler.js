@@ -578,8 +578,6 @@ function runForbiddenPath(svg, forbiddenPathId, d, ms = 200) {
     }, ms);
 }
 
-
-// ADD PREVIEW ELEMENTS!!
 function graphToSVG(graph) {
     var svg = document.createElement("svg");
 
@@ -676,9 +674,115 @@ function graphToSVG(graph) {
             }
         }
     }
-
     return svg;
 }
+
+function graphToDirSVG(graph) {
+    var svg = document.createElement("svg");
+
+    var circle, text, node;
+    var nodeId, node, x, y, r, w; 
+    var nodesNo = graph.allNodes.length;
+
+    for (var i = 0; i < nodesNo; ++i) {
+        node = graph.allNodes[i];
+
+        nodeId = node.id;
+        nodeId = "0" + nodeId;
+        x = node.x;
+        y = node.y;
+        r = node.r;
+        w = node.outlineWidth;
+      
+        circle = createSVGCirlce(nodeId, x, y, r, w);
+        text = createSVGText(node.id, x, y);
+        node = createSVGNode(nodeId, circle, text);
+
+        svg.appendChild(node);      
+    }
+
+    if (graph.directed === true) {
+        var adjList;
+        var outNeighbours, outNeighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var x1, y1, x2, y2;
+
+        var d, path, marker, arrow, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            outNeighbours = adjList.outNeighbours;
+            outNeighboursNo = outNeighbours.length;
+            nodeId = adjList.id;
+            nodeId = "0" + nodeId;
+            nodeIndex = graph.nodeIndexFromId(nodeId);
+
+            for (var j = 0; j < outNeighboursNo; ++j) {
+                neighbourId = outNeighbours[j];
+                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+
+                x1 = graph.allNodes[nodeIndex].x;
+                y1 = graph.allNodes[nodeIndex].y;
+                x2 = graph.allNodes[neighbourIndex].x;
+                y2 = graph.allNodes[neighbourIndex].y;
+
+                d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
+
+	            marker = createSVGMarker(nodeId, neighbourId);
+	            // marker.id = "0" + marker.id;
+	            arrow = createSVGArrow(marker);
+	            // arrow.id = "0" + arrow.id;
+	            path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
+	            // path.id = "0" + path.id;
+	            edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
+	            // edge.id = "0" + edge.id;
+
+                svg.insertBefore(edge, svg.firstChild);
+            }
+        }
+    }
+    else {
+        var adjList;
+        var neighbours, neighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var x1, y1, x2, y2;
+
+        var line, edge;
+        // TODO: Consider weight.
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            neighbours = adjList.neighbours;
+            neighboursNo = neighbours.length;
+            nodeId = adjList.id;
+            nodeIndex = graph.nodeIndexFromId(nodeId);
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                neighbourId = neighbours[j];
+                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+
+                if (parseInt(nodeId) < parseInt(neighbourId)) {
+
+                    x1 = graph.allNodes[nodeIndex].x;
+                    y1 = graph.allNodes[nodeIndex].y;
+                    x2 = graph.allNodes[neighbourIndex].x;
+                    y2 = graph.allNodes[neighbourIndex].y;
+
+                    line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
+	            	line.id = "0" + line.id;
+                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
+	            	edge.id = "0" + edge.id;
+
+                    svg.insertBefore(edge, svg.firstChild);
+                }
+            }
+        }
+    }
+    return svg;
+}
+
 
 function updateGraphToState(graph, state) {
 

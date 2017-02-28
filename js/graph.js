@@ -393,24 +393,7 @@ function Graph(directed = false) {
 };
 
 function cloneGraph(graph) {
-    var newGraph = new Graph();
-
-    // newGraph.allNodes = [];
-
-    // var len = graph.allNodes.length;
-    // var node; 
-    // for (var i = 0; i < len; ++i) {
-    //     node = graph.allNodes[i];
-    //     newGraph.addNode({id: node.id, name: node.name, 
-    //                  x: node.x, y: node.y, r: node.r, 
-    //                  outlineWidth: node.outlineWidth});  
-    // }
-
-    // newGraph.directed = directed;
-    // newGraph.selfLoops = false;
-    // newGraph.weighted = false;
-
-    // newGraph.adjacencyLists = []; 
+    var newGraph = new Graph(); 
 
     newGraph.allNodes = graph.allNodes;
     newGraph.adjacencyLists = graph.adjacencyLists;
@@ -420,6 +403,70 @@ function cloneGraph(graph) {
 
     return newGraph;
 }
+
+// This mehtod has been taken from: 
+// http://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object
+function clone(obj) {
+    var copy;
+
+    if (null == obj || "object" != typeof obj) {
+        return obj;
+    }
+
+    if (obj instanceof Date) {
+        copy = new Date();
+        copy.setTime(obj.getTime());
+        return copy;
+    }
+
+    if (obj instanceof Array) {
+        copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = clone(obj[i]);
+        }
+        return copy;
+    }
+
+    if (obj instanceof Object) {
+        console.log("here bay");
+        copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+        }
+        return copy;
+    }
+
+    throw new Error("Unable to copy obj! Its type isn't supported.");
+}
+
+
+// function modifyGraphNodesIds(graph, action, backWord = "") {
+//     if (graph.allNodes.length > 0) {
+//         var nodes, len;
+//         switch(action) {
+//             case "remove":
+//                 len = graph.allNodes.length;
+//                 for (var i = 0; i < len; ++i) {
+//                     var id = "";
+//                     var words = graph.allNodes[i].id.split(backWord);
+//                     for (var j = 0; j < words.length; ++j) {
+//                         id += words[j]
+//                     }
+//                     graph.allNodes[i].id = id;
+//                 }
+//                 break;
+//             case "add":
+//                 len = graph.allNodes.length;
+//                 for (var i = 0; i < len; ++i) {
+//                     graph.allNodes[i].id = graph.allNodes[i].id + backWord;
+//                 }
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+//     return graph;
+// }
 
 // TEST THIS METHOD MORE.
 function makeGraphDirected(graph) {
@@ -496,6 +543,13 @@ function makeGraphUndirected(graph) {
 
 function graphMinY(graph) {
     var minY = null;
+        
+        var len = graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            if (minY > graph.allNodes[i].y) {
+                minY = graph.allNodes[i].y;
+            }
+        }
     if (graph.allNodes.length > 0) {
         minY = graph.allNodes[0].y;
         
