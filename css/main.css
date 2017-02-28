@@ -205,40 +205,11 @@ body  {
 
   cursor: pointer;
   background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
 }
-
-/*#build:active {
-  border-left: 2px solid rgb(137, 137, 137);
-  border-top: 2px solid rgb(137, 137, 137);
-  border-right: 2px solid rgb(221, 221, 221);
-  border-bottom: 2px solid rgb(221, 221, 221);
-
-}*/
-
-
-/*#build:hover {
-  border-style: none;
-  box-shadow: -1px 3px 4px #999;
-}*/
-/*#build:active {
-  background: rgb(254,232,200);
-  background: -webkit-linear-gradient(white, rgb(254,232,200));
-  background: -o-linear-gradient(white, rgb(254,232,200));
-  background: -moz-linear-gradient(white, rgb(254,232,200));
-  background: linear-gradient(white, rgb(254,232,200));
-  box-shadow: -1px 2px 2px #666;
-  transform: translateY(1px);
-
-}*/
-/*#build:focus {
-  background: rgb(254,232,200);
-  background: -webkit-linear-gradient(white, rgb(254,232,200));
-  background: -o-linear-gradient(white, rgb(254,232,200));
-  background: -moz-linear-gradient(white, rgb(254,232,200));
-  background: linear-gradient(white, rgb(254,232,200));
-  box-shadow: -1px 2px 2px #666;
-  transform: translateY(1px);
-}*/
 
 #algorithm {
 
@@ -251,29 +222,12 @@ body  {
 
   cursor: pointer;
   background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
 }
 
-/*#algorithm:hover {
-  box-shadow: 1px 3px 4px #999;
-}*/
-/*#algorithm:active {
-  background: rgb(254,232,200);
-  background: -webkit-linear-gradient(white, rgb(254,232,200));
-  background: -o-linear-gradient(white, rgb(254,232,200));
-  background: -moz-linear-gradient(white, rgb(254,232,200));
-  background: linear-gradient(white, rgb(254,232,200));
-  box-shadow: 1px 2px 2px #666;
-  transform: translateY(1px);
-}
-#algorithm:focus {
-  background: rgb(254,232,200);
-  background: -webkit-linear-gradient(white, rgb(254,232,200));
-  background: -o-linear-gradient(white, rgb(254,232,200));
-  background: -moz-linear-gradient(white, rgb(254,232,200));
-  background: linear-gradient(white, rgb(254,232,200));
-  box-shadow: 1px 2px 2px #666;
-  transform: translateY(1px);
-}*/
 .hoverShadow:hover {
   box-shadow: 1px 3px 4px #999;
 }
@@ -314,31 +268,28 @@ body  {
 
 #restart {
   background: rgba(255, 0, 0, 0.1);
-/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
   background: -o-linear-gradient(white, rgb(254,232,200));
   background: -moz-linear-gradient(white, rgb(254,232,200));
   background: linear-gradient(white, rgb(254,232,200));
-*/
 }
 
 
 #back {
   background: rgba(255, 0, 0, 0.1);
-/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
   background: -o-linear-gradient(white, rgb(254,232,200));
   background: -moz-linear-gradient(white, rgb(254,232,200));
   background: linear-gradient(white, rgb(254,232,200));
-*/
 }
 
 
 #next {
   background: rgba(255, 0, 0, 0.1);
-/*  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
   background: -o-linear-gradient(white, rgb(254,232,200));
   background: -moz-linear-gradient(white, rgb(254,232,200));
   background: linear-gradient(white, rgb(254,232,200));
-*/
 }
 
 .on {
@@ -358,6 +309,21 @@ body  {
 .disabled {
   opacity: 0.65; 
   cursor: not-allowed;
+}
+
+.edgeOff:hover {
+  opacity: 0.65; 
+}
+
+/*.edgeOn:hover {
+  opacity: 1; 
+}*/
+
+.edgeRemoved {
+  opacity: 0.5;
+}
+.edgeRemoved:hover {
+  opacity: 1; 
 }
 
 
@@ -440,34 +406,34 @@ hr {
 
 #cancelDirModal {
   background: rgb(255, 0, 0);
-  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
-  background: -o-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
-  background: -moz-linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
-  background: linear-gradient(rgba(255, 0, 0, 0.3), rgba(255,0,0, 0.25));
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
 }
 
 #cancelDirModal:active, 
 #cancelDirModal:hover {
   background: rgb(255, 0, 0);
-  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
-  background: -o-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
-  background: -moz-linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
-  background: linear-gradient(rgba(255, 0, 0, 0.6), rgba(255,0,0, 0.55));
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
 }
 
 #applyDirModal {
   background: rgb(0,255,0);
-  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
-  background: -o-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
-  background: -moz-linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
-  background: linear-gradient(rgba(0, 255, 0, 0.3), rgba(0, 255, 0, 0.25));
+  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
+  background: -o-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
+  background: -moz-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
+  background: linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
 }
 
 #applyDirModal:active, 
 #applyDirModal:hover {
   background: rgb(0,255,0);
-  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
-  background: -o-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
-  background: -moz-linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
-  background: linear-gradient(rgba(0, 255, 0, 0.6), rgba(0, 255, 0, 0.55));
+  background: -webkit-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
+  background: -o-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
+  background: -moz-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
+  background: linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
 }

@@ -258,7 +258,7 @@ function Graph(directed = false) {
                     this.removeNodeFromNeighbours(id2, id1, "out");
                 }
                 break;
-            case "wieght":
+            case "weight":
                 if (this.directed === false) {
                     // TODO: LATER, SET WEIGHT TO 0.
                 }

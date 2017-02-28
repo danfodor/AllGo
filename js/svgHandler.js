@@ -629,10 +629,10 @@ function graphToSVG(graph) {
 
                 d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
 
-	            marker = createSVGMarker(nodeId, neighbourId);
-	            arrow = createSVGArrow(marker);
-	            path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-	            edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
+                marker = createSVGMarker(nodeId, neighbourId);
+                arrow = createSVGArrow(marker);
+                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
+                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
 
                 svg.insertBefore(edge, svg.firstChild);
             }
@@ -729,14 +729,14 @@ function graphToDirSVG(graph) {
 
                 d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
 
-	            marker = createSVGMarker(nodeId, neighbourId);
-	            // marker.id = "0" + marker.id;
-	            arrow = createSVGArrow(marker);
-	            // arrow.id = "0" + arrow.id;
-	            path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-	            // path.id = "0" + path.id;
-	            edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
-	            // edge.id = "0" + edge.id;
+                marker = createSVGMarker(nodeId, neighbourId);
+                
+                arrow = createSVGArrow(marker);
+                
+                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
+                path.classList.add("edgeOff");
+                
+                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
 
                 svg.insertBefore(edge, svg.firstChild);
             }
@@ -757,6 +757,7 @@ function graphToDirSVG(graph) {
             neighbours = adjList.neighbours;
             neighboursNo = neighbours.length;
             nodeId = adjList.id;
+            nodeId = "0" + nodeId;
             nodeIndex = graph.nodeIndexFromId(nodeId);
 
             for (var j = 0; j < neighboursNo; ++j) {
@@ -771,15 +772,15 @@ function graphToDirSVG(graph) {
                     y2 = graph.allNodes[neighbourIndex].y;
 
                     line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
-	            	line.id = "0" + line.id;
+                    line.classList.add("edgeOff");
                     edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
-	            	edge.id = "0" + edge.id;
 
                     svg.insertBefore(edge, svg.firstChild);
                 }
             }
         }
     }
+
     return svg;
 }
 
@@ -841,10 +842,10 @@ function updateGraphToState(graph, state) {
 
                 d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
 
-	            marker = createSVGMarker(nodeId, neighbourId);
-	            arrow = createSVGArrow(marker);
-	            path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-	            edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
+                marker = createSVGMarker(nodeId, neighbourId);
+                arrow = createSVGArrow(marker);
+                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
+                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
 
                 state.svg.insertBefore(edge, state.svg.firstChild);
             }

@@ -678,10 +678,8 @@ function openDirModal(directed) {
         state.newGraph = makeGraphUndirected(state.newGraph);
     }
 
-
     var y = -(graphMinY(state.graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
 
-    // Check for xRatio of the 2 SVGs. 
     var graphWidth = graphMaxX(state.graph) - graphMinX(state.graph) + 
                     2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
     var graphHeight = graphMaxY(state.graph) - graphMinY(state.graph) + 
@@ -696,10 +694,8 @@ function openDirModal(directed) {
     state.modalTransform = {"x": 0, "y": y, "xRatio": xRatio, "yRatio": yRatio};
     state.newGraph = transposeGraphCoordinates(state.newGraph, 0, y, xRatio, yRatio);
 
-    // dirSVG.innerHTML = graphToDirSVG(state.newGraph).innerHTML;
     dirSVG.innerHTML = graphToDirSVG(state.newGraph).innerHTML;
     dirModal.style.visibility = "visible";
-    // console.log("atentiune");
 }
 
 function applyDirChanges() {
@@ -712,10 +708,20 @@ function applyDirChanges() {
                     -state.modalTransform.y, 1 / state.modalTransform.xRatio, 
                     1 / state.modalTransform.yRatio);
 
+    // remove all removed edges.
+    var removedEdges = dirSVG.querySelectorAll(".edgeRemoved");
+    var len = removedEdges.length, id, nodeId1, nodeId2;
+
+    for (var i = 0; i < len; ++i) {
+        id = removedEdges[i].id.split("line0")[1];
+        nodeId1 = id.split("-")[0];
+        nodeId2 = id.split("-")[1];
+        state.newGraph.remove("edge", nodeId1, nodeId2);
+    }
+
     state = updateGraphToState(state.newGraph, state);
 
     modal.style.display = "none";
-
     dirSVG.innerHTML = "";
 
     state.svg.innerHTML = state.svg.innerHTML;
@@ -1107,6 +1113,10 @@ function resizeListener() {
 
 // Mouse action
 function mouseDown(e) {
+    if (clickedInsideElement(e, "dirModal")) {
+        return;
+    }
+
     state.mouse.down = true;
     if (clickedInsideElement(e, "canvas")) {
         state.mouse.downInsideSVG = true;
@@ -1166,7 +1176,7 @@ function mouseDown(e) {
 
         }
     }
-    else { 
+    else {
         state.mouse.downInsideSVG = false;
         console.log("Think about what should happen when clicked outside canvas");
     }
@@ -1174,6 +1184,10 @@ function mouseDown(e) {
 
 
 function mouseMove(e) {
+    if (clickedInsideElement(e, "dirModal")) {
+        return;
+    }
+
     if (clickedInsideElement(e, "canvas")) {
         
         var currentX = e.clientX - state.left;
@@ -1411,7 +1425,19 @@ function mouseMove(e) {
 
                         path.setAttribute("d", d);
 
-                        path.setAttribute("visibility", "visible");
+                        var clickedElementId = clickedElement.id;
+                        // console.log(clickedElementId);
+                        
+                        if (clickedElementId.indexOf("circle") >= 0) {
+                            clickedElementId = clickedElementId.split("circle")[1];
+                        }
+                        if (clickedElementId.indexOf("name") >= 0) {
+                            clickedElementId = clickedElementId.split("name")[1];
+                        }
+
+                        if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
+                            path.setAttribute("visibility", "visible");
+                        }                        
                     }
                     else {
                         line.setAttribute("visibility", "visible");
@@ -1422,16 +1448,42 @@ function mouseMove(e) {
         }
     }
     else {
-
         // TODO: Use Pointer Lock API to hide previewCircle when outside canvas.
         state.svg.getElementById("previewCircle").setAttribute("visibility", "hidden");
         state.svg.getElementById("previewLine").setAttribute("visibility", "hidden");
         state.svg.getElementById("previewPath").setAttribute("visibility", "hidden");
-        // console.log("I moved the mouse outside the canvas. What should happen?");
     }
 }
 
 function mouseUp(e) {
+    if (clickedInsideElement(e, "dirModal")) {
+        // animation. 
+
+        var clickedElement = e.srcElement || e.target;
+        console.log(clickedElement);
+
+        if (clickedElement.classList.contains(edgeComponent)) {
+
+            if (clickedElement.classList.contains("edgeOff")) {
+                console.log("should be added");
+                clickedElement.classList.remove('edgeOff');
+                clickedElement.classList.add('edgeRemoved');
+
+                // CONTINUEHERE: TODO: ADD ANIMATION.
+            }
+            else {
+                console.log("Or not?");
+                clickedElement.classList.add('edgeOff');
+                clickedElement.classList.remove('edgeRemoved');
+
+                // TODO: ADD ANIMATION.
+            }
+        }
+
+        // clickedElement.classList.add('edgeOn');
+        console.log("change the line");
+        return;
+    }
     state.mouse.down = false;
     state.mouse.downInsideSVG = false;
     state.mouse.dragOnMove = false;
