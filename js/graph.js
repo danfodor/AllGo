@@ -175,6 +175,7 @@ function Graph(directed = false) {
 
     // CHECKNEEDED:
     this.removeNodeFromNeighbours = function(id1, id2, edgeType = "none") {
+        // console.log(id1, " <-->", id2);
         if (this.directed === false) {
             if(edgeType === "none") {
                 var id2AdjList = this.getNodeAdjacencyList(id2);
@@ -195,24 +196,32 @@ function Graph(directed = false) {
             var done = false;
             if (edgeType === "in") {
                 var node2AdjList = this.getNodeAdjacencyList(id2);
+                console.log("id (in): " + node2AdjList.id);
                 var inNeighbours = node2AdjList.inNeighbours;
                 var inWeights = node2AdjList.inWeights;
 
-                var ind = inNeighbours.indexOf(id1);
-
-                inNeighbours.splice(ind, 1);
-                inWeights.splice(ind, 1);
+                var ind = inNeighbours.indexOf(parseInt(id1));
+                // console.log(ind);
+                if (ind >= 0) {
+                    inNeighbours.splice(ind, 1);
+                    inWeights.splice(ind, 1);
+                }
             }
             else {
                 if (edgeType === "out") {
                     var node2AdjList = this.getNodeAdjacencyList(id2);
+                    console.log("id (out): " + node2AdjList.id);
                     var outNeighbours = node2AdjList.outNeighbours;
                     var outWeights = node2AdjList.outWeights;
 
-                    var ind = outNeighbours.indexOf(id1);
+                    var ind = outNeighbours.indexOf(parseInt(id1));
+                    // console.log(ind);
+                    // console.log(outNeighbours);
 
-                    outNeighbours.splice(ind, 1);
-                    outWeights.splice(ind, 1);
+                    if (ind >= 0) {
+                        outNeighbours.splice(ind, 1);
+                        outWeights.splice(ind, 1);
+                    }
                 }
             }
         }

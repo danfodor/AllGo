@@ -584,36 +584,40 @@ function restart() {
 }
 
 function cleanSVGGraphColors() {
-    state.startNode = document.getElementById("nodeOptions").value;
-    state.algorithmRuns = false;
+    var nodes = state.graph.allNodes, len = nodes.length;
+    if (len > 0) {
 
-    // color back:
-    var node, nodes = state.graph.allNodes, len = nodes.length;
-    var circle;
+        state.startNode = document.getElementById("nodeOptions").value;
+        state.algorithmRuns = false;
 
-    for (var i = 0; i < len; ++i) {
-        node = nodes[i];
-        circle = document.getElementById("circle" + node.id);
-
-        // TODO: Use node colour instead of default colour
-        circle.style.stroke = colors.unselectedNodeOutline;
-    }
-
-    if (state.executedSteps) {
-        var edgeType = "line", line, step;
-        var len = state.executedSteps.length;
+        // color back:
+        var node;
+        var circle;
 
         for (var i = 0; i < len; ++i) {
-            step = state.executedSteps[i];
-            if (step.type === "edge") {
+            node = nodes[i];
+            circle = document.getElementById("circle" + node.id);
 
-                line = document.getElementById(edgeType + step.id);
-                if (line === null) {
-                    line = document.getElementById("line" + step.id.split('-')[1] + "-" + 
-                                                    step.id.split('-')[0]);
+            // TODO: Use node colour instead of default colour
+            circle.style.stroke = colors.unselectedNodeOutline;
+        }
+        console.log(state.executedSteps);
+        if (state.executedSteps) {
+            var edgeType = "line", line, step;
+            var len = state.executedSteps.length;
+
+            for (var i = 0; i < len; ++i) {
+                step = state.executedSteps[i];
+                if (step.type === "edge") {
+
+                    line = document.getElementById(edgeType + step.id);
+                    if (line === null) {
+                        line = document.getElementById("line" + step.id.split('-')[1] + "-" + 
+                                                        step.id.split('-')[0]);
+                    }
+
+                    line.style.stroke = colors.unusedEdge;
                 }
-
-                line.style.stroke = colors.unusedEdge;
             }
         }
     }
@@ -716,6 +720,7 @@ function applyDirChanges() {
         id = removedEdges[i].id.split("line0")[1];
         nodeId1 = id.split("-")[0];
         nodeId2 = id.split("-")[1];
+        // console.log(nodeId1, " - ", nodeId2);
         state.newGraph.remove("edge", nodeId1, nodeId2);
     }
 
@@ -832,9 +837,26 @@ function removeSVGWeights(argument) {
     state.svg.innerHTML = state.svg.innerHTML; 
 }
 
+function resetButtonSetUp() {
+    document.getElementById("reset").classList.remove("on");
+    document.getElementById("reset").classList.add("off");
+    document.getElementById("reset").classList.add("hoverShadow");
+}
+
 function reset(orientation = false) {
+    cssSetUp();
     state.reset(orientation);
     buttonNotAllowed("algorithm");
+
+    document.getElementById("reset").classList.add("on");
+    document.getElementById("reset").classList.remove("off");
+    document.getElementById("reset").classList.remove("hoverShadow");
+
+    setTimeout(function() {
+        document.getElementById("reset").classList.remove("on");
+        document.getElementById("reset").classList.add("off");
+        document.getElementById("reset").classList.add("hoverShadow"); 
+    }, 100);     
 }
 
 // The Code for the context menu, starting here, has been done with the help of the 
@@ -1211,8 +1233,6 @@ function mouseMove(e) {
 
 
                 var nodeId, elemId = state.mouse.elem.id;
-                // console.log("-----");
-                // console.log(elemId);
 
                 if (elemId.indexOf("circle") >= 0) {
                     nodeId = elemId.split("circle")[1];
@@ -1426,7 +1446,6 @@ function mouseMove(e) {
                         path.setAttribute("d", d);
 
                         var clickedElementId = clickedElement.id;
-                        // console.log(clickedElementId);
                         
                         if (clickedElementId.indexOf("circle") >= 0) {
                             clickedElementId = clickedElementId.split("circle")[1];
@@ -1434,17 +1453,21 @@ function mouseMove(e) {
                         if (clickedElementId.indexOf("name") >= 0) {
                             clickedElementId = clickedElementId.split("name")[1];
                         }
-
+                        // console.log(typeof clickedElementId);
+                        // console.log(typeof state.selectedNodeId);
+                        // console.log(parseInt(clickedElementId) !== parseInt(state.selectedNodeId));
                         if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
                             path.setAttribute("visibility", "visible");
-                        }                        
+                        }
+                        else {
+                            path.setAttribute("visibility", "hidden"); 
+                        }
                     }
                     else {
                         line.setAttribute("visibility", "visible");
                     }
                 }
             }
-
         }
     }
     else {
@@ -1460,7 +1483,7 @@ function mouseUp(e) {
         // animation. 
 
         var clickedElement = e.srcElement || e.target;
-        console.log(clickedElement);
+        // console.log(clickedElement);
 
         if (clickedElement.classList.contains(edgeComponent)) {
 
@@ -1543,11 +1566,15 @@ function onscrollListener() {
 function cssSetUp() {
 
     switchMode("build");
+    
     state.graph.directed = false;
     switchDirButtons(false);
     buttonNotAllowed("algorithm");
+    
     state.graph.weighted = false;
     switchWeighted(false);
+    
+    resetButtonSetUp();
 }
 
 function windowClickListener() {

@@ -232,6 +232,15 @@ body  {
   box-shadow: 1px 3px 4px #999;
 }
 
+#reset {
+  background: rgba(254,52,50, 0.75);
+  background: -webkit-linear-gradient(rgba(254, 25, 50, 0.55), rgba(254, 52, 50, 0.75));
+  background: -o-linear-gradient(rgba(254, 25, 50, 0.55), rgba(254, 52, 50, 0.75));
+  background: -moz-linear-gradient(rgba(254, 25, 50, 0.55), rgba(254, 52, 50, 0.75));
+  background: linear-gradient(rgba(254, 25, 50, 0.55), rgba(254, 52, 50, 0.75));
+
+}
+
 #directed {
   background: rgb(254,232,200);
   background: -webkit-linear-gradient(white, rgb(254,232,200));
@@ -247,8 +256,6 @@ body  {
   background: -moz-linear-gradient(white, rgb(254,232,200));
   background: linear-gradient(white, rgb(254,232,200));
 }
-
-
 
 #weighted {
   background: rgb(254,232,200);

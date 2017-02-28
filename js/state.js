@@ -32,9 +32,9 @@ function State() {
     this.algorithms = new Algorithms();
     this.algorithmRuns = false;
     this.runningAlgorithm = null;
-    this.startNode;
-    this.nextSteps;
-    this.executedSteps;
+    this.startNode = null;
+    this.nextSteps = [];
+    this.executedSteps = [];
     this.pastStartingNode = null;
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
@@ -68,6 +68,8 @@ function State() {
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
         this.runningAlgorithm = null;
+        this.nextSteps = [];
+        this.executedSteps = [];
         this.pastStartingNode = null;
 
         this.left = this.svg.getBoundingClientRect().left;
