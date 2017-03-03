@@ -20,6 +20,10 @@ function State() {
     this.maxIdValue = 0;
     this.lock = false;
 
+    this.modifiedWeightId;
+
+    this.allowMove = true;
+
     this.left = this.svg.getBoundingClientRect().left;
     this.top = this.svg.getBoundingClientRect().top;
 
@@ -71,6 +75,8 @@ function State() {
         this.nextSteps = [];
         this.executedSteps = [];
         this.pastStartingNode = null;
+
+        this.allowMove = true;
 
         this.left = this.svg.getBoundingClientRect().left;
         this.top = this.svg.getBoundingClientRect().top;

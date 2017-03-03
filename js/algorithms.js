@@ -27,8 +27,8 @@ function Algorithms() {
                 }
                 var visitedNodesNo = 0;
 
-                if (graph.nodeIndexFromId(startNode) >= 0) {
-                    visitedNodes[graph.nodeIndexFromId(startNode)] = true;
+                if (graph.getNodeIndexFromId(startNode) >= 0) {
+                    visitedNodes[graph.getNodeIndexFromId(startNode)] = true;
                     ++visitedNodesNo;
                                         
                     var queue = [startNode + "-" + startNode];
@@ -41,7 +41,7 @@ function Algorithms() {
 
                             while (queue.length > 0) {
                                 currentNode = queue.shift().split("-")[1];
-                                currentNodeIndex = graph.nodeIndexFromId(currentNode);
+                                currentNodeIndex = graph.getNodeIndexFromId(currentNode);
                             
                                 var neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
                                 
@@ -51,7 +51,7 @@ function Algorithms() {
                                 // STILL DOES A WRONG CHECK. INVESTIGATE WHY.
                                 for (var it = 0; it < nLen; ++it) {
                                     // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
-                                    var ind = graph.nodeIndexFromId(neighbours[it]);
+                                    var ind = graph.getNodeIndexFromId(neighbours[it]);
 
                                     if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
 

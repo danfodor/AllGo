@@ -3,7 +3,7 @@
 var colors = {
     unselectedNode: "#FFFF99", //"#EA7CC4", //"#800000",
     unselectedNodeOutline: "#5F9EA0", //"#8422FF",
-    selectedNode: "#B22222", //"#20B2AA", // "#2e9cd3",
+    selectedNode: "#80ffff", // "#bf80ff", // "#0059b3", // "#80ffff", // "#ff3333", //"#20B2AA", // "#2e9cd3", // "#B22222"
     unusedEdge: "#5d6663",
     unselectedEdge: "#f91616",
     selectedEdge: "#08770d"
@@ -17,7 +17,7 @@ var sizes = {
  	defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
  	weightDistance: 12,
  	stdFontSize: "18px",
- 	angleDev: 15
+ 	angleDev: 12
 };
 
 var newSVGInnerHTML = "";

@@ -1,5 +1,31 @@
 "use strict";
 
+function euclideanDistance(p1, p2) {
+
+	var dist = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + 
+					 (p2.y - p1.y) * (p2.y - p1.y));
+	return dist;
+}
+
+function abs(value) {
+	if (value < 0) {
+		return -value;
+	}
+
+	return value;
+}
+
+function trianglePerimeter(triangle) {
+	var t = triangle;
+	var perimeter = 0;
+
+	perimeter += euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
+	perimeter += euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
+	perimeter += euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
+
+	return perimeter;
+}
+
 function overlapsMargins(x, y, radius, top, right, bottom, left) {
     var leftX = x - radius;
     var rightX = x + radius;
@@ -160,14 +186,14 @@ function computeDir(node1Id, node2Id, p1, p2) {
 function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
     var dx = x2 - x1;
     var dy = y2 - y1; // top-right is the (0,0) point
-    
+
     var a = Math.atan2(dy, dx);
     var angle = a * 180 / Math.PI;
     angle += deviate;
 
     if (angle < 0) {
         angle += 360;
-    }  
+    }
 
     var newX = x1 + r * Math.cos(angle * Math.PI / 180);
     var newY = y1 + r * Math.sin(angle * Math.PI / 180);
@@ -288,7 +314,7 @@ function orthogonalVector(p1, p2) {
     return v;
 }
 
-function rightAnglePoint(node1Id, node2Id, p1, p2, dist = sizes.weightDistance, distFromP1 = 0.5, sorted = true) {
+function rightAnglePoint(node1Id, node2Id, p1, p2, sorted = true, dist = sizes.weightDistance, distFromP1 = 0.5) {
     var midPoint = pointBetweenPoints(p1, p2, distFromP1);
     var v = orthogonalVector(p1, p2);
     var dir;
@@ -389,7 +415,7 @@ function createSVGLine(id1, id2, x1, y1, x2, y2,
     return line;
 }
 
-function createSVGUndirectedWeight(nodeId1, nodeId2, x1, y1, x2, y2, weight,
+function createSVGWeight(nodeId1, nodeId2, p1, p2, weight, sorted = true, 
                          fontSize = sizes.stdFontSize) {
     var text = document.createElement("text");
     
@@ -400,13 +426,12 @@ function createSVGUndirectedWeight(nodeId1, nodeId2, x1, y1, x2, y2, weight,
     text.style.textAnchor = "middle";
     text.style.fontWeight = "bold";
 
-    var p = rightAnglePoint(nodeId1, nodeId2, {"x": x1, "y": y1}, {"x": x2, "y": y2});
+    var p = rightAnglePoint(nodeId1, nodeId2, {"x": p1.x, "y": p1.y}, {"x": p2.x, "y": p2.y}, sorted);
 
     text.setAttribute("x", p.x);
     text.setAttribute("y", p.y);
     text.style.cursor = "text";
-    // GET THE WEIGHT FROM graph
-    // var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
+
     text.innerHTML = weight;
     
     text.classList.add(edgeComponent);
@@ -438,7 +463,12 @@ function createSVGUndirectedEdge(nodeId1, nodeId2, line, text) {
 
 function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edgeWidth, 
                     dev = sizes.angleDev, directedBezier = false) {
-    // console.log("done that");
+
+	x1 = parseFloat(x1);
+	y1 = parseFloat(y1);
+	x2 = parseFloat(x2);
+	y2 = parseFloat(y2);
+
     var d;
 
     var p1 = pointOnCircle(x1, y1, x2, y2, r, -dev);
@@ -517,12 +547,16 @@ function createSVGArrow(marker) {
 }
 
 // CONTINUEHERE:
-function createSVGDirectedEdge(nodeId1, nodeId2, path, arrow) {
+function createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text) {
     var edge = document.createElement("g");
     edge.id = nodeId1 + "-" + nodeId2;
 
     edge.appendChild(arrow);
     edge.appendChild(path);
+
+    if (text) {
+    	edge.appendChild(text);
+    }
             
     edge.classList.add("node" + nodeId1);      
     edge.classList.add("node" + nodeId2);   
@@ -616,11 +650,11 @@ function graphToSVG(graph) {
             outNeighbours = adjList.outNeighbours;
             outNeighboursNo = outNeighbours.length;
             nodeId = adjList.id;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < outNeighboursNo; ++j) {
                 neighbourId = outNeighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 x1 = graph.allNodes[nodeIndex].x;
                 y1 = graph.allNodes[nodeIndex].y;
@@ -653,11 +687,11 @@ function graphToSVG(graph) {
             neighbours = adjList.neighbours;
             neighboursNo = neighbours.length;
             nodeId = adjList.id;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < neighboursNo; ++j) {
                 neighbourId = neighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 if (parseInt(nodeId) < parseInt(neighbourId)) {
 
@@ -716,11 +750,11 @@ function graphToDirSVG(graph) {
             outNeighboursNo = outNeighbours.length;
             nodeId = adjList.id;
             nodeId = "0" + nodeId;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < outNeighboursNo; ++j) {
                 neighbourId = outNeighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 x1 = graph.allNodes[nodeIndex].x;
                 y1 = graph.allNodes[nodeIndex].y;
@@ -758,11 +792,11 @@ function graphToDirSVG(graph) {
             neighboursNo = neighbours.length;
             nodeId = adjList.id;
             nodeId = "0" + nodeId;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < neighboursNo; ++j) {
                 neighbourId = neighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 if (parseInt(nodeId) < parseInt(neighbourId)) {
 
@@ -786,6 +820,8 @@ function graphToDirSVG(graph) {
 
 
 function updateGraphToState(graph, state) {
+
+	state.svg.innerHTML = "";
 
     state.createPreviewCircle();
     state.createForbiddenCircle();
@@ -829,11 +865,11 @@ function updateGraphToState(graph, state) {
             outNeighbours = adjList.outNeighbours;
             outNeighboursNo = outNeighbours.length;
             nodeId = adjList.id;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < outNeighboursNo; ++j) {
                 neighbourId = outNeighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 x1 = graph.allNodes[nodeIndex].x;
                 y1 = graph.allNodes[nodeIndex].y;
@@ -866,11 +902,11 @@ function updateGraphToState(graph, state) {
             neighbours = adjList.neighbours;
             neighboursNo = neighbours.length;
             nodeId = adjList.id;
-            nodeIndex = graph.nodeIndexFromId(nodeId);
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
 
             for (var j = 0; j < neighboursNo; ++j) {
                 neighbourId = neighbours[j];
-                neighbourIndex = graph.nodeIndexFromId(neighbourId);
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
 
                 if (parseInt(nodeId) < parseInt(neighbourId)) {
 
@@ -889,6 +925,143 @@ function updateGraphToState(graph, state) {
     }
 
     state.graph = graph;
-    // state.svg.innerHTML = state.svg.innerHTML;
     return state;
 }
+
+function pointIntersectsLine(point, line) {
+    var intersects = false;
+    if ((line.x1 === point.x && line.y1 === point.y) || 
+    	(line.x2 === point.x && line.y2 === point.y)) {
+    	intersects = true;
+    	return intersects;
+    }
+    if ((point.x < line.x1 && point.x < line.x2) ||
+        (point.x > line.x1 && point.x > line.x2)) {
+        return intersects;
+    }
+    if ((point.y < line.y1 && point.y < line.y2) ||
+        (point.y > line.y1 && point.y > line.y2)) {
+        return intersects;
+    }
+
+	var lpX = point.x - line.x1;
+	var lpY = point.y - line.y1;
+
+	var lX = line.x2 - line.x1;
+	var lY = line.y2 - line.y1;
+
+	var product = lpX * lY - lpY * lX;
+
+	if (abs(product) < 0.000001) {
+		intersects = true;
+	}
+
+    return intersects;
+}
+
+function pointInsideRectangle(point, rect) {
+	var insideRect = false;
+
+	var rectArea = rectangleArea(rect);
+	var triangleTotalArea = 0;
+
+	var rectPoints = rectangleToPoints(rect);
+
+	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p1, rectPoints.p2));
+	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p2, rectPoints.p3));
+	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p3, rectPoints.p4));
+	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p4, rectPoints.p1));
+
+	if (abs(triangleTotalArea - rectArea) < 0.000001) {
+		insideRect = true;
+	}
+
+	return insideRect;
+}
+
+
+function rectangleToPoints(rect) {
+	var points = {"p1": {"x": rect.x1, "y": rect.y1}, "p2": {"x": rect.x2, "y": rect.y2}, 
+				"p3": {"x": rect.x3, "y": rect.y3}, "p4": {"x": rect.x4, "y": rect.y4}};
+
+	return points;
+}
+
+function pointsToRectangle(p1, p2, p3, p4) {
+	var rect = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
+				"x3": p3.x, "y3": p3.y, "x4": p4.x, "y4": p4.y};
+
+	return rect;
+}
+
+function pointsToTriangle(p1, p2, p3) {
+	var triangle = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
+					"x3": p3.x, "y3": p3.y};
+
+	return triangle;
+}
+
+function rectangleArea(rect) {
+	var rectArea;
+
+	var p1p2 = Math.sqrt((rect.x2 - rect.x1) * (rect.x2 - rect.x1) + 
+						 (rect.y2 - rect.y1) * (rect.y2 - rect.y1));
+	var p2p3 = Math.sqrt((rect.x3 - rect.x2) * (rect.x3 - rect.x2) + 
+						 (rect.y3 - rect.y2) * (rect.y3 - rect.y2));
+	rectArea = p1p2 * p2p3;
+
+	// var rectArea = 0.5 * abs((rect.y1 - rect.y3) * (rect.x4 - rect.x2) + 
+	// 						(rect.y2 - rect.y4) * (rect.x1 - rect.x3));
+
+	return rectArea;
+}
+
+function triangleArea(triangle) {
+	var t = triangle;
+	var area = 0.5 * abs((t.x1 * (t.y2 - t.y3)) + 
+			t.x2 * (t.y3 - t.y1) + t.x3 * (t.y1 - t.y2));
+
+	// var t = triangle;
+
+	// var perimeter = trianglePerimeter(t);
+	// var a = euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
+	// var b = euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
+	// var c = euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
+
+	// var sp = perimeter / 2;
+	// var area = Math.sqrt(sp * (sp - a) * (sp - b) * (sp - c));
+
+	return area;
+}
+
+function pointIntersectsEdge(point, graph, svg, r = sizes.radius + sizes.nodeOutlineWidth) {
+	var intersects = false;
+
+	var edge, edges = graph.getNodePointsForEdges();
+	var len = edges.length;
+
+	var pt1, pt2, pt3, pt4, rect;
+
+	for (var i = 0; i < len; ++i) {
+		edge = edges[i];
+
+	    pt1 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  90);
+	    pt2 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  -90);
+	    pt3 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  90);
+	    pt4 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  -90);
+
+
+	    rect = pointsToRectangle(pt1, pt2, pt3, pt4);
+
+	    if (pointInsideRectangle(point, rect) === true) {
+	    	intersects = true;
+	    	break;
+	    }
+	}
+	return intersects;
+}
+
+// var pn = {"x": 5, "y": 7.001};
+// var ln = {"x1": 4, "y1": 5, "x2": 5, "y2": 6.2};
+// var rt = {"x1": 2, "y1": 3, "x2": 5, "y2": 7, 
+// 			"x3": 11, "y3": 6, "x4": 8, "y4": 1};

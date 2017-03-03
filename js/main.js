@@ -176,7 +176,25 @@ function addEdge(nodeId1, nodeId2) {
             var marker = createSVGMarker(nodeId1, nodeId2);
             var arrow = createSVGArrow(marker);
             var path = createSVGDirectedPath(nodeId1, nodeId2, d, marker.id);
-            var edge = createSVGDirectedEdge(nodeId1, nodeId2, path, arrow);
+
+            var text;
+            if (state.graph.weighted === true) {
+                var xp1 = parseFloat(d.split('M')[1].split(' ')[1]);
+                var yp1 = parseFloat(d.split('M')[1].split(' ')[2]);
+
+                var l = d.split(' ').length;
+                var xp2 = parseFloat(d.split(' ')[l - 2]);
+                var yp2 = parseFloat(d.split(' ')[l - 1]);
+
+                var p1 = {"x": xp1, "y": yp1};
+                var p2 = {"x": xp2, "y": yp2};
+
+                var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
+
+                text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight, false);
+            }
+
+            var edge = createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text);
 
             state.svg.insertBefore(edge, state.svg.firstChild);
         }
@@ -195,6 +213,9 @@ function addEdge(nodeId1, nodeId2) {
         var x2 = circle2.cx.baseVal.value;
         var y2 = circle2.cy.baseVal.value;
 
+        var p1 = {"x": x1, "y": y1};
+        var p2 = {"x": x2, "y": y2};
+
         if (state.graph.addEdge(nodeId1, nodeId2)) {
 
             var line = createSVGLine(nodeId1, nodeId2, x1, y1, x2, y2);
@@ -202,7 +223,7 @@ function addEdge(nodeId1, nodeId2) {
             if (state.graph.weighted === true) {
                 var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
 
-                text = createSVGUndirectedWeight(nodeId1, nodeId2, x1, y1, x2, y2, weight);
+                text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight);
             }
             
             var edge = createSVGUndirectedEdge(nodeId1, nodeId2, line, text);
@@ -706,6 +727,11 @@ function applyDirChanges() {
     var modal = document.getElementById('directionModal');
     var dirSVG = document.getElementById('dirSVG');
 
+    var weighted = false;
+    if (state.graph.weighted) {
+        weighted = true;
+    }
+
     state.svg.innerHTML = "";
 
     state.newGraph = transposeGraphCoordinates(state.newGraph, 0, 
@@ -718,6 +744,8 @@ function applyDirChanges() {
 
     for (var i = 0; i < len; ++i) {
         id = removedEdges[i].id.split("line0")[1];
+
+        // console.log(id);
         nodeId1 = id.split("-")[0];
         nodeId2 = id.split("-")[1];
         // console.log(nodeId1, " - ", nodeId2);
@@ -726,19 +754,65 @@ function applyDirChanges() {
 
     state = updateGraphToState(state.newGraph, state);
 
+    
     modal.style.display = "none";
     dirSVG.innerHTML = "";
 
     state.svg.innerHTML = state.svg.innerHTML;
+
     switchDirButtons(state.newDirection);
+
+    if (weighted) {
+        switchWeighted(false);
+        switchWeighted(true);
+    }
 }
+
+
+function openWeightModal(e) {
+    var weightModal = document.getElementById('weightModal');
+    var weightInput = document.getElementById('weightInput');
+    var element = e.srcElement || e.target;
+
+    state.modifiedWeightId = element.id;
+    console.log(state.modifiedWeightId);
+
+    weightInput.value = parseFloat(element.innerHTML);
+
+    weightModal.style.display = "block";
+}
+
+function applyWeightChange() {
+    var modal = document.getElementById('weightModal');
+    var weightInput = document.getElementById('weightInput');
+
+    var newValue = parseFloat(weightInput.value);
+
+    if (!newValue) {
+        // CONTINUE HERE BY ADDING ALERT MESSAGE
+        alert("Not a number. Please enter a number");
+        return;
+    }
+    
+    var weight = state.svg.getElementById(state.modifiedWeightId);
+    weight.innerHTML = newValue;
+
+    var edgeId = state.modifiedWeightId.split('weight')[1];
+    var nodeId1 = edgeId.split("-")[0], nodeId2 = edgeId.split("-")[1];
+    state.graph.updateWeight(parseInt(nodeId1), parseInt(nodeId2), parseFloat(newValue));
+
+    modal.style.display = "none";
+
+    state.svg.innerHTML = state.svg.innerHTML;
+}
+
 
 function switchWeighted(weighted) {
 
     if (weighted !== state.graph.weighted) {
         if (weighted === true) {
             state.graph.setWeighted(true);
-            addSVGWeights();
+            addWeights();
 
             document.getElementById("unweighted").classList.add("off");
             document.getElementById("unweighted").classList.remove("on");
@@ -749,7 +823,7 @@ function switchWeighted(weighted) {
         }
         else {
             state.graph.setWeighted(false);
-            removeSVGWeights();
+            removeWeights();
 
             document.getElementById("unweighted").classList.add("on");
             document.getElementById("unweighted").classList.remove("off");
@@ -762,21 +836,50 @@ function switchWeighted(weighted) {
 }
 
 // CONTINUEHERE: Move to SVG
-function addSVGWeights() {
+function addWeights() {
 
     if (state.graph.directed === true) {
-        // Implement after undirected.   
+        var d, svgPath, svgEdge, svgEdges = state.svg.querySelectorAll(".edge");
+        var len = svgEdges.length;
+        var gId, lineId, x1, y1, x2, y2;
+
+        // REMAKE THIS PART.
+        for (var i = 0; i < len; ++i) {
+            svgEdge = svgEdges[i];
+
+            gId = svgEdge.id;
+            lineId = "line" + gId;
+            svgPath = document.getElementById(lineId);
+
+            d = svgPath.getAttribute("d");
+            var size = d.split(' ').length;
+
+            x1 = parseFloat(d.split('M')[1].split(' ')[1]);
+            y1 = parseFloat(d.split('M')[1].split(' ')[2]);
+            x2 = parseFloat(d.split(' ')[size - 2]);
+            y2 = parseFloat(d.split(' ')[size - 1]);
+
+            var p1 = {"x": x1, "y": y1};
+            var p2 = {"x": x2, "y": y2};
+            var nodeId1 = gId.split("-")[0];
+            var nodeId2 = gId.split("-")[1];
+
+            var p = rightAnglePoint(nodeId1, nodeId2, p1, p2, false);
+            var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
+
+            var text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight, false);
+
+            svgEdge.appendChild(text);     
+        }
     }
     else {
         var svgLine, svgEdge, svgEdges = state.svg.querySelectorAll(".edge");
         var len = svgEdges.length;
         var gId, lineId, x1, y1, x2, y2;
 
-        // console.log("LEN: " + len);
-
         for (var i = 0; i < len; ++i) {
             svgEdge = svgEdges[i];
-            console.log(svgEdge);
+
             gId = svgEdge.id;
             lineId = "line" + gId;
             svgLine = document.getElementById(lineId);
@@ -788,52 +891,31 @@ function addSVGWeights() {
 
             var p1 = {"x": x1, "y": y1};
             var p2 = {"x": x2, "y": y2};
-            var node1Id = gId.split("-")[0];
-            var node2Id = gId.split("-")[1];
+            var nodeId1 = gId.split("-")[0];
+            var nodeId2 = gId.split("-")[1];
+            var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
 
-            var p = rightAnglePoint(node1Id, node2Id, p1, p2);
-
-            var text = document.createElement("text");
-            
-            text.id = "weight" + gId;
-            text.style.fontSize = sizes.stdFontSize;
-            text.style.alignmentBaseline = "central";
-            text.style.textAnchor = "middle";
-            text.style.fontWeight = "bold";
-
-            text.setAttribute("x", p.x);
-            text.setAttribute("y", p.y);
-            text.style.cursor = "text";
-            // GET THE WEIGHT FROM graph
-            var weight = state.graph.getEdgeWeight(parseInt(node1Id), parseInt(node2Id));
-            text.innerHTML = weight;
-            
-            text.classList.add(edgeComponent);
-            text.classList.add("weight");
+            var text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight);
 
             svgEdge.appendChild(text);     
-
         }
     }
+
     state.svg.innerHTML = state.svg.innerHTML; 
 }
 
-function removeSVGWeights(argument) {
+function removeWeights(argument) {
 
-    if (state.graph.directed === true) {
-        // Implement after undirected.   
-    }
-    else {
-        var svgWeight, svgWeights = state.svg.querySelectorAll(".weight");
-        var len = svgWeights.length;
+    var svgWeight, svgWeights = state.svg.querySelectorAll(".weight");
+    var len = svgWeights.length;
 
-        // console.log(svgWeights);
-        for (var i = 0; i < len; ++i) {
-            svgWeight = svgWeights[i];
-            // console.log(svgWeight);
-            state.remove("weight", svgWeight.id);   
-        }
+
+    for (var i = 0; i < len; ++i) {
+        svgWeight = svgWeights[i];
+
+        state.remove("weight", svgWeight.id);   
     }
+
     state.svg.innerHTML = state.svg.innerHTML; 
 }
 
@@ -858,6 +940,30 @@ function reset(orientation = false) {
         document.getElementById("reset").classList.add("hoverShadow"); 
     }, 100);     
 }
+
+
+function save() {
+    console.log("saved to be implement");
+}
+
+function load() {
+    console.log("Load to be implement");
+}
+
+function rearrange() {
+    var r = min([state.svg.width.baseVal.value, 
+                 state.svg.height.baseVal.value]);
+    var x = state.svg.width.baseVal.value / 2;
+    var y = state.svg.height.baseVal.value / 2;
+    r = r / 2 - 50;
+
+    state.graph.makeCoordinatesCircular(x, y, r);
+
+    state = updateGraphToState(state.graph, state);
+
+    state.svg.innerHTML = state.svg.innerHTML;
+}
+
 
 // The Code for the context menu, starting here, has been done with the help of the 
 // "Building a Custom Right-Click (Context) Menu with JavaScript" tutorial from
@@ -1135,9 +1241,15 @@ function resizeListener() {
 
 // Mouse action
 function mouseDown(e) {
-    if (clickedInsideElement(e, "dirModal")) {
+    if (clickedInsideElement(e, "modal")) {
         return;
     }
+    // TEST HOW USEFUL THIS CODE IS:
+    state.allowMove = false;
+    setTimeout(function() {
+        state.allowMove = true;
+    }, 50);    
+
 
     state.mouse.down = true;
     if (clickedInsideElement(e, "canvas")) {
@@ -1206,7 +1318,7 @@ function mouseDown(e) {
 
 
 function mouseMove(e) {
-    if (clickedInsideElement(e, "dirModal")) {
+    if (clickedInsideElement(e, "modal")) {
         return;
     }
 
@@ -1215,6 +1327,10 @@ function mouseMove(e) {
         var currentX = e.clientX - state.left;
         var currentY = e.clientY - state.top;
 
+        if (state.allowMove == false) {
+            return;
+        }
+
         if (state.mouse.downInsideSVG === true) {
 
             if (parseFloat(currentX) !== parseFloat(state.mouse.downX) || 
@@ -1222,6 +1338,7 @@ function mouseMove(e) {
                 state.mouse.moved = true;
             }
             if (state.mouse.dragOnMove === true) {
+
                 if (state.lock === false) {
                     state.lock = true;
                 }
@@ -1230,7 +1347,6 @@ function mouseMove(e) {
                 state.svg.getElementById("previewCircle").setAttribute("visibility", "hidden");
                 state.svg.getElementById("previewLine").setAttribute("visibility", "hidden");
                 state.svg.getElementById("previewPath").setAttribute("visibility", "hidden");
-
 
                 var nodeId, elemId = state.mouse.elem.id;
 
@@ -1247,7 +1363,7 @@ function mouseMove(e) {
                 var elemsNumber = state.mouse.moveElements.length;
                 var elem;
 
-                var nodeIndex = state.graph.nodeIndexFromId(nodeId);
+                var nodeIndex = state.graph.getNodeIndexFromId(nodeId);
                 state.graph.allNodes[nodeIndex].x += dx;
                 state.graph.allNodes[nodeIndex].y += dy;
 
@@ -1283,27 +1399,27 @@ function mouseMove(e) {
                         case "path":
                             var lineId = elem.id.split("line")[1];
 
-                            var node1Id = lineId.split("-")[0];
-                            var node2Id = lineId.split("-")[1];
+                            var nodeId1 = lineId.split("-")[0];
+                            var nodeId2 = lineId.split("-")[1];
 
                             var d;
                             var dir = null; 
 
-                            if (parseInt(nodeId) === parseInt(node1Id)) {          
+                            if (parseInt(nodeId) === parseInt(nodeId1)) {          
 
-                                var node2 = state.graph.allNodes[state.graph.nodeIndexFromId(node2Id)];
+                                var node2 = state.graph.allNodes[state.graph.getNodeIndexFromId(nodeId2)];
 
                                 var p1 = pointOnCircle(newX, newY, node2.x, node2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
                                 var p2 = pointOnCircle(node2.x, node2.y, newX, newY, sizes.radius + sizes.edgeWidth, sizes.angleDev);
                             }
                             else {
 
-                                var node1 = state.graph.allNodes[state.graph.nodeIndexFromId(node1Id)];
+                                var node1 = state.graph.allNodes[state.graph.getNodeIndexFromId(nodeId1)];
 
                                 var p1 = pointOnCircle(node1.x, node1.y, newX, newY, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
                                 var p2 = pointOnCircle(newX, newY, node1.x, node1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
                             }                    
-                            dir = computeDir(parseInt(node1Id), parseInt(node2Id), p1, p2);
+                            dir = computeDir(parseInt(nodeId1), parseInt(nodeId2), p1, p2);
 
 
                             if (state.directedBezier === true) {
@@ -1320,27 +1436,54 @@ function mouseMove(e) {
                             if (elem.id.indexOf("weight") >= 0) {
                                 var weightId = elem.id;
                                 var lineId = weightId.split("weight")[1];
-                                var node1Id = lineId.split("-")[0];
-                                var node2Id = lineId.split("-")[1];
+                                var nodeId1 = lineId.split("-")[0];
+                                var nodeId2 = lineId.split("-")[1];
+                                var p1, p2;
+                                var node1, node2;
 
                                 if (state.graph.directed === true) {
-                                    // TODO: LATER, AFTER CHOOSING THE SHAPES FOR THE DIRECTED EDGES (CASE STUDY)
-                                }
-                                else {
-                                    var p1, p2;
-                                    if (parseInt(nodeId) === parseInt(node1Id)) {
-                                        var node2 = document.getElementById("circle" + node2Id);
+                                    var d;
+
+                                    if (parseInt(nodeId) === parseInt(nodeId1)) {
+                                        node2 = document.getElementById("circle" + nodeId2);
 
                                         p1 = {"x": newX, "y": newY};
                                         p2 = {"x": node2.getAttribute("cx"), "y": node2.getAttribute("cy")};
                                     }
                                     else {
-                                        var node1 = document.getElementById("circle" + node1Id);
+                                        node1 = document.getElementById("circle" + nodeId1);
 
                                         p1 = {"x": node1.getAttribute("cx"), "y": node1.getAttribute("cy")};
                                         p2 = {"x": newX, "y": newY};
                                     }
-                                    var p = rightAnglePoint(node1Id, node2Id, p1, p2);
+
+                                    d = computeD(nodeId1, nodeId2, p1.x, p1.y, p2.x, p2.y);
+
+                                    p1.x = parseFloat(d.split('M')[1].split(' ')[1]);
+                                    p1.y = parseFloat(d.split('M')[1].split(' ')[2]);
+
+                                    var l = d.split(' ').length;
+                                    p2.x = parseFloat(d.split(' ')[l - 2]);
+                                    p2.y = parseFloat(d.split(' ')[l - 1]);
+
+                                    var p = rightAnglePoint(nodeId1, nodeId2, p1, p2, false);
+                                    elem.setAttribute("x", p.x);
+                                    elem.setAttribute("y", p.y);
+                                }
+                                else {
+                                    if (parseInt(nodeId) === parseInt(nodeId1)) {
+                                        node2 = document.getElementById("circle" + nodeId2);
+
+                                        p1 = {"x": newX, "y": newY};
+                                        p2 = {"x": node2.getAttribute("cx"), "y": node2.getAttribute("cy")};
+                                    }
+                                    else {
+                                        node1 = document.getElementById("circle" + nodeId1);
+
+                                        p1 = {"x": node1.getAttribute("cx"), "y": node1.getAttribute("cy")};
+                                        p2 = {"x": newX, "y": newY};
+                                    }
+                                    var p = rightAnglePoint(nodeId1, nodeId2, p1, p2);
                                     elem.setAttribute("x", p.x);
                                     elem.setAttribute("y", p.y);
                                 }
@@ -1353,12 +1496,6 @@ function mouseMove(e) {
 
                 state.mouse.movedX = currentX; 
                 state.mouse.movedY = currentY;
-
-                if (nodeId === state.selectedNodeId && state.graph.directed === false) {
-                    var node = state.graph.allNodes[state.graph.nodeIndexFromId(state.selectedNodeId)];
-                    state.svg.getElementById("previewLine").setAttribute("x1", node.x);
-                    state.svg.getElementById("previewLine").setAttribute("y1", node.y);
-                }
 
                 state.lock = false;
             }
@@ -1381,8 +1518,8 @@ function mouseMove(e) {
                 var clickedElement = e.srcElement || e.target;
                 var clickedTag = clickedElement.nodeName;
 
-                while (clickedElement.id === "previewCircle" || clickedElement.id === "previewLine"
-                    || clickedElement.id === "previewPath") {
+                while (clickedElement.id === "previewCircle" || clickedElement.id === "previewLine" || 
+                       clickedElement.id === "previewPath") {
                     clickedElement = clickedElement.parentNode;
                     clickedTag = clickedElement.nodeName;
                 }
@@ -1398,73 +1535,85 @@ function mouseMove(e) {
                     default: 
                         break;
                 }
-                // CONTINUEHERE: How to make it know it's going over a line
-                // console.log(clickedTag);
-                if (insideNode === false) {
-                    circle.setAttribute("visibility", "visible");
+
+
+                var point = {"x": currentX, "y": currentY};
+                var checkEdgeIntersection = insideNode;
+
+                if (!insideNode && pointIntersectsEdge(point, state.graph, state.svg)) {
+                    path.setAttribute("visibility", "hidden"); 
+                    circle.setAttribute("visibility", "hidden"); 
+                    line.setAttribute("visibility", "hidden");
                 }
                 else {
-                    circle.setAttribute("visibility", "hidden");
-
-                    switch(clickedTag){
-                        case "circle":
-                            line.setAttribute("x2", clickedElement.getAttribute("cx"));
-                            line.setAttribute("y2", clickedElement.getAttribute("cy"));
-                            break;
-                        case "text":
-                            line.setAttribute("x2", clickedElement.getAttribute("x"));
-                            line.setAttribute("y2", clickedElement.getAttribute("y"));
-                            break;
-                        default: 
-                            break;
-                    }
-                }
-                if (state.isComponentSelected) {
-                    if (state.graph.directed === true) {
-                        var pt1 = {"x": parseFloat(line.getAttribute("x1")), 
-                                   "y": parseFloat(line.getAttribute("y1"))};
-                        var pt2 = {"x": parseFloat(line.getAttribute("x2")), 
-                                   "y": parseFloat(line.getAttribute("y2"))};
-
-
-                        var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
-                        var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
-
-                        var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
-                        var d;
-                        if (state.directedBezier === true) {
-                            var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
-                            d = quadBezierPointsToSVG(pt);         
-                        }
-                        else {
-                            var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
-                            d = lineToSVGPath(line);
-                        }
-
-                        path.setAttribute("d", d);
-
-                        var clickedElementId = clickedElement.id;
-                        
-                        if (clickedElementId.indexOf("circle") >= 0) {
-                            clickedElementId = clickedElementId.split("circle")[1];
-                        }
-                        if (clickedElementId.indexOf("name") >= 0) {
-                            clickedElementId = clickedElementId.split("name")[1];
-                        }
-                        // console.log(typeof clickedElementId);
-                        // console.log(typeof state.selectedNodeId);
-                        // console.log(parseInt(clickedElementId) !== parseInt(state.selectedNodeId));
-                        if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
-                            path.setAttribute("visibility", "visible");
-                        }
-                        else {
-                            path.setAttribute("visibility", "hidden"); 
-                        }
+                    
+                    if (insideNode === false) {
+                        circle.setAttribute("visibility", "visible");
                     }
                     else {
-                        line.setAttribute("visibility", "visible");
+                        circle.setAttribute("visibility", "hidden");
+
+                        switch(clickedTag){
+                            case "circle":
+                                line.setAttribute("x2", clickedElement.getAttribute("cx"));
+                                line.setAttribute("y2", clickedElement.getAttribute("cy"));
+                                break;
+                            case "text":
+                                line.setAttribute("x2", clickedElement.getAttribute("x"));
+                                line.setAttribute("y2", clickedElement.getAttribute("y"));
+                                break;
+                            default: 
+                                break;
+                        }
+                    }
+
+                    if (state.isComponentSelected) {
+                        if (state.graph.directed === true) {
+                            var node = state.svg.getElementById("circle" + state.selectedNodeId);
+
+                            var pt1 = {"x": parseFloat(node.getAttribute("cx")), 
+                                       "y": parseFloat(node.getAttribute("cy"))};
+                            var pt2 = {"x": parseFloat(line.getAttribute("x2")), 
+                                       "y": parseFloat(line.getAttribute("y2"))};
+
+
+                            var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+                            var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
+
+                            var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
+                            var d;
+                            if (state.directedBezier === true) {
+                                var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                          parseFloat(p2.x), parseFloat(p2.y), dir);
+                                d = quadBezierPointsToSVG(pt);         
+                            }
+                            else {
+                                var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                          parseFloat(p2.x), parseFloat(p2.y), dir);
+                                d = lineToSVGPath(line);
+                            }
+
+                            path.setAttribute("d", d);
+
+                            var clickedElementId = clickedElement.id;
+                            
+                            if (clickedElementId.indexOf("circle") >= 0) {
+                                clickedElementId = clickedElementId.split("circle")[1];
+                            }
+                            if (clickedElementId.indexOf("name") >= 0) {
+                                clickedElementId = clickedElementId.split("name")[1];
+                            }
+
+                            if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
+                                path.setAttribute("visibility", "visible");
+                            }
+                            else {
+                                path.setAttribute("visibility", "hidden"); 
+                            }
+                        }
+                        else {
+                            line.setAttribute("visibility", "visible");
+                        }
                     }
                 }
             }
@@ -1503,12 +1652,16 @@ function mouseUp(e) {
             }
         }
 
-        // clickedElement.classList.add('edgeOn');
-        console.log("change the line");
         return;
     }
+
     state.mouse.down = false;
     state.mouse.downInsideSVG = false;
+
+    var dragged = false;
+    if (state.mouse.dragOnMove === true) {
+        dragged = true;
+    }
     state.mouse.dragOnMove = false;
 
     // NEEDS TO BE CONTINUED
@@ -1516,7 +1669,30 @@ function mouseUp(e) {
         if (state.mouse.moved === false) {     
             clickInterpret(e);
         }
-        else {         
+        else {      
+            if (dragged) {
+
+                if (state.isComponentSelected) {
+
+                    var node = state.graph.allNodes[state.graph.getNodeIndexFromId(state.selectedNodeId)];
+                    
+                    if (state.graph.directed === true) {
+                        
+                        var node = state.graph.allNodes[state.graph.getNodeIndexFromId(state.selectedNodeId)];
+
+                        var newPath = computeD(node.id, parseInt(node.id) + 1, node.x, node.y, node.x + 100, node.y + 100);
+                        console.log(newPath);
+
+                        state.svg.getElementById("previewPath").setAttribute("d", newPath);
+
+                    }
+                    else {
+                        state.svg.getElementById("previewLine").setAttribute("x1", node.x);
+                        state.svg.getElementById("previewLine").setAttribute("y1", node.y);
+                    }
+
+                } 
+            }   
             console.log("MOUSE UP. SHOULD I DO ANYTHING HERE? MAYBE SOME CLEAN UP ON state.mouse?");
         }
         // else {
@@ -1537,6 +1713,16 @@ function mouseUp(e) {
     }
 }
 
+function dblClick(e) {
+
+    var clickedElement = e.srcElement || e.target;
+
+    if (clickedElement.id.indexOf("weight") >= 0 && clickedElement.classList.contains(edgeComponent)) {
+        openWeightModal(e);
+    }
+    
+}
+
 // Checks for click events
 function onmousedownListener() {
     document.addEventListener("mousedown", mouseDown);
@@ -1549,6 +1735,10 @@ function onmousemoveListener() {
 
 function onmouseupListener() {
     document.addEventListener("mouseup", mouseUp);
+}
+
+function ondblclickListener() {
+    document.addEventListener("dblclick", dblClick)
 }
 
 function scroll(e) {
@@ -1582,13 +1772,20 @@ function windowClickListener() {
 }
 
 function handleClick(e) {
-    if (event.target == modal || event.target.id === "cancelDirModal") {
-        var modal = document.getElementById('directionModal');
+    var dirModal = document.getElementById('directionModal');
+    if (event.target == dirModal || event.target.id === "cancelDirModal") {
         var dirSVG = document.getElementById('dirSVG');
 
         dirSVG.innerHTML = "";
-        modal.style.display = "none";
+        dirModal.style.display = "none";
     }
+
+    var weightModal = document.getElementById('weightModal');
+    if (event.target == weightModal || event.target.id === "cancelWeightModal") {
+
+        weightModal.style.display = "none";
+    }
+
 }
 
 function hireListeners() {
@@ -1601,6 +1798,7 @@ function hireListeners() {
     onmousemoveListener();
     onmouseupListener();
     onscrollListener();
+    ondblclickListener();
 
     windowClickListener();
 }

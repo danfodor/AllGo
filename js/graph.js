@@ -13,7 +13,7 @@ function Graph(directed = false) {
 
     // TO BE CHECKED
     this.addNode = function(node1) {
-        var nodeExists = this.nodeIndexFromId(node1.id);
+        var nodeExists = this.getNodeIndexFromId(node1.id);
         
         if (nodeExists >= 0) {
             return false;
@@ -93,9 +93,6 @@ function Graph(directed = false) {
             var node1AdjList = this.getNodeAdjacencyList(nodeId2);
             node1AdjList.neighbours.push(nodeId1);
             node1AdjList.weights.push(0);
-                     
-            // this.getNodeAdjacencyList(nodeId1).neighbours.push({"id": nodeId2, "weight": 0});
-            // this.getNodeAdjacencyList(nodeId2).neighbours.push({"id": nodeId1, "weight": 0});
         }
 
         return true;
@@ -138,7 +135,7 @@ function Graph(directed = false) {
     };
 
     // TODO: Implement binary search
-    this.nodeIndexFromId = function(nodeId) {
+    this.getNodeIndexFromId = function(nodeId) {
         var len = this.allNodes.length;
 
         for (var ind = 0; ind < len; ++ind) {            
@@ -182,15 +179,17 @@ function Graph(directed = false) {
                 var neighbours = id2AdjList.neighbours;
                 var weights = id2AdjList.weights;
 
-                var ind = neighbours.indexOf(id1);
+                var ind = neighbours.indexOf(parseInt(id1));
 
-                neighbours.splice(ind, 1);
-                weights.splice(ind, 1);
+                if (ind >= 0) {
+                    neighbours.splice(ind, 1);
+                    weights.splice(ind, 1);
+                }
             }
         }
         // Should normally work. Worth checking.
         else {
-            // removeNodeFromNeighbours(1,2,"in") means
+            // removeNodeFromNeighbours(1, 2, "in") means
             // remove node 1 from the in neighbours of node 2 (so, there's a 1->2 edge)
 
             var done = false;
@@ -201,7 +200,7 @@ function Graph(directed = false) {
                 var inWeights = node2AdjList.inWeights;
 
                 var ind = inNeighbours.indexOf(parseInt(id1));
-                // console.log(ind);
+
                 if (ind >= 0) {
                     inNeighbours.splice(ind, 1);
                     inWeights.splice(ind, 1);
@@ -215,8 +214,6 @@ function Graph(directed = false) {
                     var outWeights = node2AdjList.outWeights;
 
                     var ind = outNeighbours.indexOf(parseInt(id1));
-                    // console.log(ind);
-                    // console.log(outNeighbours);
 
                     if (ind >= 0) {
                         outNeighbours.splice(ind, 1);
@@ -252,13 +249,13 @@ function Graph(directed = false) {
                         this.removeNodeFromNeighbours(id1, adjList.outNeighbours[it], "in");
                     }
                 }
-                this.adjacencyLists.splice(this.nodeIndexFromId(id1), 1);
-                this.allNodes.splice(this.nodeIndexFromId(id1), 1);
+                this.adjacencyLists.splice(this.getNodeIndexFromId(id1), 1);
+                this.allNodes.splice(this.getNodeIndexFromId(id1), 1);
 
                 break;
             case "edge":
                 if (this.directed === false) {
-                    
+                    console.log(id1, id2);
                     this.removeNodeFromNeighbours(id1, id2);
                     this.removeNodeFromNeighbours(id2, id1);
                 }
@@ -316,9 +313,20 @@ function Graph(directed = false) {
         var weight = null;
         var node1AdjList = this.getNodeAdjacencyList(nodeId1);
 
-        var ind = this.getIndexFromIdInAdjList(nodeId2, node1AdjList);
-        if (ind >= 0) {
-            weight = node1AdjList.weights[ind];
+        var ind;
+        if (this.directed === true) {
+            ind = this.getIndexFromIdInAdjList(nodeId2, node1AdjList, "out");
+          
+            if (ind >= 0) {
+                weight = node1AdjList.outWeights[ind];
+            }
+        }
+        else {
+            ind = this.getIndexFromIdInAdjList(nodeId2, node1AdjList, "out");
+          
+            if (ind >= 0) {
+                weight = node1AdjList.weights[ind];
+            }
         }
 
         return weight;
@@ -397,7 +405,114 @@ function Graph(directed = false) {
         }
 
         return noEdge;
-    }
+    };
+
+    this.getNodePointsForEdges = function() {
+        var pointsPairs = [];
+
+        var len = this.allNodes.length;
+        var neighbours, neighboursNo, id, p1, p2, ind;
+
+        for (var i = 0; i < len; ++i) {
+
+            id = this.adjacencyLists[i].id;
+            if (this.directed === true) {
+                neighbours = this.adjacencyLists[i].outNeighbours;
+            }
+            else {
+                neighbours = this.adjacencyLists[i].neighbours;                
+            }
+            neighboursNo = neighbours.length;
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                if (parseInt(id) < parseInt(neighbours[j])) {
+
+                    ind = this.getNodeIndexFromId(neighbours[j]);
+
+                    p1 = {"x": this.allNodes[i].x, y: this.allNodes[i].y};
+                    p2 = {"x": this.allNodes[ind].x, y: this.allNodes[ind].y};
+                    
+                    pointsPairs.push({"p1": p1, "p2": p2});
+                }
+            }
+        }
+
+        return pointsPairs;
+    };
+
+    this.updateWeight = function(nodeId1, nodeId2, weight) {
+
+        var done = false;
+
+        nodeId1 = parseInt(nodeId1);
+        nodeId2 = parseInt(nodeId2);
+        weight = parseFloat(weight);
+
+        if (this.directed === true) {
+            var adjList1, adjList2, ind1, ind2;
+
+            adjList1 = this.getNodeAdjacencyList(nodeId1);
+            adjList2 = this.getNodeAdjacencyList(nodeId2);
+
+            if (adjList1 && adjList2) {
+                
+                ind1 = this.getIndexFromIdInAdjList(nodeId2, adjList1, "out");
+                ind2 = this.getIndexFromIdInAdjList(nodeId1, adjList2, "in");
+
+                if (ind1 >= 0 && ind2 >= 0) {
+                    adjList1.outWeights[ind1] = weight;
+                    adjList2.inWeights[ind2] = weight;
+                    done = true;
+                }
+            }
+        }
+        else {
+            var adjList1, adjList2, ind1, ind2;
+
+            adjList1 = this.getNodeAdjacencyList(nodeId1);
+            adjList2 = this.getNodeAdjacencyList(nodeId2);
+
+            if (adjList1 && adjList2) {
+
+                ind1 = this.getIndexFromIdInAdjList(nodeId2, adjList1);
+                ind2 = this.getIndexFromIdInAdjList(nodeId1, adjList2);
+
+                if (ind1 >= 0 && ind2 >= 0) {
+                    adjList1.weights[ind1] = weight;
+                    adjList2.weights[ind2] = weight;
+                    done = true;
+                }
+            }
+        }
+
+        return done;
+    };
+
+    this.makeCoordinatesCircular = function(x, y, r, left = 0, top = 0) {
+
+        var nodesNo = this.allNodes.length;
+
+        if (nodesNo <= 1) {
+            if (nodesNo === 1) {
+
+                this.allNodes[0].x = x;
+                this.allNodes[0].y = y; 
+            }
+            return;
+        }
+
+        var delta = 360 / nodesNo;
+        var angle = 0;
+        var newX, newY;
+
+        for (var i = 0; i < nodesNo; ++i) {
+
+            this.allNodes[i].x = left + x + r * Math.cos(angle * Math.PI / 180);
+            this.allNodes[i].y = top + y + r * Math.sin(angle * Math.PI / 180); 
+
+            angle += delta;
+        }
+    };
 
 };
 

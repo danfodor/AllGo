@@ -316,25 +316,20 @@ body  {
 .disabled {
   opacity: 0.65; 
   cursor: not-allowed;
+  box-shadow: inset 0 0 1px #555;
 }
 
 .edgeOff:hover {
   opacity: 0.65; 
 }
 
-/*.edgeOn:hover {
-  opacity: 1; 
-}*/
-
 .edgeRemoved {
   opacity: 0.5;
 }
 .edgeRemoved:hover {
-  opacity: 1; 
+  opacity: 0.8; 
 }
 
-
-/* MODAL INFO */
 .dirModal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -357,22 +352,6 @@ body  {
     width: 80%; /* Could be more or less, depending on screen size */
 }
 
-/* The Close Button */
-/*.close {
-    color: #111;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}*/
-
-
 #dirSVG {
   height: 65vh;
   width: 100%;
@@ -385,6 +364,35 @@ body  {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;    
+}
+
+
+.weightModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.weightModal-content {
+    background-color: #fefefe;
+    margin: 30px auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 360px; /* Could be more or less, depending on screen size */
+}
+
+#weightInput {
+  padding-left: 5px; 
+  width: 100%;
+  margin: auto;   
 }
 
 hr {
@@ -411,24 +419,7 @@ hr {
             user-select: none;
 }
 
-#cancelDirModal {
-  background: rgb(255, 0, 0);
-  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
-  background: -o-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
-  background: -moz-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
-  background: linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
-}
-
-#cancelDirModal:active, 
-#cancelDirModal:hover {
-  background: rgb(255, 0, 0);
-  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
-  background: -o-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
-  background: -moz-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
-  background: linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
-}
-
-#applyDirModal {
+#applyDirModal, #applyWeightModal {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
@@ -436,11 +427,28 @@ hr {
   background: linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
 }
 
-#applyDirModal:active, 
-#applyDirModal:hover {
+#applyDirModal:active, #applyDirModal:hover, 
+#applyWeightModal:active, #applyWeightModal:hover {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
   background: -moz-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
   background: linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
+}
+
+#cancelDirModal, #cancelWeightModal {
+  background: rgb(255, 0, 0);
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+  background: linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
+}
+
+#cancelDirModal:active, #cancelDirModal:hover, 
+#cancelWeightModal:active, #cancelWeightModal:hover {
+  background: rgb(255, 0, 0);
+  background: -webkit-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: -o-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: -moz-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
+  background: linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
 }

@@ -31,13 +31,36 @@
         <div id="side-div" class="col-sm-4">
             <div class = "sided odd">
                 <div class="row">
-                    <div class="col-sm-4 buttonDiv"> 
+                    <div class="col-sm-4"> 
                     </div>
                     <div id="resetDiv" class="col-sm-4 buttonDiv" style="text-align: center;">
                         <div id="reset" class="button" onclick="reset()"> 
                             Reset
                         </div>
                     </div>
+                    <div class="col-sm-4">
+                    </div>                    
+                </div>
+                <div class="row">
+                    <div id="saveDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                        <div id="save" class="button" onclick="save()"> 
+                            Save Graph
+                        </div>
+                    </div> 
+                    <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                        <div id="load" class="button" onclick="load()"> 
+                            Load graph
+                        </div>
+                    </div>                  
+                </div>
+                <div class="row">
+                    <div class="col-sm-4"> 
+                    </div>
+                    <div id="rearrangeDiv" class="col-sm-4 buttonDiv" style="text-align: center;">
+                        <div id="rearrange" class="button" onclick="rearrange()"> 
+                            Rearrange Graph
+                        </div>
+                    </div>   
                     <div class="col-sm-4">
                     </div>                    
                 </div>
@@ -86,9 +109,6 @@
                                     <div id="next" class="button" onclick="nextStep()">Next</div>
                                 </div>
                             </div>
-<!--                             <button id="restart" onclick="restart()">Restart</button>
-                            <button id="back" onclick="backStep()">Back</button>
-                            <button id="next" onclick="nextStep()">Next</button> -->
                         </div>
 
                     </div>
@@ -104,7 +124,6 @@
                                     Directed Graph
                                 </div>
                             </div>
-                            <!-- <input id="dir" type="checkbox" data-toggle="toggle" data-on="dir on" data-off="dir off" onchange="switchDir()"> -->
                         </div>
                         <div id="weightDiv" style="text-align: center;">
                             <div class="col-sm-6 buttonDiv leftDiv"> 
@@ -117,14 +136,16 @@
                                     Weighted Graph
                                 </div>
                             </div>
-
-                            <!-- <input id="weight" type="checkbox" data-toggle="toggle" data-on="Weighted on" data-off="Weighted off" onchange="switchWeighted()"> -->
                         </div>
                     </div>
                 </div>
             </div>
             <div class = "sided odd">
-                c
+                <div class="row">
+                    <div id="algorithmCodeDiv" class="col-sm-12"> 
+                        Implement it here
+                    </div>                
+                </div>
             </div>
         </div>
     </div>
@@ -155,9 +176,8 @@
       </ul>
     </nav>
 
-    <div id="directionModal" class="dirModal">
+    <div id="directionModal" class="dirModal modal">
         <div class="dirModal-content">
-            <!-- <span class="close">&times;</span> -->
             <div class="row">
                 <div class="col-sm-12">
                     Changing direction of the graph.
@@ -166,7 +186,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12">
-                    <svg id="dirSVG" class=""> 
+                    <svg id="dirSVG"> 
                     </svg>
                     <hr />
                 </div>
@@ -185,9 +205,39 @@
                     </div>
                 </div>
             </div>
-
         </div>
-    </div>    
+    </div>
+
+    <div id="weightModal" class="weightModal modal">
+        <div class="weightModal-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    Enter a weight value (should be a number).
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <input id="weightInput" type="text" name="username">
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="applyWeightModal" class="modalButton" onclick="applyWeightChange()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                </div>
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="cancelWeightModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
@@ -203,6 +253,7 @@
     <script type="text/javascript" src="./js/state.js"></script>
     <script type="text/javascript" src="./js/svgHandler.js"></script>
     <script type="text/javascript" src="./js/main.js"></script>
+
     <script type="text/javascript" src="./js/testing.js"></script>
 </body>
 </html>
