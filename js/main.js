@@ -264,17 +264,21 @@ function switchMode(mode) {
         document.getElementById("algMode").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
 
-        document.getElementById("build").classList.remove("off");
-        document.getElementById("build").classList.add("on");
-        document.getElementById("build").classList.remove("hoverShadow");
-        // if (state.graph.allNodes.length > 0) {
-            document.getElementById("algorithm").classList.add("hoverShadow");
-            document.getElementById("algorithm").classList.remove("on");
+        turnButton("build", "on");
+        // document.getElementById("build").classList.remove("off");
+        // document.getElementById("build").classList.add("on");
+        // document.getElementById("build").classList.remove("hoverShadow");
+
+        if (state.graph.allNodes.length === 0) {
             document.getElementById("algorithm").classList.add("off");
-        // }
+            return;
+        }
+        document.getElementById("algorithm").classList.add("hoverShadow");
+        document.getElementById("algorithm").classList.remove("on");
+        document.getElementById("algorithm").classList.add("off");
     }
     else {
-        if (!(state.graph.allNodes.length > 0) === true) {
+        if (state.graph.allNodes.length === 0) {
             return;
         }
 
@@ -324,22 +328,6 @@ function seqControlMenuSetUp() {
     }
 }
 
-function setCursor(id, cursor) {
-    document.getElementById(id).style.cursor = cursor;
-}
-
-function buttonNotAllowed(id, notAllowed = true) {
-    if (notAllowed === true) {
-        setCursor(id, "not-allowed");
-        document.getElementById(id).classList.remove("hoverShadow");
-        document.getElementById(id).classList.add("disabled");
-    }
-    else {
-        setCursor(id, "pointer");
-        document.getElementById(id).classList.add("hoverShadow");
-        document.getElementById(id).classList.remove("disabled");
-    }
-}
 
 function algorithmSelect() {
 
@@ -396,7 +384,7 @@ function algorithmSelect() {
 function selectStartNode() {
     if (state.algorithmRuns === true) {
         // TOOD: Add confirm box.
-        restart();
+        restart(false);
     }
     var nodeName = document.getElementById("nodeOptions").value; 
     var nodeId = state.graph.nodeIdFromName(nodeName);
@@ -416,7 +404,7 @@ function selectStartNode() {
     circle.style.stroke = "green";
 }
 
-function nextStep(withNextButtonPress = true) {
+function nextStep(withButtonPress = true) {
     var algorithm = document.getElementById("algorithmsOptions").value;
 
     if (state.algorithmRuns === false) {
@@ -454,7 +442,7 @@ function nextStep(withNextButtonPress = true) {
         document.getElementById("back").classList.remove("disabled");
         document.getElementById("back").classList.add("hoverShadow");
 
-        if (withNextButtonPress === true) {
+        if (withButtonPress === true) {
             nextButtonPress();
         }
 
@@ -585,7 +573,7 @@ function backStep() {
     } 
 }
 
-function restart() {
+function restart(withButtonPress = true) {
     // // --- Pseudocode ---
     // clean all the colouring
     // make select algorithm available again
@@ -596,16 +584,17 @@ function restart() {
     cleanSVGGraphColors();
     seqControlMenuSetUp();
 
-    document.getElementById("restart").classList.add("on");
-    document.getElementById("restart").classList.remove("off");
-    document.getElementById("restart").classList.remove("hoverShadow");
+    if (withButtonPress) {
+        document.getElementById("restart").classList.add("on");
+        document.getElementById("restart").classList.remove("off");
+        document.getElementById("restart").classList.remove("hoverShadow");
 
-    setTimeout(function() {
-        document.getElementById("restart").classList.remove("on");
-        document.getElementById("restart").classList.add("off");
-        document.getElementById("restart").classList.add("hoverShadow"); 
-    }, 100); 
-    // document.getElementById; 
+        setTimeout(function() {
+            document.getElementById("restart").classList.remove("on");
+            document.getElementById("restart").classList.add("off");
+            document.getElementById("restart").classList.add("hoverShadow"); 
+        }, 100); 
+    }
 
     state.nextSteps = state.executedSteps;
     state.executedSteps = [];
@@ -613,22 +602,40 @@ function restart() {
     selectStartNode();
 }
 
+
+// STARTS HERE: TRYING TO REFACTOR.
+
+function next() {
+    if (state.runsContinuously) {
+        stop();
+    }
+    nextStep();
+}
+
+function back(argument) {
+    if (state.runsContinuously) {
+        stop();
+    }
+    backStep();
+}
+
 function start() {
 
     var timeInterval = document.getElementById("range").value;
     timeInterval = parseFloat(timeInterval);
     timeInterval =timeInterval * 1000;
-    // console.log(timeInterval);
+    
     nextStep(false);
     state.runsContinuously = true;
 
-    state.intervalId = window.setInterval(runNextStep, timeInterval);
-    console.log("Interval Id: ", state.intervalId);
+    state.intervalIds.push(window.setInterval(runNextStep, timeInterval));
 }
 
-var runNextStep = function() {
+function runNextStep() {
     if (state.nextSteps.length > 0) {
         nextStep(false);
+        if (state.nextSteps.length <= 0) {
+        }
     }
     else {
         stop();
@@ -636,21 +643,90 @@ var runNextStep = function() {
 }
 
 function stop() {
-
+    console.log("I was called");
     state.runsContinuously = false;
-    window.clearInterval(state.intervalId);
-
+    for (var i = 0; i < state.intervalIds.length; ++i) {
+        window.clearInterval(state.intervalIds[i]);
+    }
+    state.intervalIds = [];
+    for (var i = 0; i < state.timeoutIds.length; ++i) {
+        console.log("hello: ", state.timeoutIds[i]);
+        window.clearTimeout(state.timeoutIds[i]);
+    }
+    state.timeoutIds = [];
 }
 
 function rangeInput() {
+    var value = parseFloat(document.getElementById("range").value).toFixed(1);
+    document.getElementById("speed").value = value;
+    
+    if (state.runsContinuously) {
+        stop();
 
-    document.getElementById("speed").value = parseFloat(document.getElementById("range").value).toFixed(1);
+        state.timeoutIds.push(setTimeout(start, 1000));
+    }
 }
 
 function speedInput() {
-    console.log(document.getElementById("speed").value);
-    document.getElementById("range").value = document.getElementById("speed").value;
+
+    value = document.getElementById("speed").value;
+    document.getElementById("range").value = value;
+    
+    if (state.runsContinuously) {
+        stop();
+
+        state.timeoutIds.push(setTimeout(start, 1000));
+
+    }
 }
+// UP TO THIS POINT.
+
+
+
+// WORKING CODE:
+
+// function start() {
+
+//     var timeInterval = document.getElementById("range").value;
+//     timeInterval = parseFloat(timeInterval);
+//     timeInterval =timeInterval * 1000;
+//     // console.log(timeInterval);
+//     nextStep(false);
+//     state.runsContinuously = true;
+
+//     state.intervalId = window.setInterval(runNextStep, timeInterval);
+//     console.log("Interval Id: ", state.intervalId);
+// }
+
+// var runNextStep = function() {
+//     if (state.nextSteps.length > 0) {
+//         nextStep(false);
+//     }
+//     else {
+//         stop();
+//     }
+// }
+
+// function stop() {
+
+//     state.runsContinuously = false;
+//     window.clearInterval(state.intervalId);
+
+// }
+
+// function rangeInput() {
+//     stop();
+//     var value = parseFloat(document.getElementById("range").value).toFixed(1);
+//     document.getElementById("speed").value = value;
+// }
+
+// function speedInput() {
+//     stop();
+//     value = document.getElementById("speed").value;
+//     document.getElementById("range").value = value;
+
+// }
+// ENDS HERE
 
 function cleanSVGGraphColors() {
     var nodes = state.graph.allNodes, len = nodes.length;
@@ -1961,19 +2037,19 @@ function onscrollListener() {
     document.addEventListener("scroll", scroll);
 }
 
-function cssSetUp() {
+// function cssSetUp() {
 
-    switchMode("build");
+//     switchMode("build");
     
-    state.graph.directed = false;
-    switchDirButtons(false);
-    buttonNotAllowed("algorithm");
+//     state.graph.directed = false;
+//     switchDirButtons(false);
+//     buttonNotAllowed("algorithm");
     
-    state.graph.weighted = false;
-    switchWeighted(false);
+//     state.graph.weighted = false;
+//     switchWeighted(false);
     
-    resetButtonSetUp();
-}
+//     resetButtonSetUp();
+// }
 
 function windowClickListener() {
     window.onclick = handleClick;

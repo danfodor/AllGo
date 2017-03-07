@@ -24,7 +24,12 @@ function State() {
     this.modifiedNameId;
     this.rearrangeSelectedId = null;
 
+    // This is for contiuous run
+    // TODO: CHECK IF REALLY NEEDING intervalId and runsContinuously.
     this.runsContinuously = false;
+    this.intervalId = null;
+    this.intervalIds = [];
+    this.timeoutIds = [];
 
     this.allowMove = true;
 
@@ -44,6 +49,7 @@ function State() {
     this.nextSteps = [];
     this.executedSteps = [];
     this.pastStartingNode = null;
+
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
                   "movedX": -1, "movedY": -1, "upX": -1, "upY": -1, "down": false, 
@@ -81,11 +87,20 @@ function State() {
         this.executedSteps = [];
         this.pastStartingNode = null;
     
-        this.runsContinuously = false;
 
         this.allowMove = true;
 
+        this.runsContinuously = false;
         this.intervalId;
+
+        for (var i = 0; i < this.intervalIds.length; ++i) {
+            window.clearInterval(this.intervalIds[i]);
+        }
+        this.intervalIds = [];
+        for (var i = 0; i < this.timeoutIds.length; ++i) {
+            window.clearInterval(this.timeoutIds[i]);
+        }
+        this.timeoutIds = [];
 
         this.left = this.svg.getBoundingClientRect().left;
         this.top = this.svg.getBoundingClientRect().top;
