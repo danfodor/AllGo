@@ -425,7 +425,7 @@ function Graph(directed = false) {
             neighboursNo = neighbours.length;
 
             for (var j = 0; j < neighboursNo; ++j) {
-                if (parseInt(id) < parseInt(neighbours[j])) {
+                if (parseInt(id) < parseInt(neighbours[j]) || this.directed === true) {
 
                     ind = this.getNodeIndexFromId(neighbours[j]);
 
@@ -438,6 +438,56 @@ function Graph(directed = false) {
         }
 
         return pointsPairs;
+    };
+
+    this.getAllEdges = function() {
+        var edges = [];
+
+        var len = this.allNodes.length;
+        var neighbours, neighboursNo, id, p1, p2, ind, weights;
+
+        for (var i = 0; i < len; ++i) {
+
+            id = this.adjacencyLists[i].id;
+            if (this.directed === true) {
+                neighbours = this.adjacencyLists[i].outNeighbours;
+                weights = this.adjacencyLists[i].outWeights;
+            }
+            else {
+                neighbours = this.adjacencyLists[i].neighbours; 
+                weights = this.adjacencyLists[i].weights;               
+            }
+            neighboursNo = neighbours.length;
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                if (parseInt(id) < parseInt(neighbours[j]) || this.directed === true) {
+
+                    ind = this.getNodeIndexFromId(neighbours[j]);
+
+                    p1 = {"x": this.allNodes[i].x, y: this.allNodes[i].y};
+                    p2 = {"x": this.allNodes[ind].x, y: this.allNodes[ind].y};
+                    
+                    edges.push({"edge": id + "-" + neighbours[j], "weight": weights[j]});
+                }
+            }
+        }
+
+        return edges;
+    };
+
+    // CONTINUEHERE
+    this.updateName = function(nodeId, name) {
+
+        var done = false;
+
+        nodeId = parseInt(nodeId);
+        var nodeIndex = this.getNodeIndexFromId(nodeId);
+
+        if (nodeIndex > 0 && nodeIndex < this.allNodes.length) {
+            this.allNodes[nodeIndex].name = name;
+        }
+
+        return done;
     };
 
     this.updateWeight = function(nodeId1, nodeId2, weight) {
@@ -488,7 +538,7 @@ function Graph(directed = false) {
         return done;
     };
 
-    this.makeCoordinatesCircular = function(x, y, r, left = 0, top = 0) {
+    this.makeCoordinatesCircular = function(x, y, r, left = 0, top = 0, random = false) {
 
         var nodesNo = this.allNodes.length;
 
@@ -505,14 +555,39 @@ function Graph(directed = false) {
         var angle = 0;
         var newX, newY;
 
+        var order = [];
+        for (var i = 0; i < nodesNo; ++i) {
+            order.push(i);
+        }
+        if (random) {
+            var temp = [], ind;
+            // var len = order.length;
+            while (order.length > 0) {
+                ind = Math.floor(Math.random() * order.length);
+                temp.push(order.splice(ind, 1));
+            }
+
+            order = temp;
+        }
+
         for (var i = 0; i < nodesNo; ++i) {
 
-            this.allNodes[i].x = left + x + r * Math.cos(angle * Math.PI / 180);
-            this.allNodes[i].y = top + y + r * Math.sin(angle * Math.PI / 180); 
+            this.allNodes[order[i]].x = left + x + r * Math.cos(angle * Math.PI / 180);
+            this.allNodes[order[i]].y = top + y + r * Math.sin(angle * Math.PI / 180); 
 
             angle += delta;
         }
     };
+
+    this.getNodesByDegree = function(type = "out") {
+        var nodesDegrees = [];
+        if (this.directed) {
+
+        }
+        else {
+
+        }
+    }
 
 };
 
@@ -751,4 +826,184 @@ function transposeGraphCoordinates(graph, x = 0, y = 0, xRatio = 1, yRatio = 1) 
     graph.allNodes = nodes;
 
     return graph;
+}
+
+function graphToJSON(graph) {
+    var json = {"allNodes": graph.allNodes, "adjacencyLists": graph.adjacencyLists,
+                "directed": graph.directed, "selfLoops": graph.selfLoops, 
+                "weighted": graph.weighted};
+
+    json = JSON.stringify(json);
+
+    return json;
+}
+
+function jsonToGraph(json) {
+    var graph = new Graph();
+
+    json = JSON.parse(json);
+
+    graph.allNodes = json['allNodes'];
+    graph.adjacencyLists = json['adjacencyLists'];
+    graph.directed = json['directed'];
+    graph.selfLoops = json['selfLoops'];
+    graph.weighted = json['weighted'];
+
+    return graph;
+}
+
+function getGraphsForAlgorithm(algorithm, directed, weighted) {
+    
+    var graphs = [];
+
+    switch (algorithm) {
+        case "BFS":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "DFS":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "Bridges":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "ArtPoints":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "Dijkstra":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "Kruskal":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "Prim":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        case "MaxFlow":
+            if (directed) {
+                if (weighted) {
+
+                }
+                else {
+                    
+                }
+            } 
+            else {
+                if (weighted) {
+
+                }
+                else {
+
+                }
+            }
+            break;
+        default: 
+            break;
+    }
+
+    return graphs;
 }

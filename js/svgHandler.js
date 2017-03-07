@@ -2,28 +2,28 @@
 
 function euclideanDistance(p1, p2) {
 
-	var dist = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + 
-					 (p2.y - p1.y) * (p2.y - p1.y));
-	return dist;
+    var dist = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + 
+                     (p2.y - p1.y) * (p2.y - p1.y));
+    return dist;
 }
 
 function abs(value) {
-	if (value < 0) {
-		return -value;
-	}
+    if (value < 0) {
+        return -value;
+    }
 
-	return value;
+    return value;
 }
 
 function trianglePerimeter(triangle) {
-	var t = triangle;
-	var perimeter = 0;
+    var t = triangle;
+    var perimeter = 0;
 
-	perimeter += euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
-	perimeter += euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
-	perimeter += euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
+    perimeter += euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
+    perimeter += euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
+    perimeter += euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
 
-	return perimeter;
+    return perimeter;
 }
 
 function overlapsMargins(x, y, radius, top, right, bottom, left) {
@@ -464,10 +464,10 @@ function createSVGUndirectedEdge(nodeId1, nodeId2, line, text) {
 function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edgeWidth, 
                     dev = sizes.angleDev, directedBezier = false) {
 
-	x1 = parseFloat(x1);
-	y1 = parseFloat(y1);
-	x2 = parseFloat(x2);
-	y2 = parseFloat(y2);
+    x1 = parseFloat(x1);
+    y1 = parseFloat(y1);
+    x2 = parseFloat(x2);
+    y2 = parseFloat(y2);
 
     var d;
 
@@ -528,6 +528,7 @@ function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x 
     marker.setAttribute("markerUnits", "strokeWidth");
     
     var polygon = document.createElement("polygon");
+    polygon.id = "polygon" + nodeId1 + "-" + nodeId2;
     polygon.setAttribute("points", pts);
     polygon.setAttribute("fill", fill);
     polygon.setAttribute("stroke", stroke);
@@ -555,7 +556,7 @@ function createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text) {
     edge.appendChild(path);
 
     if (text) {
-    	edge.appendChild(text);
+        edge.appendChild(text);
     }
             
     edge.classList.add("node" + nodeId1);      
@@ -821,7 +822,7 @@ function graphToDirSVG(graph) {
 
 function updateGraphToState(graph, state) {
 
-	state.svg.innerHTML = "";
+    state.svg.innerHTML = "";
 
     state.createPreviewCircle();
     state.createForbiddenCircle();
@@ -881,7 +882,26 @@ function updateGraphToState(graph, state) {
                 marker = createSVGMarker(nodeId, neighbourId);
                 arrow = createSVGArrow(marker);
                 path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
+
+
+                var text = undefined;
+                if (graph.weighted === true) {
+                    var xp1 = parseFloat(d.split('M')[1].split(' ')[1]);
+                    var yp1 = parseFloat(d.split('M')[1].split(' ')[2]);
+
+                    var l = d.split(' ').length;
+                    var xp2 = parseFloat(d.split(' ')[l - 2]);
+                    var yp2 = parseFloat(d.split(' ')[l - 1]);
+
+                    var p1 = {"x": xp1, "y": yp1};
+                    var p2 = {"x": xp2, "y": yp2};
+
+                    var weight = graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId));
+
+                    text = createSVGWeight(nodeId, neighbourId, p1, p2, weight, false);
+                }
+
+                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow, text);
 
                 state.svg.insertBefore(edge, state.svg.firstChild);
             }
@@ -894,7 +914,6 @@ function updateGraphToState(graph, state) {
         var x1, y1, x2, y2;
 
         var line, edge;
-        // TODO: Consider weight.
 
         for (var i = 0; i < nodesNo; ++i) {
             adjList = graph.adjacencyLists[i];
@@ -916,7 +935,15 @@ function updateGraphToState(graph, state) {
                     y2 = graph.allNodes[neighbourIndex].y;
 
                     line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
-                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
+
+                    var text = undefined;
+                    if (graph.weighted === true) {
+                        var weight = graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId));
+
+                        text = createSVGWeight(nodeId, neighbourId, {x: x1, y: y1}, {x: x2, y: y2}, weight);
+                    }
+
+                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line, text);
 
                     state.svg.insertBefore(edge, state.svg.firstChild);
                 }
@@ -931,9 +958,9 @@ function updateGraphToState(graph, state) {
 function pointIntersectsLine(point, line) {
     var intersects = false;
     if ((line.x1 === point.x && line.y1 === point.y) || 
-    	(line.x2 === point.x && line.y2 === point.y)) {
-    	intersects = true;
-    	return intersects;
+        (line.x2 === point.x && line.y2 === point.y)) {
+        intersects = true;
+        return intersects;
     }
     if ((point.x < line.x1 && point.x < line.x2) ||
         (point.x > line.x1 && point.x > line.x2)) {
@@ -944,124 +971,150 @@ function pointIntersectsLine(point, line) {
         return intersects;
     }
 
-	var lpX = point.x - line.x1;
-	var lpY = point.y - line.y1;
+    var lpX = point.x - line.x1;
+    var lpY = point.y - line.y1;
 
-	var lX = line.x2 - line.x1;
-	var lY = line.y2 - line.y1;
+    var lX = line.x2 - line.x1;
+    var lY = line.y2 - line.y1;
 
-	var product = lpX * lY - lpY * lX;
+    var product = lpX * lY - lpY * lX;
 
-	if (abs(product) < 0.000001) {
-		intersects = true;
-	}
+    if (abs(product) < 0.000001) {
+        intersects = true;
+    }
 
     return intersects;
 }
 
 function pointInsideRectangle(point, rect) {
-	var insideRect = false;
+    var insideRect = false;
 
-	var rectArea = rectangleArea(rect);
-	var triangleTotalArea = 0;
+    var rectArea = rectangleArea(rect);
+    var triangleTotalArea = 0;
 
-	var rectPoints = rectangleToPoints(rect);
+    var rectPoints = rectangleToPoints(rect);
 
-	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p1, rectPoints.p2));
-	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p2, rectPoints.p3));
-	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p3, rectPoints.p4));
-	triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p4, rectPoints.p1));
+    triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p1, rectPoints.p2));
+    triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p2, rectPoints.p3));
+    triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p3, rectPoints.p4));
+    triangleTotalArea += triangleArea(pointsToTriangle(point, rectPoints.p4, rectPoints.p1));
 
-	if (abs(triangleTotalArea - rectArea) < 0.000001) {
-		insideRect = true;
-	}
+    if (abs(triangleTotalArea - rectArea) < 0.000001) {
+        insideRect = true;
+    }
 
-	return insideRect;
+    return insideRect;
 }
 
 
 function rectangleToPoints(rect) {
-	var points = {"p1": {"x": rect.x1, "y": rect.y1}, "p2": {"x": rect.x2, "y": rect.y2}, 
-				"p3": {"x": rect.x3, "y": rect.y3}, "p4": {"x": rect.x4, "y": rect.y4}};
+    var points = {"p1": {"x": rect.x1, "y": rect.y1}, "p2": {"x": rect.x2, "y": rect.y2}, 
+                "p3": {"x": rect.x3, "y": rect.y3}, "p4": {"x": rect.x4, "y": rect.y4}};
 
-	return points;
+    return points;
 }
 
 function pointsToRectangle(p1, p2, p3, p4) {
-	var rect = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
-				"x3": p3.x, "y3": p3.y, "x4": p4.x, "y4": p4.y};
+    var rect = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
+                "x3": p3.x, "y3": p3.y, "x4": p4.x, "y4": p4.y};
 
-	return rect;
+    return rect;
 }
 
 function pointsToTriangle(p1, p2, p3) {
-	var triangle = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
-					"x3": p3.x, "y3": p3.y};
+    var triangle = {"x1": p1.x, "y1": p1.y, "x2": p2.x, "y2": p2.y, 
+                    "x3": p3.x, "y3": p3.y};
 
-	return triangle;
+    return triangle;
 }
 
 function rectangleArea(rect) {
-	var rectArea;
+    var rectArea;
 
-	var p1p2 = Math.sqrt((rect.x2 - rect.x1) * (rect.x2 - rect.x1) + 
-						 (rect.y2 - rect.y1) * (rect.y2 - rect.y1));
-	var p2p3 = Math.sqrt((rect.x3 - rect.x2) * (rect.x3 - rect.x2) + 
-						 (rect.y3 - rect.y2) * (rect.y3 - rect.y2));
-	rectArea = p1p2 * p2p3;
+    var p1p2 = Math.sqrt((rect.x2 - rect.x1) * (rect.x2 - rect.x1) + 
+                         (rect.y2 - rect.y1) * (rect.y2 - rect.y1));
+    var p2p3 = Math.sqrt((rect.x3 - rect.x2) * (rect.x3 - rect.x2) + 
+                         (rect.y3 - rect.y2) * (rect.y3 - rect.y2));
+    rectArea = p1p2 * p2p3;
 
-	// var rectArea = 0.5 * abs((rect.y1 - rect.y3) * (rect.x4 - rect.x2) + 
-	// 						(rect.y2 - rect.y4) * (rect.x1 - rect.x3));
+    // var rectArea = 0.5 * abs((rect.y1 - rect.y3) * (rect.x4 - rect.x2) + 
+    //                         (rect.y2 - rect.y4) * (rect.x1 - rect.x3));
 
-	return rectArea;
+    return rectArea;
 }
 
 function triangleArea(triangle) {
-	var t = triangle;
-	var area = 0.5 * abs((t.x1 * (t.y2 - t.y3)) + 
-			t.x2 * (t.y3 - t.y1) + t.x3 * (t.y1 - t.y2));
+    var t = triangle;
+    var area = 0.5 * abs((t.x1 * (t.y2 - t.y3)) + 
+            t.x2 * (t.y3 - t.y1) + t.x3 * (t.y1 - t.y2));
 
-	// var t = triangle;
+    // var t = triangle;
 
-	// var perimeter = trianglePerimeter(t);
-	// var a = euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
-	// var b = euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
-	// var c = euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
+    // var perimeter = trianglePerimeter(t);
+    // var a = euclideanDistance({"x": t.x1, "y": t.y1}, {"x": t.x2, "y": t.y2});
+    // var b = euclideanDistance({"x": t.x2, "y": t.y2}, {"x": t.x3, "y": t.y3});
+    // var c = euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
 
-	// var sp = perimeter / 2;
-	// var area = Math.sqrt(sp * (sp - a) * (sp - b) * (sp - c));
+    // var sp = perimeter / 2;
+    // var area = Math.sqrt(sp * (sp - a) * (sp - b) * (sp - c));
 
-	return area;
+    return area;
 }
 
 function pointIntersectsEdge(point, graph, svg, r = sizes.radius + sizes.nodeOutlineWidth) {
-	var intersects = false;
+    var intersects = false;
 
-	var edge, edges = graph.getNodePointsForEdges();
-	var len = edges.length;
+    var edge, edges = graph.getNodePointsForEdges();
+    var len = edges.length;
 
-	var pt1, pt2, pt3, pt4, rect;
+    var pt1, pt2, pt3, pt4, rect;
 
-	for (var i = 0; i < len; ++i) {
-		edge = edges[i];
+    for (var i = 0; i < len; ++i) {
+        edge = edges[i];
 
-	    pt1 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  90);
-	    pt2 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  -90);
-	    pt3 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  90);
-	    pt4 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  -90);
+        pt1 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  90);
+        pt2 = pointOnCircle(edge.p1.x, edge.p1.y, edge.p2.x, edge.p2.y, r,  -90);
+        pt3 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  90);
+        pt4 = pointOnCircle(edge.p2.x, edge.p2.y, edge.p1.x, edge.p1.y, r,  -90);
 
 
-	    rect = pointsToRectangle(pt1, pt2, pt3, pt4);
+        rect = pointsToRectangle(pt1, pt2, pt3, pt4);
 
-	    if (pointInsideRectangle(point, rect) === true) {
-	    	intersects = true;
-	    	break;
-	    }
-	}
-	return intersects;
+        if (pointInsideRectangle(point, rect) === true) {
+            intersects = true;
+            break;
+        }
+    }
+    return intersects;
 }
 
-// var pn = {"x": 5, "y": 7.001};
-// var ln = {"x1": 4, "y1": 5, "x2": 5, "y2": 6.2};
-// var rt = {"x1": 2, "y1": 3, "x2": 5, "y2": 7, 
-// 			"x3": 11, "y3": 6, "x4": 8, "y4": 1};
+function updatePolygonColor(polygonId, color) {
+    var polygon = document.getElementById(polygonId);
+
+    polygon.style.stroke = color;
+    polygon.style.fill = color;
+}
+
+
+
+//////////////////////////////////////////////////////// 
+/////////////////// CREATE HTML HERE ///////////////////
+////////////////////////////////////////////////////////
+
+function algorithmOptionsHTML(state) {
+    var algorithms = state.algorithms.getAvailableAlgorithms(state.graph); 
+    var len = algorithms.length;
+    var optionsHTML = "";
+    var option;
+
+    for (var it = 0; it < len; ++it) {
+
+        option = document.createElement("option");
+        option.setAttribute("value", algorithms[it].name);
+        option.innerHTML = algorithms[it].name;
+        
+        optionsHTML += option.outerHTML + "\n";
+    }
+
+    return optionsHTML;
+}

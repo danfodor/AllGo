@@ -21,6 +21,10 @@ function State() {
     this.lock = false;
 
     this.modifiedWeightId;
+    this.modifiedNameId;
+    this.rearrangeSelectedId = null;
+
+    this.runsContinuously = false;
 
     this.allowMove = true;
 
@@ -68,6 +72,7 @@ function State() {
 
         this.newDirection = null;
         this.modalTransform = null;
+        this.rearrangeSelectedId = null;
 
         this.algorithms = new Algorithms();
         this.algorithmRuns = false;
@@ -75,8 +80,12 @@ function State() {
         this.nextSteps = [];
         this.executedSteps = [];
         this.pastStartingNode = null;
+    
+        this.runsContinuously = false;
 
         this.allowMove = true;
+
+        this.intervalId;
 
         this.left = this.svg.getBoundingClientRect().left;
         this.top = this.svg.getBoundingClientRect().top;

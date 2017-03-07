@@ -31,109 +31,141 @@
         <div id="side-div" class="col-sm-4">
             <div class = "sided odd">
                 <div class="row">
-                    <div class="col-sm-4"> 
+                    <div class="col-sm-3"> 
                     </div>
-                    <div id="resetDiv" class="col-sm-4 buttonDiv" style="text-align: center;">
+                    <div id="resetDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
                         <div id="reset" class="button" onclick="reset()"> 
                             Reset
                         </div>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                     </div>                    
                 </div>
                 <div class="row">
+                    <div class="col-sm-3"> 
+                    </div>
                     <div id="saveDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="save" class="button" onclick="save()"> 
+                        <div id="save" class="button" onclick="openSaveModal()"> 
                             Save Graph
                         </div>
                     </div> 
-                    <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="load" class="button" onclick="load()"> 
-                            Load graph
-                        </div>
-                    </div>                  
+                    <div class="col-sm-3">
+                    </div>                    
                 </div>
                 <div class="row">
-                    <div class="col-sm-4"> 
+                    <div class="col-sm-3"> 
                     </div>
-                    <div id="rearrangeDiv" class="col-sm-4 buttonDiv" style="text-align: center;">
-                        <div id="rearrange" class="button" onclick="rearrange()"> 
+                    <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                        <div id="load" class="button" onclick="openLoadModal()"> 
+                            Load Graph
+                        </div>
+                    </div>       
+                    <div class="col-sm-3">
+                    </div>                    
+                </div>
+                <div class="row">
+                    <div class="col-sm-3"> 
+                    </div>
+                    <div id="rearrangeDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                        <div id="rearrange" class="button" onclick="openRearrangeModal()"> 
                             Rearrange Graph
                         </div>
                     </div>   
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                     </div>                    
                 </div>
             </div>
             <div class = "sided even">
-                <div id="modeDiv" style="text-align: center;">
-                    <div id="buildDiv" class="col-sm-6 buttonDiv"> 
-                        <!-- <button id="build" class="modeButton" onclick="toBuild()">Build Graph</button> -->
-                        <div id="build" class="button" onclick="switchMode('build')">Build Graph</div>
-                    </div>
-                    <div id="algorithmDiv" class="col-sm-6 buttonDiv">
-                        <!-- <button id="algorithm" class="button" onclick="toAlgorithm()">Algorithms</button> -->
-                        <div id="algorithm" class="button" onclick="switchMode('algorithm')">Algorithms</div>
+                <div class="row">
+                    <div id="modeDiv" style="text-align: center;">
+                        <div id="buildDiv" class="col-sm-6 buttonDiv"> 
+                            <!-- <button id="build" class="modeButton" onclick="toBuild()">Build Graph</button> -->
+                            <div id="build" class="button" onclick="switchMode('build')">Build Graph</div>
+                        </div>
+                        <div id="algorithmDiv" class="col-sm-6 buttonDiv">
+                            <!-- <button id="algorithm" class="button" onclick="toAlgorithm()">Algorithms</button> -->
+                            <div id="algorithm" class="button" onclick="switchMode('algorithm')">Algorithms</div>
+                        </div>
                     </div>
                 </div>
-                <div id="modeMenu">
-                    <div id="algMode" style="display: none;">
-                        <div id="algoList" style="text-align: center; margin-bottom: 5px;">
-                            Select algorithm: <br>
-                            <select id="algorithmsOptions" onchange="algorithmSelect()">
-                                <option value="BFS">Breadth First Search (BFS)</option>
-                                <option value="DFS">Depth First Search (DFS)</option>
-                                <option value="Dijkstra">Dijkstra (Shortest Path)</option>
-                                <option value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
-                            </select>                               
-                        </div>
-                        <div id="buttons" style="display: none; text-align: center;">
+                <div class="row">
+                    <div id="modeMenu">
+                        <div id="algMode" style="display: none;">
+                            <div id="algoList" class="col-sm-12" style="text-align: center; margin-bottom: 5px;">
+                                Select algorithm: <br>
+                                <select id="algorithmsOptions" onchange="algorithmSelect()">
+                                    <option value="BFS">Breadth First Search (BFS)</option>
+                                    <option value="DFS">Depth First Search (DFS)</option>
+                                    <option value="Dijkstra">Dijkstra (Shortest Path)</option>
+                                    <option value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
+                                </select>                               
+                            </div>
+                            <div id="buttons" style="display: none; text-align: center;">
+                                <div id="startNode" class="col-sm-12" style="text-align: center; margin-bottom: 5px;" >
+                                    Select starting node: 
+                                    <select id="nodeOptions" onchange="selectStartNode()">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>                                
+                                </div>
+                                <div class="controlSeqRow">
+                                    <div class="col-sm-4 leftDiv buttonDiv">
+                                        <div id="restart" class="button" onclick="restart()">Restart</div>
+                                    </div>
+                                    <div class="col-sm-4 buttonDiv">
+                                        <div id="back" class="button" onclick="backStep()">Back</div>
+                                    </div>
+                                    <div class="col-sm-4 rightDiv buttonDiv">
+                                        <div id="next" class="button" onclick="nextStep()">Next</div>
+                                    </div>
+                                </div>
+                                <div class="continuousMenu">
+                                    <div class="startstop col-sm-12">
+                                        <div class="col-sm-6 buttonDiv">
+                                            <div id="start" class="button" onclick="start()">Start</div>
+                                        </div>
+                                        <div class="col-sm-6 buttonDiv">
+                                            <div id="stop" class="button" onclick="stop()">Stop</div>
+                                        </div>
+                                    </div>
+                                    <div class="speed col-sm-12">
+                                        <div class="col-sm-6 buttonDiv">
+                                            <input id="range" type="range" name="Speed" 
+                                            min="0.5" max="10" step="0.5" value="1.5" oninput="rangeInput()">
+                                        </div>
+                                        <div class="col-sm-6 buttonDiv">
+                                            <input id="speed" type="number" name="seconds" value="1.5" oninput="speedInput()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <div id="startNode" style="text-align: center; margin-bottom: 5px;" >
-                                Select starting node: 
-                                <select id="nodeOptions" onchange="selectStartNode()">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                </select>                                
-                            </div>
-                            <div class="row controlSeqRow">
-                                <div class="col-sm-4 leftDiv controlSeq" onclick="restart()">
-                                    <div id="restart" class="button" onclick="restart()">Restart</div>
-                                </div>
-                                <div class="col-sm-4 controlSeq">
-                                    <div id="back" class="button" onclick="backStep()">Back</div>
-                                </div>
-                                <div class="col-sm-4 rightDiv controlSeq">
-                                    <div id="next" class="button" onclick="nextStep()">Next</div>
-                                </div>
-                            </div>
                         </div>
-
-                    </div>
-                    <div id="buildMode">
-                        <div id="dirDiv" style="text-align: center;">
-                            <div class="col-sm-6 buttonDiv leftDiv"> 
-                                <div id="undirected" class="button" onclick="switchDirected(false)">
-                                    Undirected Graph
+                        <div id="buildMode">
+                            <div id="dirDiv" style="text-align: center;">
+                                <div class="col-sm-6 buttonDiv leftDiv"> 
+                                    <div id="undirected" class="button" onclick="switchDirected(false)">
+                                        Undirected Graph
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 buttonDiv rightDiv">
+                                    <div id="directed" class="button" onclick="switchDirected(true)">
+                                        Directed Graph
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6 buttonDiv rightDiv">
-                                <div id="directed" class="button" onclick="switchDirected(true)">
-                                    Directed Graph
+                            <div id="weightDiv" style="text-align: center;">
+                                <div class="col-sm-6 buttonDiv leftDiv"> 
+                                    <div id="unweighted" class="button on" onclick="switchWeighted(false)">
+                                        Unweighted Graph
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div id="weightDiv" style="text-align: center;">
-                            <div class="col-sm-6 buttonDiv leftDiv"> 
-                                <div id="unweighted" class="button on" onclick="switchWeighted(false)">
-                                    Unweighted Graph
-                                </div>
-                            </div>
-                            <div class="col-sm-6 buttonDiv rightDiv">
-                                <div id="weighted" class="button off hoverShadow" onclick="switchWeighted(true)">
-                                    Weighted Graph
+                                <div class="col-sm-6 buttonDiv rightDiv">
+                                    <div id="weighted" class="button off hoverShadow" onclick="switchWeighted(true)">
+                                        Weighted Graph
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -176,7 +208,7 @@
       </ul>
     </nav>
 
-    <div id="directionModal" class="dirModal modal">
+    <div id="directionModal" class="dirModal isModal">
         <div class="dirModal-content">
             <div class="row">
                 <div class="col-sm-12">
@@ -208,7 +240,7 @@
         </div>
     </div>
 
-    <div id="weightModal" class="weightModal modal">
+    <div id="weightModal" class="weightModal isModal">
         <div class="weightModal-content">
             <div class="row">
                 <div class="col-sm-12">
@@ -223,14 +255,14 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-3 modalButtonDiv">
+                <div class="col-sm-4 modalButtonDiv">
                     <div id="applyWeightModal" class="modalButton" onclick="applyWeightChange()">
                         Apply
                     </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-sm-4">
                 </div>
-                <div class="col-sm-3 modalButtonDiv">
+                <div class="col-sm-4 modalButtonDiv">
                     <div id="cancelWeightModal" class="modalButton">
                         Cancel
                     </div>
@@ -238,6 +270,171 @@
             </div>
         </div>
     </div>
+
+    <div id="loadModal" class="loadModal isModal" style="text-align: center;">
+        <div class="loadModal-content">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div id="defaultGraphsButton" class="modalButton on" onclick="displayGraphs('default')">
+                        Suggested Graphs
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div id="savedGraphsButton" class="modalButton off" onclick="displayGraphs('saved')">
+                        Saved Graphs
+                    </div>
+                </div>  
+            </div>
+            <hr />
+            <div class="row">
+                <div id="graphsDisplay" class="col-sm-12">
+                    Hi.
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="applyLoadModal" class="modalButton" onclick="applyLoadModal()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                </div>
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="cancelLoadModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="saveModal" class="saveModal isModal">
+        <div class="saveModal-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    Save the current graph
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div id="savedGraphs" class="col-sm-12">
+                    Here will be saved graphs.
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div id="graphName" class="col-sm-12">
+                    Name: 
+                    <input type="text" value="graph">
+                </div>
+            </div>
+            <hr />
+            <div class="row"  style="text-align: center;">
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="applySaveModal" class="modalButton" onclick="applySaveModal()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                </div>
+                <div class="col-sm-3 modalButtonDiv">
+                    <div id="cancelSaveModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rearrangeModal" class="rearrangeModal isModal">
+        <div class="rearrangeModal-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    Choose from the above list the type of preferred display:
+                </div>
+            </div>
+            <hr />
+            <div id="rearrangeOptions">
+                <div class="row">
+                    <div id="rearrangeCircular" class="col-sm-12 rearrangeOption">
+                        Circular
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="rearrangeRandomCircular" class="col-sm-12 rearrangeOption">
+                        Random Circular
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row"  style="text-align: center;">
+                <div class="col-sm-4 modalButtonDiv">
+                    <div id="applyRearrangeModal" class="modalButton" onclick="applyRearrangeModal()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                </div>
+                <div class="col-sm-4 modalButtonDiv">
+                    <div id="cancelRearrangeModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="nameModal" class="nameModal isModal">
+        <div class="nameModal-content">
+            <div class="row">
+                <div class="col-sm-12">
+                    Enter the name of the node.
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <input id="nameInput" type="text" name="username">
+                    <hr />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 modalButtonDiv">
+                    <div id="applyNameModal" class="modalButton" onclick="applyNameChange()">
+                        Apply
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                </div>
+                <div class="col-sm-4 modalButtonDiv">
+                    <div id="cancelNameModal" class="modalButton">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- http://codepen.io/erikterwan/pen/EVzeRP -->
+<!--     <nav role="navigation">
+        <div id="menuToggle">
+            <input type="checkbox" />
+            
+            <span></span>
+            <span></span>
+            <span></span>
+            
+            <ul id="menu">
+                <a href="#"><li>Home</li></a>
+                <a href="#"><li>About</li></a>
+                <a href="#"><li>Info</li></a>
+                <a href="#"><li>Contact</li></a>
+                <a href="https://erikterwan.com/" target="_blank"><li>Show me more</li></a>
+            </ul>
+        </div>
+    </nav> -->
+
 
 </div>
 
