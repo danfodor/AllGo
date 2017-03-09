@@ -380,6 +380,33 @@ function algorithmSelect() {
                 startNode.style.display = "none";
             }
 
+            state.visitedNodes = [];
+            switch (algorithmId) {
+                case "BFS": 
+                    var code = document.getElementById("code");
+                    var node = document.getElementById("selectStartNode");
+
+                    var nodeName = document.getElementById("nodeOptions").value; 
+                    
+                    state.visitedNodes.push(nodeName);
+                    code.innerHTML = "Visited nodes: "  + nodeName;
+
+                    break;
+                case "DFS": 
+                    var code = document.getElementById("code");
+                    var node = document.getElementById("selectStartNode");
+
+                    var nodeName = document.getElementById("nodeOptions").value; 
+                    
+                    state.visitedNodes.push(nodeName);
+                    code.innerHTML = "Visited nodes: "  + nodeName;
+                    break;
+                default:
+                    var code = document.getElementById("code");
+                    code.innerHTML = "";
+                    break;
+            }
+
             document.getElementById("buttons").style.display = "block";
         }
 
@@ -411,6 +438,36 @@ function selectStartNode() {
     state.pastStartingNode = "circle" + nodeId;
     var circle = document.getElementById("circle" + nodeId);
     circle.style.stroke = "green";
+
+
+    var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
+    var algorithmId = algorithm.id;
+    state.visitedNodes = [];
+    switch (algorithmId) {
+    case "BFS": 
+        var code = document.getElementById("code");
+        var node = document.getElementById("selectStartNode");
+
+        var nodeName = document.getElementById("nodeOptions").value; 
+        
+        state.visitedNodes.push(nodeName);
+        code.innerHTML = "Visited nodes: "  + nodeName;
+
+        break;
+    case "DFS": 
+        var code = document.getElementById("code");
+        var node = document.getElementById("selectStartNode");
+
+        var nodeName = document.getElementById("nodeOptions").value; 
+        
+        state.visitedNodes.push(nodeName);
+        code.innerHTML = "Visited nodes: "  + nodeName;
+        break;
+    default:
+        var code = document.getElementById("code");
+        code.innerHTML = "";
+        break;
+    }
 }
 
 function nextStep(withButtonPress = true) {
@@ -423,8 +480,7 @@ function nextStep(withButtonPress = true) {
         state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
         
         var algorithmId = state.algorithms.algorithmId(algorithm);
-        console.log(algorithm);
-        console.log(algorithmId);
+
         switch (algorithmId) {
             case "Prim": 
                 state.nextSteps = state.nextSteps.steps;
@@ -435,7 +491,6 @@ function nextStep(withButtonPress = true) {
             default:
                 break;
         }
-        console.log(state.nextSteps);
 
         state.runningAlgorithm = algorithm;
 
@@ -451,6 +506,93 @@ function nextStep(withButtonPress = true) {
 
         if (withButtonPress === true) {
             nextButtonPress();
+        }
+
+        var algorithmId = state.algorithms.algorithmId(algorithm);
+        switch (algorithmId) {
+            case "BFS":
+                var len = state.visitedNodes.length;
+                var nodes = [];
+                var id = executeStep.id;
+
+                if (executeStep.type === "edge") {
+                    var node1 = id.split('-')[0];
+                    var node2 = id.split('-')[1];
+
+                    nodes.push(parseInt(node1));
+                    nodes.push(parseInt(node2));
+                }
+                if (executeStep.type === "node") {
+                    var node = id;
+                    nodes.push(parseInt(node));
+                }
+                
+                var addNodes = [];
+                var dontAdd;
+
+                for (var j = 0; j < nodes.length; ++j) { 
+                    dontAdd = false;
+                    
+                    for (var i = 0; i < len; ++i) {
+                        if (parseInt(nodes[j]) === parseInt(state.visitedNodes[i])) {
+                            dontAdd = true;
+                        }
+                    }
+                    
+                    if (!dontAdd) {
+                        addNodes.push(nodes[j]);
+                    }
+                }
+
+                var code = document.getElementById("code");
+                for (var i = 0; i < addNodes.length; ++i) {
+                    state.visitedNodes.push(addNodes[i]);
+                    code.innerHTML += " "  + addNodes[i];
+                }
+
+                break;
+            case "DFS": 
+                var len = state.visitedNodes.length;
+                var nodes = [];
+                var id = executeStep.id;
+
+                if (executeStep.type === "edge") {
+                    var node1 = id.split('-')[0];
+                    var node2 = id.split('-')[1];
+
+                    nodes.push(parseInt(node1));
+                    nodes.push(parseInt(node2));
+                }
+                if (executeStep.type === "node") {
+                    var node = id;
+                    nodes.push(parseInt(node));
+                }
+                
+                var addNodes = [];
+                var dontAdd;
+
+                for (var j = 0; j < nodes.length; ++j) { 
+                    dontAdd = false;
+                    
+                    for (var i = 0; i < len; ++i) {
+                        if (parseInt(nodes[j]) === parseInt(state.visitedNodes[i])) {
+                            dontAdd = true;
+                        }
+                    }
+                    
+                    if (!dontAdd) {
+                        addNodes.push(nodes[j]);
+                    }
+                }
+
+                var code = document.getElementById("code");
+                for (var i = 0; i < addNodes.length; ++i) {
+                    state.visitedNodes.push(addNodes[i]);
+                    code.innerHTML += " "  + addNodes[i];
+                }
+                break;
+            default: 
+                break;
         }
 
         // EXECUTE IT
@@ -573,6 +715,31 @@ function backStep() {
                     
                     if (backStep.extended === true) {
                         node.style.stroke = colors.unselectedNodeOutline;
+                        
+                        var algorithm = document.getElementById("algorithmsOptions").value;
+                        var algorithmId = state.algorithms.algorithmId(algorithm);
+                        switch (algorithmId) {
+                            case "BFS":
+                                var code = document.getElementById("code");
+                                var v = state.visitedNodes[state.visitedNodes.length - 1];
+                                v = v.toString().length;
+                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
+                                console.log(v);
+                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
+                                state.visitedNodes.pop();
+                                break;
+                            case "DFS":
+                                var code = document.getElementById("code");
+                                var v = state.visitedNodes[state.visitedNodes.length - 1];
+                                v = v.toString().length;
+                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
+                                console.log(v);
+                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
+                                state.visitedNodes.pop();
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                     edge.style.stroke = colors.unusedEdge;
@@ -581,6 +748,34 @@ function backStep() {
                 case "node": 
                     var nodeId = backStep.id;
                     
+                    if (backStep.extended === true) {
+                        
+                        var algorithm = document.getElementById("algorithmsOptions").value;
+                        var algorithmId = state.algorithms.algorithmId(algorithm);
+                        switch (algorithmId) {
+                            case "BFS":
+                                var code = document.getElementById("code");
+                                var v = state.visitedNodes[state.visitedNodes.length - 1];
+                                v = v.toString().length;
+                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
+                                console.log(v);
+                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
+                                state.visitedNodes.pop();
+                                break;
+                            case "DFS":
+                                var code = document.getElementById("code");
+                                var v = state.visitedNodes[state.visitedNodes.length - 1];
+                                v = v.toString().length;
+                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
+                                console.log(v);
+                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
+                                state.visitedNodes.pop();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
                     document.getElementById("circle" + nodeId).style.stroke = colors.unselectedNodeOutline;
                     break; 
                 default:
@@ -626,6 +821,8 @@ function restart(withButtonPress = true) {
             document.getElementById("restart").classList.add("hoverShadow"); 
         }, 100); 
     }
+
+    state.visitedNodes = [];
 
     state.nextSteps = state.executedSteps;
     state.executedSteps = [];
@@ -758,7 +955,7 @@ function cleanSVGGraphColors() {
             // TODO: Use node colour instead of default colour
             circle.style.stroke = colors.unselectedNodeOutline;
         }
-        console.log(state.executedSteps);
+
         if (state.executedSteps) {
             var edgeType = "line", line, step;
             var len = state.executedSteps.length, edgeId;
@@ -773,10 +970,11 @@ function cleanSVGGraphColors() {
                         edgeId = step.id.split('-')[1] + "-" + step.id.split('-')[0];
                         line = document.getElementById("line" + edgeId);
                     }
-
-                    line.style.stroke = colors.unusedEdge;
-                    if (state.graph.directed) {
-                        updatePolygonColor("polygon" + edgeId, colors.unusedEdge);
+                    if (line) {
+                        line.style.stroke = colors.unusedEdge;
+                        if (state.graph.directed) {
+                            updatePolygonColor("polygon" + edgeId, colors.unusedEdge);
+                        }
                     }
                 }
             }
@@ -1196,8 +1394,8 @@ function applyLoadModal() {
         if (graph) {
 
             // CONTINUEHERE
-            var y = -(graphMinY(graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
-            var x = -(graphMinX(graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
+            var y = -(graphMinY(graph) - (sizes.radius + sizes.nodeOutlineWidth * 2 + 6));
+            var x = -(graphMinX(graph) - (sizes.radius + sizes.nodeOutlineWidth * 2 + 6));
 
             var graphWidth = graphMaxX(graph) - graphMinX(graph) + 
                             2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
@@ -1215,9 +1413,13 @@ function applyLoadModal() {
             x = graphMaxX(graph) - graphMinX(graph);
             x = modalSVGWidth - x;
             x /= 2;
+
+            x -= (sizes.radius + 2 * sizes.edgeWidth);
+
             y = graphMaxY(graph) - graphMinY(graph);
             y = modalSVGHeight - y;
             y /= 2;
+            y -= (sizes.radius + 2 * sizes.edgeWidth);
 
             graph = transposeGraphCoordinates(graph, x, y, 1, 1);
 

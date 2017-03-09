@@ -53,6 +53,7 @@ function State() {
     this.executedSteps = [];
     this.pastStartingNode = null;
     this.algorithmFinished = false;
+    this.visitedNodes = [];
 
     this.mode = "build";
 
@@ -92,7 +93,8 @@ function State() {
         this.executedSteps = [];
         this.pastStartingNode = null;
         this.algorithmFinished = false;
-    
+        this.visitedNodes = [];
+
         this.loadGraphs = [];
 
         this.allowMove = true;
