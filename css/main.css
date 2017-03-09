@@ -69,8 +69,13 @@ body  {
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none;    
+    user-select: none;
 }
+
+/*#svg.mouseMove{
+    cursor:pointer;
+}*/
+
 #footer {
     background-color: #404040;
     height: 50px;
@@ -152,7 +157,6 @@ body  {
 }
 
 .buttonDiv {
-  /*padding: 0;*/
   padding-bottom: 10px;
 }
 
@@ -170,9 +174,9 @@ body  {
             user-select: none;  
 }
 
-.controlSeqRow {
+/*.controlSeqRow {
   margin: 0;
-}
+}*/
 
 .leftDiv {
   padding-right: 2px;
@@ -212,7 +216,7 @@ body  {
        -moz-user-select: none;
         -ms-user-select: none;
             user-select: none;
-
+ /*rgb(244, 176, 66) REMEMBER THIS COLUOR */
   cursor: pointer;
   background: rgb(254,232,200);
   background: -webkit-linear-gradient(white, rgb(254,232,200));
@@ -296,7 +300,7 @@ body  {
 }
 
 #restart {
-  background: rgba(255, 0, 0, 0.1);
+  background: rgba(22, 108, 247, 0.1);
   background: -webkit-linear-gradient(white, rgb(254,232,200));
   background: -o-linear-gradient(white, rgb(254,232,200));
   background: -moz-linear-gradient(white, rgb(254,232,200));
@@ -321,6 +325,23 @@ body  {
   background: linear-gradient(white, rgb(254,232,200));
 }
 
+#start {
+  background: rgba(255, 0, 0, 0.1);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+}
+
+
+#stop {
+  background: rgba(255, 0, 0, 0.1);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+}
+
 .on {
   border-left: 2px solid rgb(137, 137, 137);
   border-top: 2px solid rgb(137, 137, 137);
@@ -333,6 +354,23 @@ body  {
   border-top: 2px solid rgb(221, 221, 221);
   border-right: 2px solid rgb(137, 137, 137);
   border-bottom: 2px solid rgb(137, 137, 137);
+}
+
+.graphOption {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.graphOption:hover {
+  /*background-color: green;*/
+}
+
+.graphOptions {
+  padding-bottom: 18px;
+}
+
+.savedGraph {
+  padding-bottom: 10px;
+  padding-left: 10px;
 }
 
 .disabled {
@@ -534,7 +572,7 @@ hr {
 
 #applyDirModal, #applyWeightModal,
 #applyNameModal, #applyRearrangeModal,
-#applyLoadModal {
+#applyLoadModal, #applySaveModal {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
@@ -546,7 +584,8 @@ hr {
 #applyWeightModal:active, #applyWeightModal:hover,
 #applyNameModal:active, #applyNameModal:hover,
 #applyRearrangeModal:active, #applyRearrangeModal:hover,
-#applyLoadModal:active, #applyLoadModal:hover {
+#applyLoadModal:active, #applyLoadModal:hover,
+#applySaveModal:active, #applySaveModal:hover {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
@@ -556,7 +595,7 @@ hr {
 
 #cancelDirModal, #cancelWeightModal,
 #cancelNameModal, #cancelRearrangeModal,
-#cancelLoadModal {
+#cancelLoadModal, #cancelSaveModal {
   background: rgb(255, 0, 0);
   background: -webkit-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
   background: -o-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
@@ -568,7 +607,8 @@ hr {
 #cancelWeightModal:active, #cancelWeightModal:hover,
 #cancelNameModal:active, #cancelNameModal:hover,
 #cancelRearrangeModal:active, #cancelRearrangeModal:hover,
-#cancelLoadModal:active, #cancelLoadModal:hover {
+#cancelLoadModal:active, #cancelLoadModal:hover,
+#cancelSaveModal:active, #cancelSaveModal:hover {
   background: rgb(255, 0, 0);
   background: -webkit-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
   background: -o-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
@@ -628,6 +668,22 @@ hr {
 #graphsDisplay {
   overflow: scroll; overflow-x:hidden;
     height: 50vh;
+}
+
+#code {
+  overflow: hidden;
+}
+pre {
+  overflow: hidden;
+}
+
+
+.lightBlue {
+  background: rgba(22, 108, 247, 0.3);
+  background: -webkit-linear-gradient(white, rgba(22, 108, 247, 0.3));
+  background: -o-linear-gradient(white, rgba(22, 108, 247, 0.3));
+  background: -moz-linear-gradient(white, rgba(22, 108, 247, 0.3));
+  background: linear-gradient(white, rgba(22, 108, 247, 0.3));
 }
 
 

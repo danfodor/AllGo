@@ -38,6 +38,9 @@ function State() {
 
     this.directedBezier = false;
 
+    this.loadGraphs = [];
+    this.savedGraphs = [];
+
     this.newDirection = null;
     this.newGraph = null;
     this.modalTransform = null;
@@ -49,7 +52,9 @@ function State() {
     this.nextSteps = [];
     this.executedSteps = [];
     this.pastStartingNode = null;
+    this.algorithmFinished = false;
 
+    this.mode = "build";
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
                   "movedX": -1, "movedY": -1, "upX": -1, "upY": -1, "down": false, 
@@ -86,12 +91,16 @@ function State() {
         this.nextSteps = [];
         this.executedSteps = [];
         this.pastStartingNode = null;
+        this.algorithmFinished = false;
     
+        this.loadGraphs = [];
 
         this.allowMove = true;
 
         this.runsContinuously = false;
         this.intervalId;
+
+        this.mode = "build";
 
         for (var i = 0; i < this.intervalIds.length; ++i) {
             window.clearInterval(this.intervalIds[i]);

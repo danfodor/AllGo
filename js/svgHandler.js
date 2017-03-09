@@ -395,7 +395,7 @@ function createSVGNode (id, circle, text) {
 
 
 function createSVGLine(id1, id2, x1, y1, x2, y2, 
-                        stroke = colors.unusedEdge, 
+                        stroke = colors.buildModeEdge, 
                         strokeWidth = sizes.edgeWidth) {
 
     var line = document.createElement("line");
@@ -490,7 +490,7 @@ function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edg
 }
 
 function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null, 
-                               stroke = colors.unusedEdge, 
+                               stroke = colors.buildModeEdge, 
                                strokeWidth = sizes.edgeWidth) {
     var path = document.createElement("path");
 
@@ -514,8 +514,8 @@ function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null,
 }
 
 function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x = -2, y = 0,
-                        pts = sizes.stdPolygonPoints, fill = colors.unusedEdge, 
-                        stroke = colors.unusedEdge, strokeWidth = "1px") {
+                        pts = sizes.stdPolygonPoints, fill = colors.buildModeEdge, 
+                        stroke = colors.buildModeEdge, strokeWidth = "1px") {
     var marker = document.createElement("marker");
 
     marker.id = "arrow" + nodeId1 + "-" + nodeId2;
@@ -533,6 +533,7 @@ function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x 
     polygon.setAttribute("fill", fill);
     polygon.setAttribute("stroke", stroke);
     polygon.setAttribute("stroke-width", strokeWidth);
+    polygon.classList.add("line");
 
     marker.innerHTML = polygon.outerHTML;
 
@@ -566,6 +567,31 @@ function createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text) {
     edge.classList.add(graphComponent);
 
     return edge;
+}
+
+function createSVGOption(name, value) {
+    var option = document.createElement("option");
+    
+    option.setAttribute("value", value);
+    option.innerHTML = name;
+
+    return option
+}
+
+function createSVGOptions(id, nodes) {
+
+    var options = document.createElement("select");
+    options.id = id;
+    var optionsHTML = "";
+    var option;
+    for (var it = 0; it < nodes.length; ++it) {
+
+        option = createSVGOption(nodes[it].name, nodes[it].id)
+
+        optionsHTML += option.outerHTML + "\n";
+	}
+	options.innerHTML = optionsHTML;
+    return options;
 }
 
 
@@ -1095,6 +1121,21 @@ function updatePolygonColor(polygonId, color) {
     polygon.style.fill = color;
 }
 
+function updateSVGEdgesColor(svg, newColor = "black", lineClass = "line") {
+	var lines = svg.getElementsByClassName(lineClass);
+
+	var line, len = lines.length;
+	for (var i = 0; i < len; ++i) {
+		line = lines[i];
+		if (line.nodeName === "polygon") {
+    		line.style.stroke = newColor;
+    		line.style.fill = newColor;
+		}
+		else {
+    		line.style.stroke = newColor;
+		}
+	}
+}
 
 
 //////////////////////////////////////////////////////// 

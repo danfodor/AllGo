@@ -8,7 +8,7 @@ function addClassesToId(id, classes = []) {
     }
 }
 
-function removeClassesToId(id, classes = []) {
+function removeClassesFromId(id, classes = []) {
     var element = document.getElementById(id);
 
     if (element && classes) {
@@ -23,10 +23,10 @@ function turnButton(buttonId, on = 'on', onClasses = ['on'], offClasses = ['off'
     switch(on) {
         case 'on':
             addClassesToId(buttonId, onClasses);
-            removeClassesToId(buttonId, offClasses);
+            removeClassesFromId(buttonId, offClasses);
              break;
         case 'off':
-            removeClassesToId(buttonId, onClasses);
+            removeClassesFromId(buttonId, onClasses);
             addClassesToId(buttonId, offClasses);
             break;
         default:
@@ -46,12 +46,12 @@ function changeElementDisplay(elementId, display = "block") {
 function buttonNotAllowed(elementId, notAllowed = true) {
 
     if (notAllowed === true) {
-        removeClassesToId(elementId, ['hoverShadow']);
+        removeClassesFromId(elementId, ['hoverShadow']);
         addClassesToId(elementId, ['disabled']);
     }
     else {
         addClassesToId(elementId, ['hoverShadow']);
-        removeClassesToId(elementId, ['disabled']);
+        removeClassesFromId(elementId, ['disabled']);
     }
 }
 

@@ -9,6 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
 
     <link href="css/main.css" rel="stylesheet">
@@ -28,69 +29,76 @@
             <svg id="svg" class="canvas"> 
             </svg>
         </div>
+
         <div id="side-div" class="col-sm-4">
+
             <div class = "sided odd">
+
                 <div class="row">
-                    <div class="col-sm-3"> 
+                    <div class="col-sm-12" style="text-align: right; padding-bottom: 10px;">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                        
                     </div>
-                    <div id="resetDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="reset" class="button" onclick="reset()"> 
-                            Reset
-                        </div>
-                    </div>
-                    <div class="col-sm-3">
-                    </div>                    
                 </div>
-                <div class="row">
-                    <div class="col-sm-3"> 
-                    </div>
-                    <div id="saveDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="save" class="button" onclick="openSaveModal()"> 
-                            Save Graph
-                        </div>
-                    </div> 
-                    <div class="col-sm-3">
-                    </div>                    
-                </div>
-                <div class="row">
-                    <div class="col-sm-3"> 
-                    </div>
-                    <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="load" class="button" onclick="openLoadModal()"> 
-                            Load Graph
-                        </div>
-                    </div>       
-                    <div class="col-sm-3">
-                    </div>                    
-                </div>
-                <div class="row">
-                    <div class="col-sm-3"> 
-                    </div>
-                    <div id="rearrangeDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="rearrange" class="button" onclick="openRearrangeModal()"> 
-                            Rearrange Graph
-                        </div>
-                    </div>   
-                    <div class="col-sm-3">
-                    </div>                    
-                </div>
-            </div>
-            <div class = "sided even">
+
                 <div class="row">
                     <div id="modeDiv" style="text-align: center;">
                         <div id="buildDiv" class="col-sm-6 buttonDiv"> 
-                            <!-- <button id="build" class="modeButton" onclick="toBuild()">Build Graph</button> -->
                             <div id="build" class="button" onclick="switchMode('build')">Build Graph</div>
                         </div>
                         <div id="algorithmDiv" class="col-sm-6 buttonDiv">
-                            <!-- <button id="algorithm" class="button" onclick="toAlgorithm()">Algorithms</button> -->
                             <div id="algorithm" class="button" onclick="switchMode('algorithm')">Algorithms</div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div id="modeMenu">
-                        <div id="algMode" style="display: none;">
+
+                <div id="file">
+                    <div class="row">
+                        <div class="col-sm-3"> 
+                        </div>
+                        <div id="saveDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                            <div id="save" class="button off hoverShadow" onclick="openSaveModal()"> 
+                                Save Graph
+                            </div>
+                        </div> 
+                        <div class="col-sm-3">
+                        </div>                    
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-3"> 
+                        </div>
+                        <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                            <div id="load" class="button off hoverShadow" onclick="openLoadModal()"> 
+                                Load Graph
+                            </div>
+                        </div>       
+                        <div class="col-sm-3">
+                        </div>                    
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-3"> 
+                        </div>
+                        <div id="rearrangeDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                            <div id="rearrange" class="button off hoverShadow" onclick="openRearrangeModal()"> 
+                                Rearrange Graph
+                            </div>
+                        </div>   
+                        <div class="col-sm-3">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class = "sided even">
+
+                <div id="modeMenu">
+                    
+                    <div id="algMode" style="display: none;">
+
+                        <div class="row">
                             <div id="algoList" class="col-sm-12" style="text-align: center; margin-bottom: 5px;">
                                 Select algorithm: <br>
                                 <select id="algorithmsOptions" onchange="algorithmSelect()">
@@ -99,51 +107,63 @@
                                     <option value="Dijkstra">Dijkstra (Shortest Path)</option>
                                     <option value="Kruskal">Kruskal's MSP (Minimum Spanning Tree)</option>
                                 </select>                               
+                            </div>                            
+                        </div>
+
+                        <div class="row">
+                            <div id="startNode" class="col-sm-12" style="text-align: center; margin-bottom: 5px;" >
+                                Select starting node: 
+                                <select id="nodeOptions" onchange="selectStartNode()">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
                             </div>
-                            <div id="buttons" style="display: none; text-align: center;">
-                                <div id="startNode" class="col-sm-12" style="text-align: center; margin-bottom: 5px;" >
-                                    Select starting node: 
-                                    <select id="nodeOptions" onchange="selectStartNode()">
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                    </select>                                
+                        </div>
+
+                        <div id="buttons" style="display: none; text-align: center;">
+
+                            <div class="row">
+                                <div class="col-sm-4 leftDiv buttonDiv">
+                                    <div id="restart" class="button" onclick="restart()">Restart</div>
                                 </div>
-                                <div class="controlSeqRow">
-                                    <div class="col-sm-4 leftDiv buttonDiv">
-                                        <div id="restart" class="button" onclick="restart()">Restart</div>
-                                    </div>
-                                    <div class="col-sm-4 buttonDiv">
-                                        <div id="back" class="button" onclick="back()">Back</div>
-                                    </div>
-                                    <div class="col-sm-4 rightDiv buttonDiv">
-                                        <div id="next" class="button" onclick="next()">Next</div>
-                                    </div>
+                                <div class="col-sm-4 buttonDiv">
+                                    <div id="back" class="button" onclick="back()">Back</div>
                                 </div>
-                                <div class="continuousMenu">
-                                    <div class="startstop col-sm-12">
-                                        <div class="col-sm-6 buttonDiv">
-                                            <div id="start" class="button" onclick="start()">Start</div>
-                                        </div>
-                                        <div class="col-sm-6 buttonDiv">
-                                            <div id="stop" class="button" onclick="stop()">Stop</div>
-                                        </div>
+                                <div class="col-sm-4 rightDiv buttonDiv">
+                                    <div id="next" class="button" onclick="next()">Next</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="startstop">
+                                    <div class="col-sm-6 buttonDiv">
+                                        <div id="start" class="button off hoverShadow" onclick="start()">Start</div>
                                     </div>
-                                    <div class="speed col-sm-12">
-                                        <div class="col-sm-6 buttonDiv">
-                                            <input id="range" type="range" name="Speed" 
-                                            min="0.5" max="10" step="0.5" value="1.5" oninput="rangeInput()">
-                                        </div>
-                                        <div class="col-sm-6 buttonDiv">
-                                            <input id="speed" type="number" name="seconds" value="1.5" oninput="speedInput()">
-                                        </div>
+                                    <div class="col-sm-6 buttonDiv">
+                                        <div id="stop" class="button off disabled" onclick="stop()">Stop</div>
                                     </div>
                                 </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-sm-6 buttonDiv">
+                                    <input id="range" type="range" name="Speed" 
+                                    min="0.5" max="10" step="0.5" value="1.5" oninput="rangeInput()">
+                                </div>
+                                <div class="col-sm-6 buttonDiv">
+                                    <input id="speed" type="number" name="seconds" value="1.5" oninput="speedInput()">
+                                </div>
+                            </div>
+
                         </div>
-                        <div id="buildMode">
+
+                    </div>
+
+                    <div id="buildMode">
+                        
+                        <div class="row">
                             <div id="dirDiv" style="text-align: center;">
                                 <div class="col-sm-6 buttonDiv leftDiv"> 
                                     <div id="undirected" class="button" onclick="switchDirected(false)">
@@ -156,6 +176,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
                             <div id="weightDiv" style="text-align: center;">
                                 <div class="col-sm-6 buttonDiv leftDiv"> 
                                     <div id="unweighted" class="button on" onclick="switchWeighted(false)">
@@ -169,17 +192,39 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-sm-3"></div>
+                            <div id="resetDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                                <div id="reset" class="button" onclick="reset()"> 
+                                    Reset
+                                </div>
+                            </div>
+                            <div class="col-sm-3"></div>
+                        </div>
+
                     </div>
+
                 </div>
+
             </div>
+
             <div class = "sided odd">
                 <div class="row">
-                    <div id="algorithmCodeDiv" class="col-sm-12"> 
-                        Implement it here
+                    <div class="col-sm-12"> 
+                        <pre><code id="code">
+<!-- queue = empty
+pick starting node
+while (queue not empty or graph not fully visited)
+    for n in queue.front.neighbours
+        add n to queue if not visited -->
+
+                        </code></pre>
                     </div>                
                 </div>
             </div>
         </div>
+
     </div>
 
     <div class="row">
@@ -326,14 +371,14 @@
             <div class="row">
                 <div id="graphName" class="col-sm-12">
                     Name: 
-                    <input type="text" value="graph">
+                    <input id="saveGraphName" type="text" value="" oninput="savedOnInputCheck()" placeholder="Enter graph name">
                 </div>
             </div>
             <hr />
             <div class="row"  style="text-align: center;">
                 <div class="col-sm-3 modalButtonDiv">
                     <div id="applySaveModal" class="modalButton" onclick="applySaveModal()">
-                        Apply
+                        Save
                     </div>
                 </div>
                 <div class="col-sm-6">

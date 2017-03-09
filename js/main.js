@@ -36,6 +36,10 @@ function clickInterpret(e) {
             clickedTag = clickedElement.nodeName;
         }
 
+        if (state.mode === "algorithm") {
+            return;
+        }
+
         switch(clickedTag){
             case "svg": 
                 notSVG = false;
@@ -84,7 +88,7 @@ function clickInterpret(e) {
                 addEdge(state.selectedNodeId, addedNode.id);
                 svgCircle.style.fill = colors.unselectedNode;
             }
-        }        
+        }
         state.svg.innerHTML = state.svg.innerHTML;
     }
 }
@@ -262,33 +266,46 @@ function switchMode(mode) {
         // TODO: CLEAN UP. 
         cleanSVGGraphColors();
         document.getElementById("algMode").style.display = "none";
+        document.getElementById("code").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
 
         turnButton("build", "on");
-        // document.getElementById("build").classList.remove("off");
-        // document.getElementById("build").classList.add("on");
-        // document.getElementById("build").classList.remove("hoverShadow");
+        updateSVGEdgesColor(state.svg, colors.buildModeEdge);
 
         if (state.graph.allNodes.length === 0) {
             document.getElementById("algorithm").classList.add("off");
             return;
         }
-        document.getElementById("algorithm").classList.add("hoverShadow");
-        document.getElementById("algorithm").classList.remove("on");
-        document.getElementById("algorithm").classList.add("off");
+        turnButton("algorithm", "off");
+
+        // HIDE SAVE
+        document.getElementById("file").style.display = "block";
+
+        state.mode = "build";
     }
     else {
         if (state.graph.allNodes.length === 0) {
             return;
         }
 
+        updateSVGEdgesColor(state.svg, colors.unusedEdge);
+
         var algorithmsOptions = document.getElementById("algorithmsOptions");
         var optionsHTML = algorithmOptionsHTML(state);
 
         algorithmsOptions.innerHTML = optionsHTML;
-
+        
+        var len = state.graph.allNodes.length;
+        var nodes = [];
+        for (var it = 0; it < len; ++it) {
+            nodes.push({"id": state.graph.allNodes[it].id, 
+                        "name": state.graph.allNodes[it].name});
+        }
+        var options = createSVGOptions("", nodes);
+        document.getElementById("nodeOptions"). innerHTML = options.innerHTML;
 
         document.getElementById("algMode").style.display = "block";
+        document.getElementById("code").style.display = "block";
         document.getElementById("buildMode").style.display = "none";
 
         document.getElementById("build").classList.remove("on");
@@ -299,24 +316,31 @@ function switchMode(mode) {
         document.getElementById("algorithm").classList.add("on");
 
         seqControlMenuSetUp();
+        
+        document.getElementById("file").style.display = "none";
+
+        state.mode = "algorithm";
 
         algorithmSelect();
         selectStartNode();
+
     }
 }
 
 function seqControlMenuSetUp() {        
-    document.getElementById("restart").classList.add("off");
-    document.getElementById("restart").classList.add("hoverShadow");
-    document.getElementById("back").classList.add("off");
-    document.getElementById("back").classList.add("disabled");
-    document.getElementById("back").classList.remove("on");
-    document.getElementById("back").classList.remove("hoverShadow");
 
-    document.getElementById("next").classList.add("off");
-    document.getElementById("next").classList.add("hoverShadow");
-    document.getElementById("next").classList.remove("disabled");
-    document.getElementById("next").classList.remove("on");
+    stop();
+
+    addClassesToId("restart", ["off", "hoverShadow"]);
+
+    addClassesToId("back", ["off", "disabled"]);
+    removeClassesFromId("back", ["on", "hoverShadow"]);
+
+
+    addClassesToId("next", ["off", "hoverShadow"]);
+    addClassesToId("start", ["off", "hoverShadow"]);
+    removeClassesFromId("next", ["disabled", "on"]);
+    removeClassesFromId("start", ["disabled", "on"]);
 
     if (state.graph.noEdge() === true) {
         if (state.graph.allNodes.length <= 1) {
@@ -328,7 +352,6 @@ function seqControlMenuSetUp() {
     }
 }
 
-
 function algorithmSelect() {
 
     var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
@@ -336,40 +359,26 @@ function algorithmSelect() {
         
         // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
         // generate-html part
-        var nodes = [];
         var len = state.graph.allNodes.length;
+
         if (len <= 0) {
-            // TODO: Think of what should happen if no node
             alert("Nodes should be in. Handler for this case under construction.");
         }
         else {
-            // console.log(algorithm)
             var algorithmId = algorithm.id;
 
             cleanSVGGraphColors();
+
+            var startNodeDiv = document.getElementById("startNode");
             if (algorithmId !== "Kruskal") {
-                selectStartNode();                
+                if (startNode.style.display === "none") {
+                    startNode.style.display = "block";
+                }
+                selectStartNode();
             }
-
-
-            for (var it = 0; it < len; ++it) {
-                nodes.push({"id": state.graph.allNodes[it].id, 
-                            "name": state.graph.allNodes[it].name});
+            else {
+                startNode.style.display = "none";
             }
-            // Generate options.
-            var options = document.getElementById("nodeOptions");
-            var optionsHTML = "";
-            var option;
-            for (var it = 0; it < len; ++it) {
-                option = document.createElement("option");
-                option.setAttribute("value", nodes[it].id);
-                
-                option.innerHTML = nodes[it].name;
-
-                optionsHTML += option.outerHTML + "\n";
-            }
-            options.innerHTML = optionsHTML;
-
 
             document.getElementById("buttons").style.display = "block";
         }
@@ -418,11 +427,9 @@ function nextStep(withButtonPress = true) {
         console.log(algorithmId);
         switch (algorithmId) {
             case "Prim": 
-                // console.log("Entered");
                 state.nextSteps = state.nextSteps.steps;
                 break;
-            case "Kruskal": 
-                console.log("Entered");
+            case "Kruskal":
                 state.nextSteps = state.nextSteps.steps;
                 break;
             default:
@@ -466,6 +473,13 @@ function nextStep(withButtonPress = true) {
                 edge.style.stroke = color;
                 node.style.stroke = "green";
 
+                if (state.algorithms.algorithmId(algorithm) === "Kruskal") {
+                    var node2 = executeStep.id.split('-')[0];
+                    node2 = document.getElementById("circle" + node2);
+                    node2.style.stroke = "green";
+                    
+                }
+
                 if (state.graph.directed === true) {
                     updatePolygonColor("polygon" + edgeId, color);
                 }
@@ -482,10 +496,22 @@ function nextStep(withButtonPress = true) {
             default:
                 break;
         }
+
+
     }
 
     if (state.nextSteps.length === 0) {
+        state.algorithmFinished = true;
+
         document.getElementById("next").classList.add("disabled");
+
+        turnButton("start", "on");
+        addClassesToId("start", ["disabled", "hoverShadow"]);
+        stop(false);
+
+        document.getElementById("stop").classList.add("disabled");
+        document.getElementById("stop").classList.remove("hoverShadow"); 
+        
         setTimeout(function() {
             document.getElementById("next").classList.remove("hoverShadow"); 
         }, 120); 
@@ -509,6 +535,8 @@ function backStep() {
         if (state.nextSteps.length === 0 && state.executedSteps.length > 0) {
             document.getElementById("next").classList.add("hoverShadow");        
             document.getElementById("next").classList.remove("disabled");
+            document.getElementById("start").classList.add("hoverShadow");
+            document.getElementById("start").classList.remove("disabled");
         }
         if (state.executedSteps.length > 0) {
 
@@ -523,7 +551,8 @@ function backStep() {
             }, 100);             
 
             var backStep = state.executedSteps.splice(-1,1)[0];
-            // NICIUN PUSH
+
+            state.algorithmFinished = false;
             state.nextSteps.unshift(backStep);
             // EXECUTE IT
             console.log(backStep);
@@ -581,6 +610,8 @@ function restart(withButtonPress = true) {
     // color the starting node 
     // consider that algorithm does not run
 
+    state.algorithmFinished = false;
+
     cleanSVGGraphColors();
     seqControlMenuSetUp();
 
@@ -602,9 +633,6 @@ function restart(withButtonPress = true) {
     selectStartNode();
 }
 
-
-// STARTS HERE: TRYING TO REFACTOR.
-
 function next() {
     if (state.runsContinuously) {
         stop();
@@ -619,16 +647,32 @@ function back(argument) {
     backStep();
 }
 
-function start() {
+function start(withButtonPress = true) {
 
-    var timeInterval = document.getElementById("range").value;
-    timeInterval = parseFloat(timeInterval);
-    timeInterval =timeInterval * 1000;
-    
-    nextStep(false);
-    state.runsContinuously = true;
+    if (!state.algorithmFinished) {
+        var timeInterval = document.getElementById("range").value;
+        timeInterval = parseFloat(timeInterval);
+        timeInterval =timeInterval * 1000;
+        
+        nextStep(false);
+        state.runsContinuously = true;
 
-    state.intervalIds.push(window.setInterval(runNextStep, timeInterval));
+        if (withButtonPress) {
+            if (!state.algorithmFinished) {
+                turnButton("start", "on");
+            }
+
+            removeClassesFromId("stop", ["disabled", "on"]);
+            addClassesToId("stop", ["off", "hoverShadow"]);
+        }
+        if (!state.algorithmFinished) {
+            state.intervalIds.push(window.setInterval(runNextStep, timeInterval));
+        }
+        else {
+            addClassesToId("stop", ["disabled", "off"]);
+            removeClassesFromId("stop", ["on", "hoverShadow"]);
+        }
+    }
 }
 
 function runNextStep() {
@@ -642,18 +686,34 @@ function runNextStep() {
     }
 }
 
-function stop() {
-    console.log("I was called");
+function stop(withButtonPress = true) {
+
     state.runsContinuously = false;
     for (var i = 0; i < state.intervalIds.length; ++i) {
         window.clearInterval(state.intervalIds[i]);
     }
     state.intervalIds = [];
     for (var i = 0; i < state.timeoutIds.length; ++i) {
-        console.log("hello: ", state.timeoutIds[i]);
         window.clearTimeout(state.timeoutIds[i]);
     }
     state.timeoutIds = [];
+
+    if (state.algorithmFinished) {
+
+        turnButton("start", "off");
+        removeClassesFromId("start", ["hoverShadow", "on"]);
+       
+        addClassesToId("stop", ["disabled", "off"]);
+        removeClassesFromId("stop", ["on", "hoverShadow"]);
+    }
+
+    var disabled = document.getElementById("stop").classList.contains("disabled")
+    if (withButtonPress && !disabled) {
+        turnButton("start", "off");
+
+        addClassesToId("stop", ["disabled", "on"]);
+        removeClassesFromId("stop", ["off", "hoverShadow"]);
+    }
 }
 
 function rangeInput() {
@@ -661,7 +721,7 @@ function rangeInput() {
     document.getElementById("speed").value = value;
     
     if (state.runsContinuously) {
-        stop();
+        stop(false);
 
         state.timeoutIds.push(setTimeout(start, 1000));
     }
@@ -673,60 +733,12 @@ function speedInput() {
     document.getElementById("range").value = value;
     
     if (state.runsContinuously) {
-        stop();
+        stop(false);
 
         state.timeoutIds.push(setTimeout(start, 1000));
 
     }
 }
-// UP TO THIS POINT.
-
-
-
-// WORKING CODE:
-
-// function start() {
-
-//     var timeInterval = document.getElementById("range").value;
-//     timeInterval = parseFloat(timeInterval);
-//     timeInterval =timeInterval * 1000;
-//     // console.log(timeInterval);
-//     nextStep(false);
-//     state.runsContinuously = true;
-
-//     state.intervalId = window.setInterval(runNextStep, timeInterval);
-//     console.log("Interval Id: ", state.intervalId);
-// }
-
-// var runNextStep = function() {
-//     if (state.nextSteps.length > 0) {
-//         nextStep(false);
-//     }
-//     else {
-//         stop();
-//     }
-// }
-
-// function stop() {
-
-//     state.runsContinuously = false;
-//     window.clearInterval(state.intervalId);
-
-// }
-
-// function rangeInput() {
-//     stop();
-//     var value = parseFloat(document.getElementById("range").value).toFixed(1);
-//     document.getElementById("speed").value = value;
-// }
-
-// function speedInput() {
-//     stop();
-//     value = document.getElementById("speed").value;
-//     document.getElementById("range").value = value;
-
-// }
-// ENDS HERE
 
 function cleanSVGGraphColors() {
     var nodes = state.graph.allNodes, len = nodes.length;
@@ -821,30 +833,46 @@ function switchWeighted(weighted) {
             state.graph.setWeighted(true);
             addWeights();
 
-            document.getElementById("unweighted").classList.add("off");
-            document.getElementById("unweighted").classList.remove("on");
-            document.getElementById("unweighted").classList.add("hoverShadow");
-            document.getElementById("weighted").classList.remove("hoverShadow");
-            document.getElementById("weighted").classList.add("on");
-            document.getElementById("weighted").classList.remove("off");
+            switchWeightButtons(true);
         }
         else {
             state.graph.setWeighted(false);
             removeWeights();
 
-            document.getElementById("unweighted").classList.add("on");
-            document.getElementById("unweighted").classList.remove("off");
-            document.getElementById("unweighted").classList.remove("hoverShadow");
-            document.getElementById("weighted").classList.add("hoverShadow");
-            document.getElementById("weighted").classList.add("off");
-            document.getElementById("weighted").classList.remove("on");
+            switchWeightButtons(false);
         }
+    }
+}
+
+
+function switchWeightButtons(weighted) {
+
+    if (weighted === true) {
+
+        document.getElementById("unweighted").classList.add("off");
+        document.getElementById("unweighted").classList.remove("on");
+        document.getElementById("unweighted").classList.add("hoverShadow");
+        document.getElementById("weighted").classList.remove("hoverShadow");
+        document.getElementById("weighted").classList.add("on");
+        document.getElementById("weighted").classList.remove("off");
+
+    }
+    else {
+
+        document.getElementById("unweighted").classList.add("on");
+        document.getElementById("unweighted").classList.remove("off");
+        document.getElementById("unweighted").classList.remove("hoverShadow");
+        document.getElementById("weighted").classList.add("hoverShadow");
+        document.getElementById("weighted").classList.add("off");
+        document.getElementById("weighted").classList.remove("on");
     }
 }
 
 
 function openRearrangeModal() {
     var rearrangeModal = document.getElementById('rearrangeModal');
+
+    turnButton('rearrange', 'on');
 
     rearrangeModal.style.display = "block";
 }
@@ -877,6 +905,7 @@ function applyRearrangeModal() {
 
     if (rearranged === true) {
         var rearrangeModal = document.getElementById('rearrangeModal');
+        turnButton('rearrange', 'off');
         rearrangeModal.style.display = "none";
     }
     else {
@@ -887,16 +916,81 @@ function applyRearrangeModal() {
 function openSaveModal() {
     var saveModal = document.getElementById('saveModal');
 
+    // DELETE THIS LINE AND CHECK CONTINUE HERE. FIX BUTTONS FOR SAVE DIV
+    // state.savedGraphs = [{id: "id1", graphJSON: "none"}, {id: "id2", graphJSON: "none2"}]
+    var len = state.savedGraphs.length;
+
+    var savedGraphs = document.getElementById("savedGraphs");
+
+    savedGraphs.innerHTML = "";
+
+    var savedGraphsHTML = "";
+    var graphDiv, rowDiv;
+    for (var i = 0; i < len; ++i) {
+        rowDiv = document.createElement("div");
+        graphDiv = document.createElement("div");
+
+        rowDiv.classList.add("row");
+        graphDiv.classList.add("12-col-sm");
+        graphDiv.classList.add("savedGraph");
+
+        graphDiv.innerHTML = state.savedGraphs[i].id;
+
+        rowDiv.appendChild(graphDiv);
+
+        savedGraphs.appendChild(rowDiv);
+    }
+
+    document.getElementById("saveGraphName").value = "";
+
     saveModal.style.display = "block";
 }
 
 function applySaveModal() {
-    console.log("here");
-    // GET SELECTED.
+    var name = document.getElementById("saveGraphName");
+    var id = name.value;
+
+    var graphNameExists = false;
+
+    var len = state.savedGraphs.length;
+    for (var i = 0; i < len; ++i) {
+        if (id === state.savedGraphs[i].id) {
+
+            state.savedGraphs[i].graphJSON = graphToJSON(state.graph);
+            
+            graphNameExists = true;
+            break;
+        }
+    }
+    if (!graphNameExists) {
+        state.savedGraphs.push({id: id, graphJSON: graphToJSON(state.graph)});
+    }
+
+    var saveModal = document.getElementById('saveModal');
+    saveModal.style.display = "none";
+}
+
+function savedOnInputCheck(shouldWork = true) {
+    if (shouldWork) {
+        var input = document.getElementById("saveGraphName");
+        var value = input.value;
+
+        var len = state.savedGraphs.length;
+        for (var i = 0; i < len; ++i) {
+            if (value === state.savedGraphs[i].id) {
+                alert("Shout");
+            }
+        }
+    }
 }
 
 function openLoadModal() {
     var loadModal = document.getElementById('loadModal');
+
+    // TODO: MAKE IT MORE FORMAL -- Temporary solution to make it work
+    var def = document.getElementById("defaultGraphsButton");
+    def.classList.add("off");
+    displayGraphs('default');
 
     loadModal.style.display = "block";
 }
@@ -906,6 +1000,7 @@ function displayGraphs(type = "default") {
     var saved = document.getElementById("savedGraphsButton");
 
     if (type === "default" && def.classList.contains("off")) {
+        state.graphsType = "suggested";
         def.classList.add("on");
         def.classList.remove("off");
         saved.classList.remove("on");
@@ -914,35 +1009,237 @@ function displayGraphs(type = "default") {
         var algorithms = state.algorithms.getAvailableAlgorithms(state.graph);
         var len = algorithms.length;
         var newHTML = "";
-        var graphs;
+        var graphs, graphsNo;
         var graphDisplay = document.getElementById("graphsDisplay");
         graphDisplay.innerHTML = "";
+        state.loadGraphs = [];
 
         for (var i = 0; i < len; ++i) {
             newHTML += '<p style="text-decoration: underline; text-align: left; font-size: 21px;">' 
                     + algorithms[i].name + "<p> <br>\n"; 
-            graphs = getGraphsForAlgorithm(algorithms[i].id);
+            graphs = getGraphsForAlgorithm(algorithms[i].id, state.graph.directed, state.graph.weighted);
+            graphsNo = graphs.length;
+            
+
+            var rowDiv;
+            var iterations = Math.floor(graphsNo / 4);
+            var k;
+            var option, options;
+            options = document.createElement("div");
+
+            for (var j = 0; j < iterations; ++j) {
+                rowDiv = document.createElement("div");
+                rowDiv.classList.add("row");
+                rowDiv.classList.add("graphOptions");
+                k = j * 4 - 1;
+
+                for (var l = 0; l < 4; ++l) {
+                    ++k;
+                    option = document.createElement("div");
+
+                    option.id = graphs[k].id;
+                    option.innerHTML = graphs[k].name;
+
+                    option.classList.add("col-sm-3");
+                    option.classList.add("graphOption");
+                    option.classList.add("off");
+                    option.classList.add("hoverShadow");
+                    option.classList.add("lightBlue");
+                    
+                    rowDiv.appendChild(option);
+                    state.loadGraphs.push({id: graphs[k].id, graphJSON: graphs[k].graph});
+                }
+                options.appendChild(rowDiv);
+            }
+
+            var last4 = (graphsNo - 1) % 4 + 1;
+            rowDiv = document.createElement("div");
+            rowDiv.classList.add("row");
+            rowDiv.classList.add("graphOptions");
+            k = iterations * 4 - 1;
+
+            for (var j = 0; j < last4; ++j) {
+                ++k;
+
+                option = document.createElement("div");
+
+                option.id = graphs[k].id;
+                option.innerHTML = graphs[k].name;
+
+                option.classList.add("col-sm-3");
+                option.classList.add("graphOption");
+                option.classList.add("off");
+                option.classList.add("hoverShadow");
+                option.classList.add("lightBlue");
+
+                rowDiv.appendChild(option);
+                state.loadGraphs.push({id: graphs[k].id, graphJSON: graphs[k].graph});
+            }
+
+            last4 = 4 - last4;
+            for (var j = 0; j < last4; ++j) {
+
+                option = document.createElement("div");
+                option.classList.add("col-sm-3");
+                rowDiv.appendChild(option);
+            }
+            options.appendChild(rowDiv);
+
+            newHTML += options.outerHTML + "\n";
         }
         graphDisplay.innerHTML = newHTML;
+
+        var opt, allOptions = document.getElementsByClassName("graphOption");
+        var optsLen = allOptions.length;
+
+        for (var i = 0; i < optsLen; ++i) {
+            opt = allOptions[i];
+            opt.onclick = selectGraph;
+        }
 
         return;   
     }
     if (type === "saved" && saved.classList.contains("off")) {
+        state.graphsType = "saved";
         saved.classList.add("on");
         saved.classList.remove("off");
         def.classList.remove("on");
         def.classList.add("off");
+
+        var len = state.savedGraphs.length;
+
+        var graphDisplay = document.getElementById("graphsDisplay");
+        graphDisplay.innerHTML = "";
+
+        var option, options;
+        options = document.createElement("div");
+        options.classList.add("row");
+        options.classList.add("graphOptions");
+
+        for (var i = 0; i < len; ++i) {
+            option = document.createElement("div");
+
+            option.id = state.savedGraphs[i].id;
+            option.innerHTML = state.savedGraphs[i].id;
         
+            option.classList.add("col-sm-3");
+            option.classList.add("graphOption");
+            option.classList.add("off");
+            option.classList.add("hoverShadow");
+            option.classList.add("lightBlue");
+
+            options.appendChild(option);
+        }
+
+        var complete = (len - 1) % 4 + 1;
+        complete = 4 - complete;
+
+        for (var j = 0; j < complete; ++j) {
+
+            option = document.createElement("div");
+
+            option.classList.add("col-sm-3");
+            
+            options.appendChild(option);
+        }
+
+        graphDisplay.innerHTML = options.outerHTML;
+
+        var opt, allOptions = document.getElementsByClassName("graphOption");
+        var optsLen = allOptions.length;
+
+        for (var i = 0; i < optsLen; ++i) {
+            opt = allOptions[i];
+            opt.onclick = selectGraph;
+        }
+
         return;
     }
 
 }
 
+function selectGraph(e) {
+
+    var oldId = state.selectedGraphId;
+    if (oldId) {
+        turnButton(oldId, "off");
+    }
+    var elem = e.srcElement || e.target;
+    state.selectedGraphId = elem.id;
+    turnButton(state.selectedGraphId, "on");
+}
+
 function applyLoadModal() {
-    console.log("I should load.");
+
+    var directed = state.graph.directed;
+    var weighted = state.graph.weighted;
+
+    if (state.selectedGraphId) {
+
+        var graph = null, graphs;
+        if (state.graphsType === "suggested") {
+            graphs = state.loadGraphs;
+        } 
+        else {
+            graphs = state.savedGraphs;
+        }
+        
+        var len = graphs.length;
+        for (var i = 0; i < len; ++i) {
+            console.log(graphs[i].id);
+            if (state.selectedGraphId === graphs[i].id) {
+
+                graph = jsonToGraph(graphs[i].graphJSON);
+                break;
+            }
+        }
+        if (graph) {
+
+            // CONTINUEHERE
+            var y = -(graphMinY(graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
+            var x = -(graphMinX(graph) - (sizes.radius + sizes.nodeOutlineWidth + 6));
+
+            var graphWidth = graphMaxX(graph) - graphMinX(graph) + 
+                            2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
+            var graphHeight = graphMaxY(graph) - graphMinY(graph) + 
+                            2 * (sizes.radius + sizes.nodeOutlineWidth + 6);
+
+            var modalSVGWidth = state.svg.getClientRects()[0].width;
+            var modalSVGHeight = state.svg.getClientRects()[0].height;
+
+            var xRatio = min([parseFloat(modalSVGWidth) / parseFloat(graphWidth), 1]);
+            var yRatio = min([parseFloat(modalSVGHeight) / parseFloat(graphHeight), 1]);
+            
+            graph = transposeGraphCoordinates(graph, x, y, xRatio, yRatio);
+
+            x = graphMaxX(graph) - graphMinX(graph);
+            x = modalSVGWidth - x;
+            x /= 2;
+            y = graphMaxY(graph) - graphMinY(graph);
+            y = modalSVGHeight - y;
+            y /= 2;
+
+            graph = transposeGraphCoordinates(graph, x, y, 1, 1);
+
+            state = updateGraphToState(graph, state);
+
+            if (state.graph.directed !== directed) {
+                switchDirButtons(state.graph.directed)
+            }
+            if (state.graph.weighted !== weighted) {
+                switchWeightButtons(state.graph.weighted)
+            }
+
+            state.svg.innerHTML = state.svg.innerHTML;
+        }
+    }
+
+    state.maxIdValue = state.graph.getMaxId();
 
     var loadModal = document.getElementById('loadModal');
     loadModal.style.display = "none";
+
+    buttonNotAllowed("algorithm", false);
 }
 
 function rearrangeCircular(random = false) {
@@ -1767,6 +2064,10 @@ function mouseMove(e) {
         }
         else {
 
+            if (state.mode === "algorithm") {
+                return;
+            }
+
             var circle = state.svg.getElementById("previewCircle");
             circle.setAttribute("cx", currentX);
             circle.setAttribute("cy", currentY);
@@ -2037,20 +2338,6 @@ function onscrollListener() {
     document.addEventListener("scroll", scroll);
 }
 
-// function cssSetUp() {
-
-//     switchMode("build");
-    
-//     state.graph.directed = false;
-//     switchDirButtons(false);
-//     buttonNotAllowed("algorithm");
-    
-//     state.graph.weighted = false;
-//     switchWeighted(false);
-    
-//     resetButtonSetUp();
-// }
-
 function windowClickListener() {
     window.onclick = handleClick;
 }
@@ -2092,6 +2379,7 @@ function handleClick(e) {
             state.rearrangeSelectedId = null;        
         }
 
+        turnButton('rearrange', 'off');
         rearrangeModal.style.display = "none";
     }
 
@@ -2120,9 +2408,26 @@ function hireListeners() {
 
 // Event managing 
 window.onload = function() {
+    presentationSetUp();
     state = new State();
 
     hireListeners();
 
     cssSetUp();
+
+}
+
+function presentationSetUp() {
+    sizes.radius = 30;
+    sizes.edgeWidth = 6;
+    sizes.nodeOutlineWidth = 6;
+    sizes.stdPolygonPoints = "-4,0 -8,-4 -1,0 -8,4";
+    sizes.stdFontSize = "32px";
+    sizes.weightDistance = 18;
+
+    graphExamples = graphExamplesForPresentation;
+
+    // stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
+    // defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
+    // angleDev: 12
 }

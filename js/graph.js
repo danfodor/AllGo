@@ -589,6 +589,17 @@ function Graph(directed = false) {
         }
     }
 
+    this.getMaxId = function () {
+        var maxId = 0;
+        for (var i = 0; i < this.allNodes.length; ++i) {
+            if (parseInt(maxId) < parseInt(this.allNodes[i].id)){
+                maxId = parseInt(this.allNodes[i].id);
+            }
+        }
+
+        return maxId;
+    }
+
 };
 
 function cloneGraph(graph) {
@@ -852,7 +863,7 @@ function jsonToGraph(json) {
     return graph;
 }
 
-function getGraphsForAlgorithm(algorithm, directed, weighted) {
+function getGraphsForAlgorithm(algorithm, directed = false, weighted = false) {
     
     var graphs = [];
 
@@ -860,144 +871,144 @@ function getGraphsForAlgorithm(algorithm, directed, weighted) {
         case "BFS":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.BFS.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.BFS.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.BFS.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.BFS.undirected.unweighted;
                 }
             }
             break;
         case "DFS":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.DFS.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.DFS.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.DFS.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.DFS.undirected.unweighted;
                 }
             }
             break;
         case "Bridges":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.Bridges.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.Bridges.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.Bridges.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.Bridges.undirected.unweighted;
                 }
             }
             break;
         case "ArtPoints":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.ArtPoints.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.ArtPoints.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.ArtPoints.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.ArtPoints.undirected.unweighted;
                 }
             }
             break;
         case "Dijkstra":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.Dijkstra.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.Dijkstra.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.Dijkstra.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.Dijkstra.undirected.unweighted;
                 }
             }
             break;
         case "Kruskal":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.Kruskal.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.Kruskal.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.Kruskal.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.Kruskal.undirected.unweighted;
                 }
             }
             break;
         case "Prim":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.Prim.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.Prim.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.Prim.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.Prim.undirected.unweighted;
                 }
             }
             break;
         case "MaxFlow":
             if (directed) {
                 if (weighted) {
-
+                    graphs = graphExamples.MaxFlow.directed.weighted;
                 }
                 else {
-                    
+                    graphs = graphExamples.MaxFlow.directed.unweighted;
                 }
             } 
             else {
                 if (weighted) {
-
+                    graphs = graphExamples.MaxFlow.undirected.weighted;
                 }
                 else {
-
+                    graphs = graphExamples.MaxFlow.undirected.unweighted;
                 }
             }
             break;
