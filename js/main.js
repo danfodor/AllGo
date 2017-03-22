@@ -1123,16 +1123,19 @@ function openSaveModal() {
     savedGraphs.innerHTML = "";
 
     var savedGraphsHTML = "";
-    var graphDiv, rowDiv;
+    var graphDiv, graphSpan, rowDiv;
     for (var i = 0; i < len; ++i) {
         rowDiv = document.createElement("div");
         graphDiv = document.createElement("div");
+        graphSpan = document.createElement("span");
+        graphSpan.id = state.savedGraphs[i].id;
 
         rowDiv.classList.add("row");
         graphDiv.classList.add("12-col-sm");
         graphDiv.classList.add("savedGraph");
 
-        graphDiv.innerHTML = state.savedGraphs[i].id;
+        graphSpan.innerHTML = state.savedGraphs[i].id;
+        graphDiv.appendChild(graphSpan);
 
         rowDiv.appendChild(graphDiv);
 
@@ -1169,14 +1172,28 @@ function applySaveModal() {
 }
 
 function savedOnInputCheck(shouldWork = true) {
+    console.log("shout");
     if (shouldWork) {
         var input = document.getElementById("saveGraphName");
         var value = input.value;
 
         var len = state.savedGraphs.length;
+
+        if (state.savedInputJustMatched === true) {
+            state.savedInputJustMatched = false;
+
+            var graphSpan = document.getElementById(state.savedInputJustMatchedId);
+            graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0)";
+        }
+
         for (var i = 0; i < len; ++i) {
             if (value === state.savedGraphs[i].id) {
-                alert("Shout");
+                state.savedInputJustMatched = true;
+                state.savedInputJustMatchedId = state.savedGraphs[i].id;
+
+                var graphSpan = document.getElementById(state.savedGraphs[i].id);
+                graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0.5)";
+                // alert("Shout");
             }
         }
     }

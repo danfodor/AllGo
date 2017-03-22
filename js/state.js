@@ -40,6 +40,9 @@ function State() {
 
     this.loadGraphs = [];
     this.savedGraphs = [];
+    this.savedInputJustMatched = false;
+    this.savedInputJustMatchedId;
+
 
     this.newDirection = null;
     this.newGraph = null;
@@ -96,6 +99,9 @@ function State() {
         this.visitedNodes = [];
 
         this.loadGraphs = [];
+        this.savedGraphs = [];
+        this.savedInputJustMatched = false;
+        this.savedInputJustMatchedId;
 
         this.allowMove = true;
 
