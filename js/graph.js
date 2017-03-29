@@ -1018,3 +1018,22 @@ function getGraphsForAlgorithm(algorithm, directed = false, weighted = false) {
 
     return graphs;
 }
+
+function updateGraphSizes(graph, newRadius = -1, newStroke = -1) {
+
+    var len = graph.allNodes.length;
+
+    if (newRadius > 0) {
+        for (var i = 0; i < len; ++i) {
+            graph.allNodes[i].r = newRadius;
+        }
+    }
+
+    if (newStroke > 0) {
+        for (var i = 0; i < len; ++i) {
+            graph.allNodes[i].outlineWidth = newStroke;
+        }
+    }
+
+    return graph;
+} 

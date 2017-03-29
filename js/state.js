@@ -43,6 +43,18 @@ function State() {
     this.savedInputJustMatched = false;
     this.savedInputJustMatchedId;
 
+    this.currentRadius = sizes.radius;
+    this.currentNodeColor = colors.unselectedNode;
+    this.currentNodeBorderColor = colors.unselectedNodeOutline;
+    this.currentBuildEdgeColor = colors.buildEdge;
+    this.currentSelectedNodeColor = colors.selectedNode;
+    this.currentVisitedNodeBorderColor = colors.visitedNodeBorder;
+    this.currentUnvisitedNodeBorderColor = colors.unvisitedNodeBorder;
+    this.currentActiveNodeBorderColor = colors.activeNodeBorder;
+    this.currentUnvisitedEdgeColor = colors.unvisitedEdge;
+    this.currentExtendedEdgeColor = colors.extendedEdge;
+    this.currentUnextendedEdgeColor = colors.unextendedEdge;
+    this.keepSizeRatios = true;
 
     this.newDirection = null;
     this.newGraph = null;
@@ -103,6 +115,19 @@ function State() {
         this.savedInputJustMatched = false;
         this.savedInputJustMatchedId;
 
+        this.currentRadius = sizes.radius;
+        this.currentNodeColor = colors.unselectedNode;
+        this.currentNodeBorderColor = colors.unselectedNodeOutline;
+        this.currentBuildEdgeColor = colors.buildEdge;
+        this.currentSelectedNodeColor = colors.selectedNode;
+        this.currentVisitedNodeBorderColor = colors.visitedNodeBorder;
+        this.currentUnvisitedNodeBorderColor = colors.unvisitedNodeBorder;
+        this.currentActiveNodeBorderColor = colors.activeNodeBorder;
+        this.currentUnvisitedEdgeColor = colors.unvisitedEdge;
+        this.currentExtendedEdgeColor = colors.extendedEdge;
+        this.currentUnextendedEdgeColor = colors.unextendedEdge;
+        this.keepSizeRatios = true;
+
         this.allowMove = true;
 
         this.runsContinuously = false;
@@ -121,6 +146,8 @@ function State() {
 
         this.left = this.svg.getBoundingClientRect().left;
         this.top = this.svg.getBoundingClientRect().top;
+
+        this.svg.insertBefore(createSVGGroupZero(), this.svg.firstChild);
 
         this.createPreviewCircle();
         this.createForbiddenCircle();
@@ -201,7 +228,7 @@ function State() {
         circle.style.stroke = stroke;
         circle.style.strokeWidth = strokeWidth;
 
-        this.svg.appendChild(circle);
+        this.svg.insertBefore(circle, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;
     }
@@ -222,13 +249,13 @@ function State() {
         circle.style.stroke = stroke;
         circle.style.strokeWidth = strokeWidth;
 
-        this.svg.appendChild(circle);
+        this.svg.insertBefore(circle, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;
     }
 
     this.createPreviewLine = function(x1 = 0, y1 = 0, x2 = 0, y2 = 0, opacity = 0.25,
-                                stroke = colors.unusedEdge, strokeWidth = sizes.edgeWidth) {
+                                stroke = colors.buildEdge, strokeWidth = sizes.edgeWidth) {
         
         var line = document.createElement("line");
         line.id = "previewLine";
@@ -245,7 +272,7 @@ function State() {
 
         line.setAttribute("visibility", "hidden");
  
-        this.svg.appendChild(line);
+        this.svg.insertBefore(line, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;
     }
@@ -268,12 +295,12 @@ function State() {
 
         line.setAttribute("visibility", "hidden");
  
-        this.svg.appendChild(line);
+        this.svg.insertBefore(line, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;
     }
 
-    this.createPreviewPath = function(d = "M 0 0 Q 0 0, 0 0", opacity = 0.4, stroke = colors.unusedEdge, 
+    this.createPreviewPath = function(d = "M 0 0 Q 0 0, 0 0", opacity = 0.4, stroke = colors.buildEdge, 
                                         strokeWidth = sizes.edgeWidth) {
         var edge = document.createElement("g");
         edge.id = "previewEdge";
@@ -305,9 +332,11 @@ function State() {
         marker.setAttribute("markerUnits", "strokeWidth");
         
         var polygon = document.createElement("polygon");
+
+        polygon.id = "previewPolygon";
         polygon.setAttribute("points", sizes.stdPolygonPoints);
-        polygon.setAttribute("fill", colors.unusedEdge);
-        polygon.setAttribute("stroke", colors.unusedEdge);
+        polygon.setAttribute("fill", colors.unvisitedEdge);
+        polygon.setAttribute("stroke", colors.unvisitedEdge);
         polygon.setAttribute("stroke-width", "1px");
 
         marker.innerHTML = polygon.outerHTML;
@@ -318,7 +347,7 @@ function State() {
         edge.appendChild(defs);
         edge.appendChild(path);    
  
-        this.svg.appendChild(edge);
+        this.svg.insertBefore(edge, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;        
     }
@@ -354,6 +383,8 @@ function State() {
         marker.setAttribute("markerUnits", "strokeWidth");
         
         var polygon = document.createElement("polygon");
+
+        polygon.id = "forbiddenPolygon";
         polygon.setAttribute("points", sizes.stdPolygonPoints);
         polygon.setAttribute("fill", stroke);
         polygon.setAttribute("stroke", stroke);
@@ -368,10 +399,13 @@ function State() {
         edge.appendChild(path);    
 
 
-        this.svg.appendChild(edge);
+        this.svg.insertBefore(edge, this.svg.firstChild);
 
         this.svg.innerHTML = this.svg.innerHTML;        
     }
+
+
+    this.svg.insertBefore(createSVGGroupZero(), this.svg.firstChild);
 
     this.createPreviewCircle();
     this.createForbiddenCircle();

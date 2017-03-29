@@ -154,6 +154,150 @@ function Algorithms() {
                 }
                 return null;
             }
+            // run: function(graph, startNode, full = true) {
+                
+            //     var nodes = graph.allNodes;
+            //     var adjLists = graph.adjacencyLists;
+            //     var len = graph.allNodes.length;
+                
+            //     var briefSteps = [];
+            //     var fullSteps = [];
+                
+            //     var queue = [];
+            //     var visitedEdges = [];
+            //     var visitedNodes = [];
+            //     var visitedNodesNo = 0;
+
+            //     for (var it = 0; it < len; ++it) {
+            //         visitedEdges.push([]);
+            //         visitedNodes.push(false);
+            //     }
+
+            //     if (graph.getNodeIndexFromId(startNode) >= 0) {
+            //         visitedNodes[graph.getNodeIndexFromId(startNode)] = true;
+            //         ++visitedNodesNo;
+                                        
+            //         queue = [startNode + "-" + startNode];
+
+            //         var currentNode;
+            //         var currentNodeIndex;
+
+            //         if (graph.directed === false) {
+
+            //             while (visitedNodesNo < len) {
+
+            //                 while (queue.length > 0) {
+            //                     currentNode = queue.shift().split("-")[1];
+            //                     currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+                            
+            //                     var neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+            //                     var nLen = neighbours.length;
+
+            //                     for (var it = 0; it < nLen; ++it) {
+            //                         var ind = graph.getNodeIndexFromId(neighbours[it]);
+
+            //                         if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
+
+            //                             visitedEdges[currentNodeIndex].push(parseInt(ind));
+            //                             // BECAUSE IT IS UNDIRECTED
+            //                             visitedEdges[ind].push(currentNodeIndex);
+            //                             queue.push(currentNode + "-" + graph.allNodes[ind].id);
+
+            //                             if (visitedNodes[ind] !== true) {
+            //                                 ++visitedNodesNo;
+            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+            //                             }
+            //                             else {
+            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+            //                             }
+            //                             visitedNodes[ind] = true;
+
+            //                         }
+            //                         else {
+            //                             //if (extended[graph.allNodes[ind].id] === false) {
+            //                                 // fullSteps.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+            //                             //} 
+            //                         }
+            //                     }
+            //                 }
+
+            //                 if (visitedNodesNo < len) {
+            //                     for (var it = 0; it < len; ++it) {
+            //                         if (visitedNodes[it] === false) {
+            //                             queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
+            //                             fullSteps.push({"type": "node", 
+            //                                                    "id": graph.allNodes[it].id, 
+            //                                                    "extended": true});
+            //                             visitedNodes[it] = true;
+            //                             ++visitedNodesNo;
+            //                             break;
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         else {
+
+            //             while (visitedNodesNo < len || queue.length > 0) {
+
+            //                 while (queue.length > 0) {
+            //                     currentNode = queue.shift().split("-")[1];
+            //                     currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+                            
+            //                     var neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+                                
+            //                     var nLen = neighbours.length;
+
+            //                     for (var it = 0; it < nLen; ++it) {
+            //                         // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
+            //                         var ind = graph.getNodeIndexFromId(neighbours[it]);
+
+            //                         if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
+
+            //                             visitedEdges[currentNodeIndex].push(parseInt(ind));
+            //                             queue.push(currentNode + "-" + graph.allNodes[ind].id);
+
+            //                             if (visitedNodes[ind] !== true) {
+            //                                 ++visitedNodesNo;
+            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+            //                             }
+            //                             else {
+            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+            //                             }
+            //                             visitedNodes[ind] = true;
+            //                         }
+            //                         else {
+            //                         }
+            //                     }
+            //                 }
+
+            //                 if (visitedNodesNo < len) {
+            //                     for (var it = 0; it < len; ++it) {
+            //                         if (visitedNodes[it] === false) {
+            //                             queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
+            //                             fullSteps.push({"type": "node", 
+            //                                                    "id": graph.allNodes[it].id, 
+            //                                                    "extended": true});
+            //                             visitedNodes[it] = true;
+            //                             ++visitedNodesNo;
+            //                             break;
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         // RECONSIDER THIS
+            //         console.log(visitedEdges);
+            //         if (full === false) {
+            //             return sequenceExec;
+            //         }
+            //         else {
+            //             return fullSteps;
+            //         }
+
+            //     }
+            //     return null;
+            // }
         },
         {
             id: "DFS",

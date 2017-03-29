@@ -4,16 +4,25 @@ var colors = {
     unselectedNode: "#FFFF99", //"#EA7CC4", //"#800000",
     unselectedNodeOutline: "#5F9EA0", //"#8422FF",
     selectedNode: "#80ffff", // "#bf80ff", // "#0059b3", // "#80ffff", // "#ff3333", //"#20B2AA", // "#2e9cd3", // "#B22222"
-    unusedEdge: "#5d6663",
-    buildModeEdge: "black",
-    unselectedEdge: "#f91616",
-    selectedEdge: "#08770d"
+    buildEdge: "black",
+
+    activeNode: "#eff5ff",
+    activeNodeBorder: "#4286f4",
+    unvisitedNode: "#eff5ff",
+    unvisitedNodeBorder: "#4286f4",
+    visitedNode: "#eff5ff",
+    visitedNodeBorder: "#008e17",
+
+    unvisitedEdge: "#5d6663",
+    unextendedEdge: "#f91616",
+    extendedEdge: "#008706"
 };
 
 var sizes = {
-    radius: 17,
+    radius: 18,
     edgeWidth: 3,
     nodeOutlineWidth: 3,
+    ratios: {radiusStroke: 6, radiusLine: 6, radiusFont: 1},
     stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
     defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
     weightDistance: 12,

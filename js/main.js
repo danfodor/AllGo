@@ -200,7 +200,8 @@ function addEdge(nodeId1, nodeId2) {
 
             var edge = createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text);
 
-            state.svg.insertBefore(edge, state.svg.firstChild);
+            var groupZero = state.svg.getElementById("groupZero");
+            state.svg.insertBefore(edge, groupZero);
         }
         else {
             runForbiddenPath(state.svg, "forbiddenPath", d);
@@ -232,7 +233,8 @@ function addEdge(nodeId1, nodeId2) {
             
             var edge = createSVGUndirectedEdge(nodeId1, nodeId2, line, text);
 
-            state.svg.insertBefore(edge, state.svg.firstChild);
+            var groupZero = state.svg.getElementById("groupZero");
+            state.svg.insertBefore(edge, groupZero);
         }
         else {
             runForbiddenLine(state.svg, "forbiddenLine", x1, y1, x2, y2);
@@ -270,7 +272,8 @@ function switchMode(mode) {
         document.getElementById("buildMode").style.display = "block";
 
         turnButton("build", "on");
-        updateSVGEdgesColor(state.svg, colors.buildModeEdge);
+        updateSVGEdgesColor(state.svg, colors.buildEdge);
+        updateSVGNodesBorderColor(state.svg, colors.unselectedNodeOutline);
 
         if (state.graph.allNodes.length === 0) {
             document.getElementById("algorithm").classList.add("off");
@@ -288,7 +291,9 @@ function switchMode(mode) {
             return;
         }
 
-        updateSVGEdgesColor(state.svg, colors.unusedEdge);
+        updateSVGEdgesColor(state.svg, colors.unvisitedEdge);
+        updateSVGNodesBorderColor(state.svg, colors.unvisitedNodeBorder);
+
 
         var algorithmsOptions = document.getElementById("algorithmsOptions");
         var optionsHTML = algorithmOptionsHTML(state);
@@ -308,12 +313,8 @@ function switchMode(mode) {
         document.getElementById("code").style.display = "block";
         document.getElementById("buildMode").style.display = "none";
 
-        document.getElementById("build").classList.remove("on");
-        document.getElementById("build").classList.add("off");
-        document.getElementById("build").classList.add("hoverShadow");
-        document.getElementById("algorithm").classList.remove("hoverShadow");
-        document.getElementById("algorithm").classList.remove("off");
-        document.getElementById("algorithm").classList.add("on");
+        turnButton("build", "off");
+        turnButton("algorithm", "on");
 
         seqControlMenuSetUp();
         
@@ -407,6 +408,9 @@ function algorithmSelect() {
                     break;
             }
 
+            seqControlMenuSetUp();
+
+            // TODO: REFACTOR: THIS SHOULD NOT BE HERE.
             document.getElementById("buttons").style.display = "block";
         }
 
@@ -430,14 +434,14 @@ function selectStartNode() {
 
         pastNode = document.getElementById(state.pastStartingNode)
         if (pastNode !== null) {
-            pastNode.style.stroke = colors.unselectedNodeOutline;
+            pastNode.style.stroke = colors.unvisitedNodeBorder;
         }
     }
 
     state.algorithmRuns = false;
     state.pastStartingNode = "circle" + nodeId;
     var circle = document.getElementById("circle" + nodeId);
-    circle.style.stroke = "green";
+    circle.style.stroke = colors.visitedNodeBorder;
 
 
     var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
@@ -607,18 +611,18 @@ function nextStep(withButtonPress = true) {
                 }
                 
                 node = document.getElementById("circle" + node);
-                var color = "green";
+                var color = colors.extendedEdge;
                 if (executeStep.extended === false) {
-                    color = "red";
+                    color = colors.unextendedEdge;
                 }
                 
                 edge.style.stroke = color;
-                node.style.stroke = "green";
+                node.style.stroke = colors.visitedNodeBorder;
 
                 if (state.algorithms.algorithmId(algorithm) === "Kruskal") {
                     var node2 = executeStep.id.split('-')[0];
                     node2 = document.getElementById("circle" + node2);
-                    node2.style.stroke = "green";
+                    node2.style.stroke = colors.visitedNodeBorder;
                     
                 }
 
@@ -631,7 +635,7 @@ function nextStep(withButtonPress = true) {
             case "node": 
                 var nodeId = executeStep.id;
                 
-                document.getElementById("circle" + nodeId).style.stroke = "green";
+                document.getElementById("circle" + nodeId).style.stroke = colors.selectedNode;
                 
                 state.executedSteps.push(executeStep);
                 break; 
@@ -710,7 +714,7 @@ function backStep() {
                     }
 
                     if (state.graph.directed === true) {
-                        updatePolygonColor("polygon" + edgeId, colors.unusedEdge);
+                        updatePolygonColor("polygon" + edgeId, colors.unvisitedEdge);
                     }
                     
                     if (backStep.extended === true) {
@@ -742,7 +746,7 @@ function backStep() {
                         }
                     }
 
-                    edge.style.stroke = colors.unusedEdge;
+                    edge.style.stroke = colors.unvisitedEdge;
 
                     break;
                 case "node": 
@@ -914,7 +918,7 @@ function stop(withButtonPress = true) {
 }
 
 function rangeInput() {
-    var value = parseFloat(document.getElementById("range").value).toFixed(1);
+    var value = parseFloat(document.getElementById("range").value).toFixed(2);
     document.getElementById("speed").value = value;
     
     if (state.runsContinuously) {
@@ -926,9 +930,10 @@ function rangeInput() {
 
 function speedInput() {
 
-    value = document.getElementById("speed").value;
+    var value = parseFloat(document.getElementById("speed").value).toFixed(2);
     document.getElementById("range").value = value;
-    
+    document.getElementById("speed").value = value;
+
     if (state.runsContinuously) {
         stop(false);
 
@@ -953,7 +958,7 @@ function cleanSVGGraphColors() {
             circle = document.getElementById("circle" + node.id);
 
             // TODO: Use node colour instead of default colour
-            circle.style.stroke = colors.unselectedNodeOutline;
+            circle.style.stroke = colors.unvisitedNodeBorder;
         }
 
         if (state.executedSteps) {
@@ -971,9 +976,9 @@ function cleanSVGGraphColors() {
                         line = document.getElementById("line" + edgeId);
                     }
                     if (line) {
-                        line.style.stroke = colors.unusedEdge;
+                        line.style.stroke = colors.unextendedEdge;
                         if (state.graph.directed) {
-                            updatePolygonColor("polygon" + edgeId, colors.unusedEdge);
+                            updatePolygonColor("polygon" + edgeId, colors.unextendedEdge);
                         }
                     }
                 }
@@ -1063,6 +1068,165 @@ function switchWeightButtons(weighted) {
         document.getElementById("weighted").classList.add("hoverShadow");
         document.getElementById("weighted").classList.add("off");
         document.getElementById("weighted").classList.remove("on");
+    }
+}
+
+function openSettingsModal() {
+    var settingsModal = document.getElementById('settingsModal');
+
+    // TODO: MAKE IT MORE FORMAL -- Temporary solution to make it work
+    // var def = document.getElementById("defaultGraphsButton");
+    // def.classList.add("off");
+    // displayGraphs('default');
+
+    document.getElementById("radiusSize").value = sizes.radius;
+    state.currentRadius = sizes.radius;
+
+    document.getElementById("defaultNodeColor").value = colors.unselectedNode;
+    document.getElementById("defaultNodeBorderColor").value = colors.unselectedNodeOutline;
+    state.currentNodeColor = colors.unselectedNode;
+    state.currentNodeBorderColor = colors.unselectedNodeOutline;
+
+    document.getElementById("selectedNodeColor").value = colors.selectedNode;
+    state.currentSelectedNodeColor = colors.selectedNode;
+
+    document.getElementById("buildEdgeColor").value = colors.buildEdge;
+    state.currentBuildEdgeColor = colors.buildEdge;
+
+    document.getElementById("unvisitedNodeBorderColor").value = colors.unvisitedNodeBorder;
+    state.currentUnvisitedNodeBorderColor = colors.unvisitedNodeBorder;
+
+    document.getElementById("visitedNodeBorderColor").value = colors.visitedNodeBorder;
+    state.currentVisitedNodeBorderColor = colors.visitedNodeBorder;
+
+    document.getElementById("activeNodeBorderColor").value = colors.activeNodeBorder;
+    state.currentActiveNodeBorderColor = colors.activeNodeBorder;
+
+
+    document.getElementById("unvisitedEdgeColor").value = colors.unvisitedEdge;
+    state.currentUnvisitedEdgeColor = colors.unvisitedEdge;
+
+    document.getElementById("extendedEdgeColor").value = colors.extendedEdge;
+    state.currentExtendedEdgeColor = colors.extendedEdge;
+
+    document.getElementById("unextendedEdgeColor").value = colors.unextendedEdge;
+    state.currentUnextendedEdgeColor = colors.unextendedEdge;
+
+
+    turnButton('settings', 'on');
+    settingsModal.style.display = "block";
+}
+
+function applySettingsModal() {
+
+    var wrongRadiusSize = true;
+    var defaultNodeColorsModified = false;
+
+    var radiusSize = parseFloat(document.getElementById("radiusSize").value);
+    if (radiusSize >= 12 && radiusSize <= 60) {
+        wrongRadiusSize = false;
+        if (radiusSize !== parseFloat(state.currentRadius)) {
+
+            if (state.keepSizeRatios === true) {
+                var newRadius = radiusSize, newStroke, newEdgeSize, newFontSize;
+                newStroke = newRadius / sizes.ratios.radiusStroke;
+                newEdgeSize = newRadius / sizes.ratios.radiusLine;
+                newFontSize = newRadius / sizes.ratios.radiusFont + "px";
+
+                updateSVGGraphSizes(state.svg, newRadius, newStroke, newEdgeSize, newFontSize);
+                state.graph = updateGraphSizes(state.graph, newRadius, newStroke);
+
+                sizes.radius = newRadius;
+                sizes.edgeWidth = newStroke;
+                sizes.nodeOutlineWidth = newEdgeSize;
+                sizes.stdFontSize = newFontSize;
+            }
+            else {
+                // TODO: Implement later - for advanced options.
+            }
+        }
+
+        var settingsModal = document.getElementById('settingsModal');
+        settingsModal.style.display = "none";
+        turnButton('settings', 'off');
+    }
+
+    var newDefaultNodeColor = document.getElementById("defaultNodeColor").value;
+    if (state.currentNodeColor.toLowerCase() !== newDefaultNodeColor.toLowerCase()) {
+        colors.unselectedNode = newDefaultNodeColor;
+        defaultNodeColorsModified = true;
+
+        var previewCircle = document.getElementById("previewCircle");
+        previewCircle.style.fill = colors.unselectedNode;
+    }
+
+    var newDefaultBorderNodeColor = document.getElementById("defaultNodeBorderColor").value;
+    if (state.currentNodeBorderColor.toLowerCase() !== newDefaultBorderNodeColor.toLowerCase()) {
+        colors.unselectedNodeOutline = newDefaultBorderNodeColor;
+        defaultNodeColorsModified = true; 
+
+        var previewCircle = document.getElementById("previewCircle");
+        previewCircle.style.stroke = colors.unselectedNodeOutline;
+    }
+
+    var newSelectedNodeColor = document.getElementById("selectedNodeColor").value;
+    if (state.currentSelectedNodeColor.toLowerCase() !== newSelectedNodeColor.toLowerCase()) {
+        colors.selectedNode = newSelectedNodeColor;
+
+        if (state.isComponentSelected) {
+            var selectedCircle = document.getElementById("circle" + state.selectedNodeId);
+            if (selectedCircle) {
+                selectedCircle.style.fill = colors.selectedNode;
+            }
+        }
+    }
+
+    var newBuildEdgeColor = document.getElementById("buildEdgeColor").value;
+    if (state.currentBuildEdgeColor.toLowerCase() !== newBuildEdgeColor.toLowerCase()) {
+        colors.buildEdge = newBuildEdgeColor;
+
+        updateSVGEdgesColor(state.svg);
+        updatePolygonColor("previewPolygon", colors.buildEdge);
+        updatePolygonColor("previewPath", colors.buildEdge);
+        updateLineColor("previewLine", colors.buildEdge);
+    }
+
+    var newVisitedNodeBorderColor = document.getElementById("visitedNodeBorderColor").value;
+    if (state.currentVisitedNodeBorderColor.toLowerCase() !== newVisitedNodeBorderColor.toLowerCase()) {
+        colors.visitedNodeBorder = newVisitedNodeBorderColor;
+    }
+
+    var newUnvisitedNodeBorderColor = document.getElementById("unvisitedNodeBorderColor").value;
+    if (state.currentUnvisitedNodeBorderColor.toLowerCase() !== newUnvisitedNodeBorderColor.toLowerCase()) {
+        colors.unvisitedNodeBorder = newUnvisitedNodeBorderColor;
+    }
+
+    var newActiveNodeBorderColor = document.getElementById("activeNodeBorderColor").value;
+    if (state.currentActiveNodeBorderColor.toLowerCase() !== newActiveNodeBorderColor.toLowerCase()) {
+        colors.activeNodeBorder = newActiveNodeBorderColor;
+    }
+
+    var newUnvisitedEdgeColor = document.getElementById("unvisitedEdgeColor").value;
+    if (state.currentUnvisitedEdgeColor.toLowerCase() !== newUnvisitedEdgeColor.toLowerCase()) {
+        colors.unvisitedEdge = newUnvisitedEdgeColor;
+    }
+
+    var newExtendedEdgeColor = document.getElementById("extendedEdgeColor").value;
+    if (state.currentExtendedEdgeColor.toLowerCase() !== newExtendedEdgeColor.toLowerCase()) {
+        colors.extendedEdge = newExtendedEdgeColor;
+    }
+
+    var newUnextendedEdgeColor = document.getElementById("unextendedEdgeColor").value;
+    if (state.currentUnextendedEdgeColor.toLowerCase() !== newUnextendedEdgeColor.toLowerCase()) {
+        colors.unextendedEdge = newUnextendedEdgeColor;
+    }
+
+    if (defaultNodeColorsModified) {
+        updateSVGGraphNodesColor(state.svg);
+    }
+
+    if (wrongRadiusSize) {
+        alert("Maybe make alert message.");
     }
 }
 
@@ -1206,6 +1370,8 @@ function openLoadModal() {
     var def = document.getElementById("defaultGraphsButton");
     def.classList.add("off");
     displayGraphs('default');
+
+    turnButton('load', 'on');
 
     loadModal.style.display = "block";
 }
@@ -1458,6 +1624,7 @@ function applyLoadModal() {
     var loadModal = document.getElementById('loadModal');
     loadModal.style.display = "none";
 
+    turnButton('load', 'off');
     buttonNotAllowed("algorithm", false);
 }
 
@@ -2300,6 +2467,7 @@ function mouseMove(e) {
             if (state.contextMenuOn === false) {
 
                 var insideNode = false;
+                var insideEdge = false;
                 var clickedElement = e.srcElement || e.target;
                 var clickedTag = clickedElement.nodeName;
 
@@ -2308,6 +2476,7 @@ function mouseMove(e) {
                     clickedElement = clickedElement.parentNode;
                     clickedTag = clickedElement.nodeName;
                 }
+                // console.log(clickedTag);
                 switch(clickedTag){
                     case "circle":
                         insideNode = true;
@@ -2315,6 +2484,19 @@ function mouseMove(e) {
                     case "text":
                         if (clickedElement.parentNode.classList.contains(nodeClass)) {
                             insideNode = true;
+                        }
+                        if (clickedElement.parentNode.classList.contains(edgeClass)) {
+                            insideEdge = true;
+                        }
+                        break;
+                    case "line":
+                        if (clickedElement.parentNode.classList.contains(edgeClass)) {
+                            insideEdge = true;
+                        }
+                        break;
+                    case "path":
+                        if (clickedElement.parentNode.classList.contains(edgeClass)) {
+                            insideEdge = true;
                         }
                         break;
                     default: 
@@ -2325,82 +2507,92 @@ function mouseMove(e) {
                 var point = {"x": currentX, "y": currentY};
                 var checkEdgeIntersection = insideNode;
 
-                if (!insideNode && pointIntersectsEdge(point, state.graph, state.svg)) {
-                    path.setAttribute("visibility", "hidden"); 
-                    circle.setAttribute("visibility", "hidden"); 
-                    line.setAttribute("visibility", "hidden");
+                // if (!insideNode && pointIntersectsEdge(point, state.graph, state.svg)) {
+                //     path.setAttribute("visibility", "hidden"); 
+                //     circle.setAttribute("visibility", "hidden"); 
+                //     line.setAttribute("visibility", "hidden");
+                // }
+                // else {
+                    
+                if (insideNode === false && insideEdge === false) {
+                    circle.setAttribute("visibility", "visible");
                 }
                 else {
-                    
-                    if (insideNode === false) {
-                        circle.setAttribute("visibility", "visible");
+                    circle.setAttribute("visibility", "hidden");
+                    if (insideEdge === true) {
+                        state.svg.getElementById("previewLine").setAttribute("visibility", "hidden");
+                        state.svg.getElementById("previewPath").setAttribute("visibility", "hidden");
                     }
-                    else {
-                        circle.setAttribute("visibility", "hidden");
 
-                        switch(clickedTag){
-                            case "circle":
-                                line.setAttribute("x2", clickedElement.getAttribute("cx"));
-                                line.setAttribute("y2", clickedElement.getAttribute("cy"));
-                                break;
-                            case "text":
+                    switch(clickedTag){
+                        case "circle":
+                            line.setAttribute("x2", clickedElement.getAttribute("cx"));
+                            line.setAttribute("y2", clickedElement.getAttribute("cy"));
+                            break;
+                        case "text":
+                            if (insideNode) {
                                 line.setAttribute("x2", clickedElement.getAttribute("x"));
                                 line.setAttribute("y2", clickedElement.getAttribute("y"));
-                                break;
-                            default: 
-                                break;
-                        }
+                            }
+                            break;
+                        default: 
+                            break;
                     }
+                }
 
-                    if (state.isComponentSelected) {
-                        if (state.graph.directed === true) {
-                            var node = state.svg.getElementById("circle" + state.selectedNodeId);
+                if (state.isComponentSelected) {
+                    if (state.graph.directed === true) {
+                        var node = state.svg.getElementById("circle" + state.selectedNodeId);
 
-                            var pt1 = {"x": parseFloat(node.getAttribute("cx")), 
-                                       "y": parseFloat(node.getAttribute("cy"))};
-                            var pt2 = {"x": parseFloat(line.getAttribute("x2")), 
-                                       "y": parseFloat(line.getAttribute("y2"))};
+                        var pt1 = {"x": parseFloat(node.getAttribute("cx")), 
+                                   "y": parseFloat(node.getAttribute("cy"))};
+                        var pt2 = {"x": parseFloat(line.getAttribute("x2")), 
+                                   "y": parseFloat(line.getAttribute("y2"))};
 
 
-                            var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
-                            var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
+                        var p1 = pointOnCircle(pt1.x, pt1.y, pt2.x, pt2.y, sizes.radius + sizes.edgeWidth, -sizes.angleDev);
+                        var p2 = pointOnCircle(pt2.x, pt2.y, pt1.x, pt1.y, sizes.radius + sizes.edgeWidth, sizes.angleDev);
 
-                            var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
-                            var d;
-                            if (state.directedBezier === true) {
-                                var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                                          parseFloat(p2.x), parseFloat(p2.y), dir);
-                                d = quadBezierPointsToSVG(pt);         
-                            }
-                            else {
-                                var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                                          parseFloat(p2.x), parseFloat(p2.y), dir);
-                                d = lineToSVGPath(line);
-                            }
+                        var dir = computeDir(state.selectedNodeId, state.maxIdValue, p1, p2);
+                        var d;
+                        if (state.directedBezier === true) {
+                            var pt = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
+                            d = quadBezierPointsToSVG(pt);         
+                        }
+                        else {
+                            var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                                      parseFloat(p2.x), parseFloat(p2.y), dir);
+                            d = lineToSVGPath(line);
+                        }
 
-                            path.setAttribute("d", d);
+                        path.setAttribute("d", d);
 
-                            var clickedElementId = clickedElement.id;
-                            
-                            if (clickedElementId.indexOf("circle") >= 0) {
-                                clickedElementId = clickedElementId.split("circle")[1];
-                            }
-                            if (clickedElementId.indexOf("name") >= 0) {
-                                clickedElementId = clickedElementId.split("name")[1];
-                            }
+                        var clickedElementId = clickedElement.id;
+                        
+                        if (clickedElementId.indexOf("circle") >= 0) {
+                            clickedElementId = clickedElementId.split("circle")[1];
+                        }
+                        if (clickedElementId.indexOf("name") >= 0) {
+                            clickedElementId = clickedElementId.split("name")[1];
+                        }
 
-                            if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
+                        if (parseInt(clickedElementId) !== parseInt(state.selectedNodeId)) {
+                            if (insideEdge === false) {
                                 path.setAttribute("visibility", "visible");
-                            }
-                            else {
-                                path.setAttribute("visibility", "hidden"); 
                             }
                         }
                         else {
+                            path.setAttribute("visibility", "hidden"); 
+                        }
+                    }
+                    else {
+                        if (insideEdge === false) {
                             line.setAttribute("visibility", "visible");
                         }
                     }
                 }
+                // }
             }
         }
     }
@@ -2577,9 +2769,18 @@ function handleClick(e) {
         weightModal.style.display = "none";
     }
 
+    if (event.target.id === "settingsModal" || event.target.id === "cancelSettingsModal") {
+        var settingsModal = document.getElementById('settingsModal');
+        
+        turnButton('settings', 'off');
+
+        settingsModal.style.display = "none";
+    }
+
     if (event.target.id === "loadModal" || event.target.id === "cancelLoadModal") {
         var loadModal = document.getElementById('loadModal');
 
+        turnButton('load', 'off');
         loadModal.style.display = "none";
     }
 
@@ -2629,7 +2830,7 @@ function hireListeners() {
 window.onload = function() {
     presentationSetUp();
     state = new State();
-
+    createSVGGroupZero(state.svg);
     hireListeners();
 
     cssSetUp();
@@ -2641,7 +2842,7 @@ function presentationSetUp() {
     sizes.edgeWidth = 6;
     sizes.nodeOutlineWidth = 6;
     sizes.stdPolygonPoints = "-4,0 -8,-4 -1,0 -8,4";
-    sizes.stdFontSize = "32px";
+    sizes.stdFontSize = "30px";
     sizes.weightDistance = 18;
 
     graphExamples = graphExamplesForPresentation;

@@ -332,6 +332,13 @@ function rightAnglePoint(node1Id, node2Id, p1, p2, sorted = true, dist = sizes.w
     return p;
 }
 
+function createSVGGroupZero() {
+    var gZero = document.createElement("g");
+    gZero.id = "groupZero";
+
+    return gZero;
+}
+
 function createSVGCirlce (id, x, y, radius = sizes.radius, strokeWidth = sizes.nodeOutlineWidth,
                         fill = colors.unselectedNode, stroke = colors.unselectedNodeOutline) {
     var circle = document.createElement("circle");
@@ -395,7 +402,7 @@ function createSVGNode (id, circle, text) {
 
 
 function createSVGLine(id1, id2, x1, y1, x2, y2, 
-                        stroke = colors.buildModeEdge, 
+                        stroke = colors.buildEdge, 
                         strokeWidth = sizes.edgeWidth) {
 
     var line = document.createElement("line");
@@ -490,7 +497,7 @@ function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edg
 }
 
 function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null, 
-                               stroke = colors.buildModeEdge, 
+                               stroke = colors.buildEdge, 
                                strokeWidth = sizes.edgeWidth) {
     var path = document.createElement("path");
 
@@ -514,8 +521,8 @@ function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null,
 }
 
 function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x = -2, y = 0,
-                        pts = sizes.stdPolygonPoints, fill = colors.buildModeEdge, 
-                        stroke = colors.buildModeEdge, strokeWidth = "1px") {
+                        pts = sizes.stdPolygonPoints, fill = colors.buildEdge, 
+                        stroke = colors.buildEdge, strokeWidth = "1px") {
     var marker = document.createElement("marker");
 
     marker.id = "arrow" + nodeId1 + "-" + nodeId2;
@@ -642,6 +649,10 @@ function runForbiddenPath(svg, forbiddenPathId, d, ms = 200) {
 function graphToSVG(graph) {
     var svg = document.createElement("svg");
 
+    var gZero = createSVGGroupZero();
+    svg.appendChild(gZero);
+    console.log("called");
+
     var circle, text, node;
     var nodeId, node, x, y, r, w; 
     var nodesNo = graph.allNodes.length;
@@ -695,7 +706,9 @@ function graphToSVG(graph) {
                 path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
                 edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
 
-                svg.insertBefore(edge, svg.firstChild);
+                var groupZero = state.svg.getElementById("groupZero");
+                state.svg.insertBefore(edge, groupZero);
+                // svg.insertBefore(edge, svg.firstChild);
             }
         }
     }
@@ -730,7 +743,9 @@ function graphToSVG(graph) {
                     line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
                     edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
 
-                    svg.insertBefore(edge, svg.firstChild);
+                    var groupZero = state.svg.getElementById("groupZero");
+                    state.svg.insertBefore(edge, groupZero);
+                    // svg.insertBefore(edge, svg.firstChild);
                 }
             }
         }
@@ -799,6 +814,8 @@ function graphToDirSVG(graph) {
                 
                 edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
 
+                // var groupZero = state.svg.getElementById("groupZero");
+                // state.svg.insertBefore(edge, groupZero);
                 svg.insertBefore(edge, svg.firstChild);
             }
         }
@@ -836,6 +853,8 @@ function graphToDirSVG(graph) {
                     line.classList.add("edgeOff");
                     edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
 
+                    // var groupZero = state.svg.getElementById("groupZero");
+                    // state.svg.insertBefore(edge, groupZero);
                     svg.insertBefore(edge, svg.firstChild);
                 }
             }
@@ -849,6 +868,10 @@ function graphToDirSVG(graph) {
 function updateGraphToState(graph, state) {
 
     state.svg.innerHTML = "";
+
+    var gZero = createSVGGroupZero();
+    state.svg.appendChild(gZero);
+    console.log("Called");
 
     state.createPreviewCircle();
     state.createForbiddenCircle();
@@ -929,7 +952,9 @@ function updateGraphToState(graph, state) {
 
                 edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow, text);
 
-                state.svg.insertBefore(edge, state.svg.firstChild);
+                var groupZero = state.svg.getElementById("groupZero");
+                state.svg.insertBefore(edge, groupZero);
+                // state.svg.insertBefore(edge, state.svg.firstChild);
             }
         }
     }
@@ -971,7 +996,9 @@ function updateGraphToState(graph, state) {
 
                     edge = createSVGUndirectedEdge(nodeId, neighbourId, line, text);
 
-                    state.svg.insertBefore(edge, state.svg.firstChild);
+                    var groupZero = state.svg.getElementById("groupZero");
+                    state.svg.insertBefore(edge, groupZero);
+                    // state.svg.insertBefore(edge, state.svg.firstChild);
                 }
             }
         }
@@ -1121,7 +1148,13 @@ function updatePolygonColor(polygonId, color) {
     polygon.style.fill = color;
 }
 
-function updateSVGEdgesColor(svg, newColor = "black", lineClass = "line") {
+function updateLineColor(lineId, color) {
+    var line = document.getElementById(lineId);
+
+    line.style.stroke = color;
+}
+
+function updateSVGEdgesColor(svg, newColor = colors.buildEdge, lineClass = "line") {
 	var lines = svg.getElementsByClassName(lineClass);
 
 	var line, len = lines.length;
@@ -1137,6 +1170,93 @@ function updateSVGEdgesColor(svg, newColor = "black", lineClass = "line") {
 	}
 }
 
+function updateSVGNodesBorderColor(svg, newBorderColor = "black", circleClass = "circle") {
+    var circles = svg.getElementsByClassName(circleClass);
+
+    var circle, len = circles.length;
+    for (var i = 0; i < len; ++i) {
+
+        circle = circles[i];
+        circle.style.stroke = newBorderColor;
+    }
+}
+
+function updateSVGGraphSizes(svg, radius = sizes.radius, strokeWidth = sizes.nodeOutlineWidth, 
+                             lineWidth = sizes.edgeWidth, fontSize = sizes.stdFontSize) {
+    var circle, circles = svg.getElementsByTagName("circle");
+    var len = circles.length;
+
+    for (var i = 0; i < len; ++i) {
+        circle = circles[i];
+        circle.setAttribute("r", radius);
+
+        circle.style.strokeWidth = strokeWidth;
+    }
+
+    var text, texts = svg.getElementsByTagName("text");
+    len = texts.length;
+
+    for (var i = 0; i < len; ++i) {
+        text = texts[i];
+
+        text.style.fontSize = fontSize;
+    }
+
+    var line, lines = svg.getElementsByTagName("line");
+    len = lines.length;
+
+    for (var i = 0; i < len; ++i) {
+        line = lines[i];
+
+        line.style.strokeWidth = lineWidth;
+    }
+
+    lines = svg.getElementsByTagName("path");
+    len = lines.length;
+
+    var id, circle1, circle2, x1, x2, y1, y2, d;
+
+    for (var i = 0; i < len; ++i) {
+        line = lines[i];
+
+        if (line.id !== "forbiddenPath" && line.id !== "previewPath") {
+            id = line.id.split("line")[1];
+            circle1 = document.getElementById("circle" + id.split("-")[0]);
+            circle2 = document.getElementById("circle" + id.split("-")[1]);
+
+            x1 = circle1.cx.baseVal.value;
+            y1 = circle1.cy.baseVal.value;
+
+            x2 = circle2.cx.baseVal.value;
+            y2 = circle2.cy.baseVal.value;
+
+            d = computeD(id.split("-")[0], id.split("-")[1], x1, y1, x2, y2, 
+                         radius + lineWidth);
+
+            // UPDATE TO NEW SIZES.
+            line.setAttribute("d", d);
+        }
+
+        line.style.strokeWidth = lineWidth;
+    }
+
+    svg.innerHTML = svg.innerHTML; 
+}
+
+function updateSVGGraphNodesColor(svg, nodeColor = colors.unselectedNode, 
+                                  nodeBorderColor = colors.unselectedNodeOutline) {
+    var circle, circles = svg.getElementsByTagName("circle");
+    var len = circles.length;
+
+    for (var i = 0; i < len; ++i) {
+        circle = circles[i];
+
+        circle.style.fill = nodeColor;
+        circle.style.stroke = nodeBorderColor;
+    }
+
+    svg.innerHTML = svg.innerHTML; 
+}
 
 //////////////////////////////////////////////////////// 
 /////////////////// CREATE HTML HERE ///////////////////

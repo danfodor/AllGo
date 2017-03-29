@@ -191,6 +191,13 @@ body  {
 #algorithmDiv {
   padding-left: 2px;
 }
+#saveDiv{
+  padding-right: 2px;
+}
+#loadDiv{
+  padding-left: 2px;
+}
+
 #build {
 
   -webkit-touch-callout: none;
@@ -239,6 +246,14 @@ body  {
 
 }
 
+#settings {
+  background: rgb(254,232,200);
+  background: -webkit-linear-gradient(white, rgb(254,232,200));
+  background: -o-linear-gradient(white, rgb(254,232,200));
+  background: -moz-linear-gradient(white, rgb(254,232,200));
+  background: linear-gradient(white, rgb(254,232,200));
+}
+
 #load {
   background: rgb(254,232,200);
   background: -webkit-linear-gradient(white, rgb(254,232,200));
@@ -254,7 +269,6 @@ body  {
   background: -o-linear-gradient(white, rgb(254,232,200));
   background: -moz-linear-gradient(white, rgb(254,232,200));
   background: linear-gradient(white, rgb(254,232,200));
-  
 }
 
 #rearrange {
@@ -409,6 +423,27 @@ body  {
     padding: 20px;
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.settingsModal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
+}
+
+.settingsModal-content {
+    background-color: #fefefe;
+    margin: 30px auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; 
 }
 
 .loadModal {
@@ -570,22 +605,14 @@ hr {
             user-select: none;
 }
 
-#applyDirModal, #applyWeightModal,
-#applyNameModal, #applyRearrangeModal,
-#applyLoadModal, #applySaveModal {
+.apply {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
   background: -moz-linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
   background: linear-gradient(rgba(0, 255, 0, 0.7), rgba(0, 255, 0, 0.5));
 }
-
-#applyDirModal:active, #applyDirModal:hover, 
-#applyWeightModal:active, #applyWeightModal:hover,
-#applyNameModal:active, #applyNameModal:hover,
-#applyRearrangeModal:active, #applyRearrangeModal:hover,
-#applyLoadModal:active, #applyLoadModal:hover,
-#applySaveModal:active, #applySaveModal:hover {
+.apply:active, .apply:hover {
   background: rgb(0,255,0);
   background: -webkit-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
   background: -o-linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
@@ -593,9 +620,7 @@ hr {
   background: linear-gradient(rgba(0, 255, 0, 0.8), rgba(0, 255, 0, 0.6));
 }
 
-#cancelDirModal, #cancelWeightModal,
-#cancelNameModal, #cancelRearrangeModal,
-#cancelLoadModal, #cancelSaveModal {
+.cancel {
   background: rgb(255, 0, 0);
   background: -webkit-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
   background: -o-linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
@@ -603,19 +628,13 @@ hr {
   background: linear-gradient(rgba(255, 0, 0, 0.7), rgba(255,0,0, 0.5));
 }
 
-#cancelDirModal:active, #cancelDirModal:hover, 
-#cancelWeightModal:active, #cancelWeightModal:hover,
-#cancelNameModal:active, #cancelNameModal:hover,
-#cancelRearrangeModal:active, #cancelRearrangeModal:hover,
-#cancelLoadModal:active, #cancelLoadModal:hover,
-#cancelSaveModal:active, #cancelSaveModal:hover {
+.cancel:active, .cancel:hover {
   background: rgb(255, 0, 0);
   background: -webkit-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
   background: -o-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
   background: -moz-linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
   background: linear-gradient(rgba(255, 0, 0, 0.8), rgba(255,0,0, 0.6));
 }
-
 
 #rearrangeOptions {
   text-align: center;
@@ -686,6 +705,9 @@ pre {
   background: linear-gradient(white, rgba(22, 108, 247, 0.3));
 }
 
+.settingsOption {
+  padding-bottom: 12px;
+}
 
 /*a
 {
