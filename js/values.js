@@ -9,7 +9,7 @@ var colors = {
     activeNode: "#eff5ff",
     activeNodeBorder: "#4286f4",
     unvisitedNode: "#eff5ff",
-    unvisitedNodeBorder: "#4286f4",
+    unvisitedNodeBorder: "#a0a0a0",
     visitedNode: "#eff5ff",
     visitedNodeBorder: "#008e17",
 
@@ -41,6 +41,9 @@ var nodeClass = "node";
 var nodeComponent = "nodeComponent";
 var edgeClass = "edge";
 var edgeComponent = "edgeComponent";
+
+
+var fullExecution = true;
 
 var undirectedAlgorithms = ["BFS", "DFS", "Dijkstra", "Kruskal", "Prim", "Bridges", "ArtPoints"];
 var directedAlgorithms = ["BFS", "DFS", "Dijkstra", "Kruskal", "Prim", "Bridges", "ArtPoints", "MaxFlow"];

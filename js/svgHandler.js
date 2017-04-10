@@ -1,18 +1,14 @@
 "use strict";
 
+////////////////////////////////////////////////////// 
+/////////////////      Geometry     //////////////////
+//////////////////////////////////////////////////////
+
 function euclideanDistance(p1, p2) {
 
     var dist = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + 
                      (p2.y - p1.y) * (p2.y - p1.y));
     return dist;
-}
-
-function abs(value) {
-    if (value < 0) {
-        return -value;
-    }
-
-    return value;
 }
 
 function trianglePerimeter(triangle) {
@@ -24,163 +20,6 @@ function trianglePerimeter(triangle) {
     perimeter += euclideanDistance({"x": t.x3, "y": t.y3}, {"x": t.x1, "y": t.y1});
 
     return perimeter;
-}
-
-function overlapsMargins(x, y, radius, top, right, bottom, left) {
-    var leftX = x - radius;
-    var rightX = x + radius;
-
-    var topY = y - radius;
-    var bottomY = y + radius;
-
-    if ((rightX + 2) >= right || (bottomY + 2) >= bottom) {
-        return true;
-    }
-
-    if ((leftX - 2) <= left || (topY - 2) <= top) {
-        return true;
-    }
-
-    return false;
-}
-
-function cubicBezierPoints(x1, y1, x2, y2, dir = 1, dfp = 0.2, ratio = 0.8) {
-    var X1 = x1; 
-    var Y1 = y1;
-    var X2 = x2; 
-    var Y2 = y2;
-
-    if (dir === 1) {
-        if (y1 > y2) {
-            dir = -dir;
-        }
-    }
-    else {
-        if (y1 < y2) {
-            dir = -dir;
-        }
-    }
-
-    var xp1 = (1 - dfp) * x1 + dfp * x2;  
-    var yp1 = (1 - dfp) * y1 + dfp * y2;
-    var d1 = Math.sqrt((xp1 - x1) * (xp1 - x1) + (yp1 - y1) * (yp1 - y1));
-
-    var m;
-    var mp, rx, ry;
-    if (xp1 === x1) {
-        rx = 1;
-        ry = 0;
-    } 
-    else {
-        if (yp1 === y1) {
-            rx = 0;
-            ry = 1;
-        }
-        else {
-            m = (y1 - yp1) / (x1 - xp1);
-            mp = -1 / m;
-            rx = 1 / Math.sqrt(1 + mp * mp);
-            ry = mp / Math.sqrt(1 + mp * mp);            
-        }
-    }
-
-    xp1 = xp1 + dir * ratio * d1 * rx;
-    yp1 = yp1 + dir * ratio * d1 * ry;
-
-    var xp2 = dfp * x1 + (1 - dfp) * x2;  
-    var yp2 = dfp * y1 + (1 - dfp) * y2;
-    var d2 = Math.sqrt((xp2 - x2) * (xp2 - x2) + (yp2 - y2) * (yp2 - y2));
-
-    xp2 = xp2 + dir * ratio * d2 * rx;
-    yp2 = yp2 + dir * ratio * d2 * ry;
-
-    return {"x1": x1, "y1": y1, "xp1": xp1, "yp1": yp1, 
-            "xp2": xp2, "yp2": yp2, "x2": x2, "y2": y2};
-}
-
-function cubicBezierPointsToSVG(points) {
-    var d = "";
-
-    d += "M " + points.x1 + " " + points.y1 + " ";
-    d += "C " + points.xp1 + " " + points.yp1 + ", ";
-    d += points.xp2 + " " + points.yp2 + ", ";   
-    d += points.x2 + " " + points.y2;   
-
-    return d;
-}
-
-function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.3, dist = null) {
-
-    var xp = (1 - distFromP1) * x1 + distFromP1 * x2;  
-    var yp = (1 - distFromP1) * y1 + distFromP1 * y2;
-    var dist = Math.sqrt((xp - x1) * (xp - x1) + (yp - y1) * (yp - y1));
-
-    var p1 = {"x": xp, "y": yp};
-    var p2 = {"x": x1, "y": y1};
-
-
-    var v = orthogonalVector(p1, p2);
-
-    var controlX = xp + dir * height * dist * v.x;
-    var controlY = yp + dir * height * dist * v.y;
-
-    return {"x1": x1, "y1": y1, "xp": controlX, "yp": controlY,
-            "x2": x2, "y2": y2};
-}
-
-function quadBezierPointsToSVG(quadBezier) {
-    var d = "";
-
-    d += "M " + quadBezier.x1 + " " + quadBezier.y1 + " ";
-    d += "Q " + quadBezier.xp + " " + quadBezier.yp + ", ";   
-    d += quadBezier.x2 + " " + quadBezier.y2;   
-
-    return d;
-}
-
-// This function is used by directed graphs so that 
-// no matter the id of the edge is, the output is the 
-// same all the time (1-2 and 2-1 will both be considered
-// as 1-2)
-function computeSortedDir(node1Id, node2Id, p1, p2) {
-    var dir = null;
-
-    if (parseInt(node1Id) < parseInt(node2Id)) {
-        dir = computeDir(node1Id, node2Id, p1, p2);
-    } 
-    else {
-        dir = computeDir(node2Id, node1Id, p2, p1);
-    }
-
-    return dir;
-}
-
-// Computes the direction for placing 
-function computeDir(node1Id, node2Id, p1, p2) {
-    var dir = 1;
-    if (parseInt(node1Id) > parseInt(node2Id)) {
-        dir = -1;
-    }
-
-    if (parseFloat(p1.y) === parseFloat(p2.y)) {
-        if ((parseFloat(p1.x) < parseFloat(p2.x) && parseInt(dir) === 1) || 
-            (parseFloat(p2.x) < parseFloat(p1.x) && parseInt(dir) === -1)) {
-            dir = -dir;
-        }
-    }
-    else {
-        if (parseInt(dir) === 1) {
-            if (parseFloat(p2.y) < parseFloat(p1.y)) {
-                dir = -dir;
-            }
-        }
-        else {
-            if (parseFloat(p1.y) < parseFloat(p2.y)) {
-                dir = -dir;
-            }
-        }
-    } 
-    return dir;   
 }
 
 function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
@@ -203,25 +42,10 @@ function pointOnCircle(x1, y1, x2, y2, r = 1, deviate = 0) {
     return pt;
 }
 
+// TODO: Consider this as util.
 function lineFromPoints(x1, y1, x2, y2) {
 
     return {"x1": x1, "y1": y1, "x2": x2, "y2": y2};
-}
-
-function lineToSVGPath(line) {
-    var d = "";
-
-    d += "M " + line.x1 + " " + line.y1 + " ";
-    d += "L " + line.x2 + " " + line.y2;
-
-    return d;
-}
-
-function pointOnBezierCurve(curve, t = 0.5) {
-    var x = (1 - t) * (1 - t) * curve.x1 + 2 * (1 - t) * t * curve.xp + t * t * curve.x2;
-    var y = (1 - t) * (1 - t) * curve.y1 + 2 * (1 - t) * t * curve.yp + t * t * curve.y2;
-
-    return {"x": x, "y": y};
 }
 
 function pointOnLine(line, t = 0.5) {
@@ -330,682 +154,6 @@ function rightAnglePoint(node1Id, node2Id, p1, p2, sorted = true, dist = sizes.w
     p.y = p.y + dir * dist * v.y;
 
     return p;
-}
-
-function createSVGGroupZero() {
-    var gZero = document.createElement("g");
-    gZero.id = "groupZero";
-
-    return gZero;
-}
-
-function createSVGCirlce (id, x, y, radius = sizes.radius, strokeWidth = sizes.nodeOutlineWidth,
-                        fill = colors.unselectedNode, stroke = colors.unselectedNodeOutline) {
-    var circle = document.createElement("circle");
-    
-    circle.id = "circle";
-    circle.id += id;
-
-    circle.setAttribute("cx", x);
-    circle.setAttribute("cy", y);
-    circle.setAttribute("r", radius);
-
-    circle.style.fill = fill;
-    circle.style.stroke = stroke;
-    circle.style.strokeWidth = strokeWidth;
-    
-    circle.classList.add(nodeComponent);
-    circle.classList.add("circle");
-
-    return circle;
-}
-
-function createSVGText (id, x, y, fontSize = sizes.stdFontSize, name = null) {
-    var text = document.createElement("text");
-    
-    text.id = "name" + id;
-    text.style.fontSize = fontSize;
-    text.style.alignmentBaseline = "central";
-    text.style.textAnchor = "middle";
-    text.style.fontWeight = "bold";
-
-    text.setAttribute("x", x);
-    text.setAttribute("y", y);
-    text.style.cursor = "default";
-    if (name === null) {
-        text.innerHTML = id;
-    }
-    else {
-        text.innerHTML = name;
-    }
-    
-    text.classList.add(nodeComponent);
-    text.classList.add("name");
-
-    return text;
-}
-
-function createSVGNode (id, circle, text) {
-    var node = document.createElement("g");
-    node.id = id;
-    
-    node.appendChild(circle);
-    node.appendChild(text);
-    
-    node.classList.add("node" + node.id);
-    
-    node.classList.add(nodeClass);
-    node.classList.add(graphComponent);
-
-    return node;
-}
-
-
-function createSVGLine(id1, id2, x1, y1, x2, y2, 
-                        stroke = colors.buildEdge, 
-                        strokeWidth = sizes.edgeWidth) {
-
-    var line = document.createElement("line");
-
-    line.id = "line" + id1 + "-" + id2;
-    
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    
-    line.style.stroke = stroke;
-    line.style.strokeWidth = strokeWidth;
-    line.classList.add(edgeComponent);
-    line.classList.add("line");
-
-    return line;
-}
-
-function createSVGWeight(nodeId1, nodeId2, p1, p2, weight, sorted = true, 
-                         fontSize = sizes.stdFontSize) {
-    var text = document.createElement("text");
-    
-    text.id = "weight" + nodeId1 + "-" + nodeId2;
-
-    text.style.fontSize = fontSize;
-    text.style.alignmentBaseline = "central";
-    text.style.textAnchor = "middle";
-    text.style.fontWeight = "bold";
-
-    var p = rightAnglePoint(nodeId1, nodeId2, {"x": p1.x, "y": p1.y}, {"x": p2.x, "y": p2.y}, sorted);
-
-    text.setAttribute("x", p.x);
-    text.setAttribute("y", p.y);
-    text.style.cursor = "text";
-
-    text.innerHTML = weight;
-    
-    text.classList.add(edgeComponent);
-    text.classList.add("weight");
-
-    return text;
-}
-
-function createSVGUndirectedEdge(nodeId1, nodeId2, line, text) {
-
-    var edge = document.createElement("g");
-    edge.id = nodeId1 + "-" + nodeId2;
-
-    edge.appendChild(line);
-
-    if (text) {
-        edge.appendChild(text);  
-    }
-    
-    edge.classList.add("node" + nodeId1);      
-    edge.classList.add("node" + nodeId2);   
-
-    edge.classList.add(edgeClass);
-    edge.classList.add(graphComponent);
-
-    return edge;
-}
-
-
-function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edgeWidth, 
-                    dev = sizes.angleDev, directedBezier = false) {
-
-    x1 = parseFloat(x1);
-    y1 = parseFloat(y1);
-    x2 = parseFloat(x2);
-    y2 = parseFloat(y2);
-
-    var d;
-
-    var p1 = pointOnCircle(x1, y1, x2, y2, r, -dev);
-    var p2 = pointOnCircle(x2, y2, x1, y1, r, dev);
-    var dir = computeDir(nodeId1, nodeId2, p1, p2);
-    
-    if (directedBezier === true) {
-        var pts = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                  parseFloat(p2.x), parseFloat(p2.y), dir);
-        d = quadBezierPointsToSVG(pts);           
-    }
-    else {
-        var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
-                                  parseFloat(p2.x), parseFloat(p2.y));
-        d = lineToSVGPath(line);        
-    }
-
-    return d;
-}
-
-function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null, 
-                               stroke = colors.buildEdge, 
-                               strokeWidth = sizes.edgeWidth) {
-    var path = document.createElement("path");
-
-    path.id = "line" + nodeId1 + "-" + nodeId2;
-
-    path.setAttribute("d", d);
-    
-    path.style.stroke = stroke;
-
-    path.style.strokeWidth = strokeWidth;
-    path.style.fill= "transparent";
-
-    path.classList.add(edgeComponent);
-    path.classList.add("line");
-    
-    if (markerId !== null) {
-        path.setAttribute("marker-end", 'url(#' + markerId + ')');
-    }
-
-    return path;
-}
-
-function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x = -2, y = 0,
-                        pts = sizes.stdPolygonPoints, fill = colors.buildEdge, 
-                        stroke = colors.buildEdge, strokeWidth = "1px") {
-    var marker = document.createElement("marker");
-
-    marker.id = "arrow" + nodeId1 + "-" + nodeId2;
-    marker.setAttribute("markerWidth", w);
-    marker.setAttribute("markerHeight", h);
-    marker.setAttribute("viewBox", vb);
-    marker.setAttribute("refX", x);
-    marker.setAttribute("refY", y);
-    marker.setAttribute("orient", "auto");
-    marker.setAttribute("markerUnits", "strokeWidth");
-    
-    var polygon = document.createElement("polygon");
-    polygon.id = "polygon" + nodeId1 + "-" + nodeId2;
-    polygon.setAttribute("points", pts);
-    polygon.setAttribute("fill", fill);
-    polygon.setAttribute("stroke", stroke);
-    polygon.setAttribute("stroke-width", strokeWidth);
-    polygon.classList.add("line");
-
-    marker.innerHTML = polygon.outerHTML;
-
-    return marker;
-}
-
-function createSVGArrow(marker) {
-    var arrow = document.createElement("defs");
-
-    arrow.appendChild(marker);
-
-    return arrow;
-}
-
-// CONTINUEHERE:
-function createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text) {
-    var edge = document.createElement("g");
-    edge.id = nodeId1 + "-" + nodeId2;
-
-    edge.appendChild(arrow);
-    edge.appendChild(path);
-
-    if (text) {
-        edge.appendChild(text);
-    }
-            
-    edge.classList.add("node" + nodeId1);      
-    edge.classList.add("node" + nodeId2);   
-
-    edge.classList.add(edgeClass);
-    edge.classList.add(graphComponent);
-
-    return edge;
-}
-
-function createSVGOption(name, value) {
-    var option = document.createElement("option");
-    
-    option.setAttribute("value", value);
-    option.innerHTML = name;
-
-    return option
-}
-
-function createSVGOptions(id, nodes) {
-
-    var options = document.createElement("select");
-    options.id = id;
-    var optionsHTML = "";
-    var option;
-    for (var it = 0; it < nodes.length; ++it) {
-
-        option = createSVGOption(nodes[it].name, nodes[it].id)
-
-        optionsHTML += option.outerHTML + "\n";
-	}
-	options.innerHTML = optionsHTML;
-    return options;
-}
-
-
-function runForbiddenCircle(svg, forbiddenCircleId, x, y, ms = 200) {
-
-    var forbiddenCircle = svg.getElementById(forbiddenCircleId);
-    forbiddenCircle.setAttribute("cx", x);
-    forbiddenCircle.setAttribute("cy", y);
-    forbiddenCircle.setAttribute("visibility", "visible");
-
-    setTimeout(function() {
-        var forbiddenCircle = svg.getElementById(forbiddenCircleId);
-        forbiddenCircle.setAttribute("visibility", "hidden");
-        svg.innerHTML = svg.innerHTML;
-    }, ms);
-}
-
-function runForbiddenLine(svg, forbiddenLineId, x1, y1, x2, y2, ms = 200) {
-
-    var forbiddenLine = svg.getElementById(forbiddenLineId);
-    forbiddenLine.setAttribute("x1", x1);
-    forbiddenLine.setAttribute("y1", y1);
-    forbiddenLine.setAttribute("x2", x2);
-    forbiddenLine.setAttribute("y2", y2);
-    forbiddenLine.setAttribute("visibility", "visible");
-
-    setTimeout(function() {
-        var forbiddenLine = svg.getElementById(forbiddenLineId);
-        forbiddenLine.setAttribute("visibility", "hidden");
-        svg.innerHTML = svg.innerHTML;
-    }, ms);
-}
-
-function runForbiddenPath(svg, forbiddenPathId, d, ms = 200) {
-
-    var forbiddenPath = svg.getElementById(forbiddenPathId);
-
-    forbiddenPath.setAttribute("d", d);
-    forbiddenPath.setAttribute("visibility", "visible");
-    
-    setTimeout(function() {
-        var forbiddenPath = svg.getElementById(forbiddenPathId);
-        forbiddenPath.setAttribute("visibility", "hidden");
-        svg.innerHTML = svg.innerHTML;
-    }, ms);
-}
-
-function graphToSVG(graph) {
-    var svg = document.createElement("svg");
-
-    var gZero = createSVGGroupZero();
-    svg.appendChild(gZero);
-    console.log("called");
-
-    var circle, text, node;
-    var nodeId, node, x, y, r, w; 
-    var nodesNo = graph.allNodes.length;
-
-    for (var i = 0; i < nodesNo; ++i) {
-        node = graph.allNodes[i];
-
-        nodeId = node.id;
-        x = node.x;
-        y = node.y;
-        r = node.r;
-        w = node.outlineWidth;
-      
-        circle = createSVGCirlce(nodeId, x, y, r, w);
-        text = createSVGText(nodeId, x, y);
-        node = createSVGNode(nodeId, circle, text);
-
-        svg.appendChild(node);      
-    }
-
-    if (graph.directed === true) {
-        var adjList;
-        var outNeighbours, outNeighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var d, path, marker, arrow, edge;
-        // TODO: Consider weight.
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            outNeighbours = adjList.outNeighbours;
-            outNeighboursNo = outNeighbours.length;
-            nodeId = adjList.id;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < outNeighboursNo; ++j) {
-                neighbourId = outNeighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                x1 = graph.allNodes[nodeIndex].x;
-                y1 = graph.allNodes[nodeIndex].y;
-                x2 = graph.allNodes[neighbourIndex].x;
-                y2 = graph.allNodes[neighbourIndex].y;
-
-                d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
-
-                marker = createSVGMarker(nodeId, neighbourId);
-                arrow = createSVGArrow(marker);
-                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
-
-                var groupZero = state.svg.getElementById("groupZero");
-                state.svg.insertBefore(edge, groupZero);
-                // svg.insertBefore(edge, svg.firstChild);
-            }
-        }
-    }
-    else {
-        var adjList;
-        var neighbours, neighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var line, edge;
-        // TODO: Consider weight.
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            neighbours = adjList.neighbours;
-            neighboursNo = neighbours.length;
-            nodeId = adjList.id;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < neighboursNo; ++j) {
-                neighbourId = neighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                if (parseInt(nodeId) < parseInt(neighbourId)) {
-
-                    x1 = graph.allNodes[nodeIndex].x;
-                    y1 = graph.allNodes[nodeIndex].y;
-                    x2 = graph.allNodes[neighbourIndex].x;
-                    y2 = graph.allNodes[neighbourIndex].y;
-
-                    line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
-                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
-
-                    var groupZero = state.svg.getElementById("groupZero");
-                    state.svg.insertBefore(edge, groupZero);
-                    // svg.insertBefore(edge, svg.firstChild);
-                }
-            }
-        }
-    }
-    return svg;
-}
-
-function graphToDirSVG(graph) {
-    var svg = document.createElement("svg");
-
-    var circle, text, node;
-    var nodeId, node, x, y, r, w; 
-    var nodesNo = graph.allNodes.length;
-
-    for (var i = 0; i < nodesNo; ++i) {
-        node = graph.allNodes[i];
-
-        nodeId = node.id;
-        nodeId = "0" + nodeId;
-        x = node.x;
-        y = node.y;
-        r = node.r;
-        w = node.outlineWidth;
-      
-        circle = createSVGCirlce(nodeId, x, y, r, w);
-        text = createSVGText(node.id, x, y);
-        node = createSVGNode(nodeId, circle, text);
-
-        svg.appendChild(node);      
-    }
-
-    if (graph.directed === true) {
-        var adjList;
-        var outNeighbours, outNeighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var d, path, marker, arrow, edge;
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            outNeighbours = adjList.outNeighbours;
-            outNeighboursNo = outNeighbours.length;
-            nodeId = adjList.id;
-            nodeId = "0" + nodeId;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < outNeighboursNo; ++j) {
-                neighbourId = outNeighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                x1 = graph.allNodes[nodeIndex].x;
-                y1 = graph.allNodes[nodeIndex].y;
-                x2 = graph.allNodes[neighbourIndex].x;
-                y2 = graph.allNodes[neighbourIndex].y;
-
-                d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
-
-                marker = createSVGMarker(nodeId, neighbourId);
-                
-                arrow = createSVGArrow(marker);
-                
-                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-                path.classList.add("edgeOff");
-                
-                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow);
-
-                // var groupZero = state.svg.getElementById("groupZero");
-                // state.svg.insertBefore(edge, groupZero);
-                svg.insertBefore(edge, svg.firstChild);
-            }
-        }
-    }
-    else {
-        var adjList;
-        var neighbours, neighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var line, edge;
-        // TODO: Consider weight.
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            neighbours = adjList.neighbours;
-            neighboursNo = neighbours.length;
-            nodeId = adjList.id;
-            nodeId = "0" + nodeId;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < neighboursNo; ++j) {
-                neighbourId = neighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                if (parseInt(nodeId) < parseInt(neighbourId)) {
-
-                    x1 = graph.allNodes[nodeIndex].x;
-                    y1 = graph.allNodes[nodeIndex].y;
-                    x2 = graph.allNodes[neighbourIndex].x;
-                    y2 = graph.allNodes[neighbourIndex].y;
-
-                    line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
-                    line.classList.add("edgeOff");
-                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line);
-
-                    // var groupZero = state.svg.getElementById("groupZero");
-                    // state.svg.insertBefore(edge, groupZero);
-                    svg.insertBefore(edge, svg.firstChild);
-                }
-            }
-        }
-    }
-
-    return svg;
-}
-
-
-function updateGraphToState(graph, state) {
-
-    state.svg.innerHTML = "";
-
-    var gZero = createSVGGroupZero();
-    state.svg.appendChild(gZero);
-    console.log("Called");
-
-    state.createPreviewCircle();
-    state.createForbiddenCircle();
-    state.createPreviewLine();
-    state.createForbiddenLine();
-    state.createPreviewPath();
-    state.createForbiddenPath();
-
-    var circle, text, node;
-    var nodeId, node, x, y, r, w; 
-    var nodesNo = graph.allNodes.length;
-
-    for (var i = 0; i < nodesNo; ++i) {
-        node = graph.allNodes[i];
-
-        nodeId = node.id;
-        x = node.x;
-        y = node.y;
-        r = node.r;
-        w = node.outlineWidth;
-      
-        circle = createSVGCirlce(nodeId, x, y, r, w);
-        text = createSVGText(nodeId, x, y);
-        node = createSVGNode(nodeId, circle, text);
-
-        state.svg.appendChild(node);      
-    }
-
-    if (graph.directed === true) {
-        var adjList;
-        var outNeighbours, outNeighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var d, path, marker, arrow, edge;
-        // TODO: Consider weight.
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            outNeighbours = adjList.outNeighbours;
-            outNeighboursNo = outNeighbours.length;
-            nodeId = adjList.id;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < outNeighboursNo; ++j) {
-                neighbourId = outNeighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                x1 = graph.allNodes[nodeIndex].x;
-                y1 = graph.allNodes[nodeIndex].y;
-                x2 = graph.allNodes[neighbourIndex].x;
-                y2 = graph.allNodes[neighbourIndex].y;
-
-                d = computeD(nodeId, neighbourId, x1, y1, x2, y2);
-
-                marker = createSVGMarker(nodeId, neighbourId);
-                arrow = createSVGArrow(marker);
-                path = createSVGDirectedPath(nodeId, neighbourId, d, marker.id);
-
-
-                var text = undefined;
-                if (graph.weighted === true) {
-                    var xp1 = parseFloat(d.split('M')[1].split(' ')[1]);
-                    var yp1 = parseFloat(d.split('M')[1].split(' ')[2]);
-
-                    var l = d.split(' ').length;
-                    var xp2 = parseFloat(d.split(' ')[l - 2]);
-                    var yp2 = parseFloat(d.split(' ')[l - 1]);
-
-                    var p1 = {"x": xp1, "y": yp1};
-                    var p2 = {"x": xp2, "y": yp2};
-
-                    var weight = graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId));
-
-                    text = createSVGWeight(nodeId, neighbourId, p1, p2, weight, false);
-                }
-
-                edge = createSVGDirectedEdge(nodeId, neighbourId, path, arrow, text);
-
-                var groupZero = state.svg.getElementById("groupZero");
-                state.svg.insertBefore(edge, groupZero);
-                // state.svg.insertBefore(edge, state.svg.firstChild);
-            }
-        }
-    }
-    else {
-        var adjList;
-        var neighbours, neighboursNo, neighbourId;
-        var nodeIndex, neighbourIndex;
-        var x1, y1, x2, y2;
-
-        var line, edge;
-
-        for (var i = 0; i < nodesNo; ++i) {
-            adjList = graph.adjacencyLists[i];
-
-            neighbours = adjList.neighbours;
-            neighboursNo = neighbours.length;
-            nodeId = adjList.id;
-            nodeIndex = graph.getNodeIndexFromId(nodeId);
-
-            for (var j = 0; j < neighboursNo; ++j) {
-                neighbourId = neighbours[j];
-                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
-
-                if (parseInt(nodeId) < parseInt(neighbourId)) {
-
-                    x1 = graph.allNodes[nodeIndex].x;
-                    y1 = graph.allNodes[nodeIndex].y;
-                    x2 = graph.allNodes[neighbourIndex].x;
-                    y2 = graph.allNodes[neighbourIndex].y;
-
-                    line = createSVGLine(nodeId, neighbourId, x1, y1, x2, y2);
-
-                    var text = undefined;
-                    if (graph.weighted === true) {
-                        var weight = graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId));
-
-                        text = createSVGWeight(nodeId, neighbourId, {x: x1, y: y1}, {x: x2, y: y2}, weight);
-                    }
-
-                    edge = createSVGUndirectedEdge(nodeId, neighbourId, line, text);
-
-                    var groupZero = state.svg.getElementById("groupZero");
-                    state.svg.insertBefore(edge, groupZero);
-                    // state.svg.insertBefore(edge, state.svg.firstChild);
-                }
-            }
-        }
-    }
-
-    state.graph = graph;
-    return state;
 }
 
 function pointIntersectsLine(point, line) {
@@ -1141,17 +289,603 @@ function pointIntersectsEdge(point, graph, svg, r = sizes.radius + sizes.nodeOut
     return intersects;
 }
 
+
+////////////////////////////////////////////////////// 
+////////////////         TBD         /////////////////
+//////////////////////////////////////////////////////
+
+
+function abs(value) {
+    if (value < 0) {
+        return -value;
+    }
+
+    return value;
+}
+
+function overlapsMargins(x, y, radius, top, right, bottom, left) {
+    var leftX = x - radius;
+    var rightX = x + radius;
+
+    var topY = y - radius;
+    var bottomY = y + radius;
+
+    if ((rightX + 2) >= right || (bottomY + 2) >= bottom) {
+        return true;
+    }
+
+    if ((leftX - 2) <= left || (topY - 2) <= top) {
+        return true;
+    }
+
+    return false;
+}
+
+function cubicBezierPoints(x1, y1, x2, y2, dir = 1, dfp = 0.2, ratio = 0.8) {
+    var X1 = x1; 
+    var Y1 = y1;
+    var X2 = x2; 
+    var Y2 = y2;
+
+    if (dir === 1) {
+        if (y1 > y2) {
+            dir = -dir;
+        }
+    }
+    else {
+        if (y1 < y2) {
+            dir = -dir;
+        }
+    }
+
+    var xp1 = (1 - dfp) * x1 + dfp * x2;  
+    var yp1 = (1 - dfp) * y1 + dfp * y2;
+    var d1 = Math.sqrt((xp1 - x1) * (xp1 - x1) + (yp1 - y1) * (yp1 - y1));
+
+    var m;
+    var mp, rx, ry;
+    if (xp1 === x1) {
+        rx = 1;
+        ry = 0;
+    } 
+    else {
+        if (yp1 === y1) {
+            rx = 0;
+            ry = 1;
+        }
+        else {
+            m = (y1 - yp1) / (x1 - xp1);
+            mp = -1 / m;
+            rx = 1 / Math.sqrt(1 + mp * mp);
+            ry = mp / Math.sqrt(1 + mp * mp);            
+        }
+    }
+
+    xp1 = xp1 + dir * ratio * d1 * rx;
+    yp1 = yp1 + dir * ratio * d1 * ry;
+
+    var xp2 = dfp * x1 + (1 - dfp) * x2;  
+    var yp2 = dfp * y1 + (1 - dfp) * y2;
+    var d2 = Math.sqrt((xp2 - x2) * (xp2 - x2) + (yp2 - y2) * (yp2 - y2));
+
+    xp2 = xp2 + dir * ratio * d2 * rx;
+    yp2 = yp2 + dir * ratio * d2 * ry;
+
+    return {"x1": x1, "y1": y1, "xp1": xp1, "yp1": yp1, 
+            "xp2": xp2, "yp2": yp2, "x2": x2, "y2": y2};
+}
+
+function cubicBezierPointsToSVG(points) {
+    var d = "";
+
+    d += "M " + points.x1 + " " + points.y1 + " ";
+    d += "C " + points.xp1 + " " + points.yp1 + ", ";
+    d += points.xp2 + " " + points.yp2 + ", ";   
+    d += points.x2 + " " + points.y2;   
+
+    return d;
+}
+
+function quadBezierPoints(x1, y1, x2, y2, dir = 1, distFromP1 = 0.5, height = 0.3, dist = null) {
+
+    var xp = (1 - distFromP1) * x1 + distFromP1 * x2;  
+    var yp = (1 - distFromP1) * y1 + distFromP1 * y2;
+    var dist = Math.sqrt((xp - x1) * (xp - x1) + (yp - y1) * (yp - y1));
+
+    var p1 = {"x": xp, "y": yp};
+    var p2 = {"x": x1, "y": y1};
+
+
+    var v = orthogonalVector(p1, p2);
+
+    var controlX = xp + dir * height * dist * v.x;
+    var controlY = yp + dir * height * dist * v.y;
+
+    return {"x1": x1, "y1": y1, "xp": controlX, "yp": controlY,
+            "x2": x2, "y2": y2};
+}
+
+function quadBezierPointsToSVG(quadBezier) {
+    var d = "";
+
+    d += "M " + quadBezier.x1 + " " + quadBezier.y1 + " ";
+    d += "Q " + quadBezier.xp + " " + quadBezier.yp + ", ";   
+    d += quadBezier.x2 + " " + quadBezier.y2;   
+
+    return d;
+}
+
+function pointOnBezierCurve(curve, t = 0.5) {
+    var x = (1 - t) * (1 - t) * curve.x1 + 2 * (1 - t) * t * curve.xp + t * t * curve.x2;
+    var y = (1 - t) * (1 - t) * curve.y1 + 2 * (1 - t) * t * curve.yp + t * t * curve.y2;
+
+    return {"x": x, "y": y};
+}
+
+// This function is used by directed graphs so that 
+// no matter the id of the edge is, the output is the 
+// same all the time (1-2 and 2-1 will both be considered
+// as 1-2)
+function computeSortedDir(node1Id, node2Id, p1, p2) {
+    var dir = null;
+
+    if (parseInt(node1Id) < parseInt(node2Id)) {
+        dir = computeDir(node1Id, node2Id, p1, p2);
+    } 
+    else {
+        dir = computeDir(node2Id, node1Id, p2, p1);
+    }
+
+    return dir;
+}
+
+// Computes the direction for placing 
+function computeDir(node1Id, node2Id, p1, p2) {
+    var dir = 1;
+    if (parseInt(node1Id) > parseInt(node2Id)) {
+        dir = -1;
+    }
+
+    if (parseFloat(p1.y) === parseFloat(p2.y)) {
+        if ((parseFloat(p1.x) < parseFloat(p2.x) && parseInt(dir) === 1) || 
+            (parseFloat(p2.x) < parseFloat(p1.x) && parseInt(dir) === -1)) {
+            dir = -dir;
+        }
+    }
+    else {
+        if (parseInt(dir) === 1) {
+            if (parseFloat(p2.y) < parseFloat(p1.y)) {
+                dir = -dir;
+            }
+        }
+        else {
+            if (parseFloat(p1.y) < parseFloat(p2.y)) {
+                dir = -dir;
+            }
+        }
+    } 
+    return dir;   
+}
+
+function lineToSVGPath(line) {
+    var d = "";
+
+    d += "M " + line.x1 + " " + line.y1 + " ";
+    d += "L " + line.x2 + " " + line.y2;
+
+    return d;
+}
+
+
+function computeD(nodeId1, nodeId2, x1, y1, x2, y2, r = sizes.radius + sizes.edgeWidth, 
+                    dev = sizes.angleDev, directedBezier = false) {
+
+    x1 = parseFloat(x1);
+    y1 = parseFloat(y1);
+    x2 = parseFloat(x2);
+    y2 = parseFloat(y2);
+
+    var d;
+
+    var p1 = pointOnCircle(x1, y1, x2, y2, r, -dev);
+    var p2 = pointOnCircle(x2, y2, x1, y1, r, dev);
+    var dir = computeDir(nodeId1, nodeId2, p1, p2);
+    
+    if (directedBezier === true) {
+        var pts = quadBezierPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                  parseFloat(p2.x), parseFloat(p2.y), dir);
+        d = quadBezierPointsToSVG(pts);           
+    }
+    else {
+        var line = lineFromPoints(parseFloat(p1.x), parseFloat(p1.y), 
+                                  parseFloat(p2.x), parseFloat(p2.y));
+        d = lineToSVGPath(line);        
+    }
+
+    return d;
+}
+
+////////////////////////////////////////////////////// 
+////////////////      SVG-Create     /////////////////
+//////////////////////////////////////////////////////
+
+function createSVGGroupZero() {
+    var gZero = document.createElement("g");
+    gZero.id = "groupZero";
+
+    return gZero;
+}
+
+function createSVGCirlce (id, x, y, radius = sizes.radius, strokeWidth = sizes.nodeOutlineWidth,
+                        fill = colors.unselectedNode, stroke = colors.unselectedNodeOutline) {
+    var circle = document.createElement("circle");
+    
+    circle.id = "circle";
+    circle.id += id;
+
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", radius);
+
+    circle.style.fill = fill;
+    circle.style.stroke = stroke;
+    circle.style.strokeWidth = strokeWidth;
+    
+    circle.classList.add(nodeComponent);
+    circle.classList.add("circle");
+
+    return circle;
+}
+
+function createSVGText (id, x, y, fontSize = sizes.stdFontSize, name = null) {
+    var text = document.createElement("text");
+    
+    text.id = "name" + id;
+    text.style.fontSize = fontSize;
+    text.style.alignmentBaseline = "central";
+    text.style.textAnchor = "middle";
+    text.style.fontWeight = "bold";
+
+    text.setAttribute("x", x);
+    text.setAttribute("y", y);
+    text.style.cursor = "default";
+    if (name === null) {
+        text.innerHTML = id;
+    }
+    else {
+        text.innerHTML = name;
+    }
+    
+    text.classList.add(nodeComponent);
+    text.classList.add("name");
+
+    return text;
+}
+
+function createSVGNode (id, circle, text) {
+    var node = document.createElement("g");
+    node.id = id;
+    
+    node.appendChild(circle);
+    node.appendChild(text);
+    
+    node.classList.add("node" + node.id);
+    
+    node.classList.add(nodeClass);
+    node.classList.add(graphComponent);
+
+    return node;
+}
+
+
+function createSVGLine(id1, id2, x1, y1, x2, y2, 
+                        stroke = colors.buildEdge, 
+                        strokeWidth = sizes.edgeWidth) {
+
+    var line = document.createElement("line");
+
+    line.id = "line" + id1 + "-" + id2;
+    
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+    
+    line.style.stroke = stroke;
+    line.style.strokeWidth = strokeWidth;
+    line.classList.add(edgeComponent);
+    line.classList.add("line");
+
+    return line;
+}
+
+function createSVGWeight(nodeId1, nodeId2, p1, p2, weight, sorted = true, 
+                         fontSize = sizes.stdFontSize) {
+    var text = document.createElement("text");
+    
+    text.id = "weight" + nodeId1 + "-" + nodeId2;
+
+    text.style.fontSize = fontSize;
+    text.style.alignmentBaseline = "central";
+    text.style.textAnchor = "middle";
+    text.style.fontWeight = "bold";
+
+    var p = rightAnglePoint(nodeId1, nodeId2, {"x": p1.x, "y": p1.y}, {"x": p2.x, "y": p2.y}, sorted);
+
+    text.setAttribute("x", p.x);
+    text.setAttribute("y", p.y);
+    text.style.cursor = "text";
+
+    text.innerHTML = weight;
+    
+    text.classList.add(edgeComponent);
+    text.classList.add("weight");
+
+    return text;
+}
+
+function createSVGUndirectedEdge(nodeId1, nodeId2, p1, p2, weighted = false, wieght = 0) {
+
+    var x1 = p1.x;
+    var y1 = p1.y;
+    var x2 = p2.x;
+    var y2 = p2.y;
+
+    var p1 = {"x": x1, "y": y1};
+    var p2 = {"x": x2, "y": y2};
+
+    var line = createSVGLine(nodeId1, nodeId2, x1, y1, x2, y2);
+    var text = undefined;
+    if (weighted === true) {
+        text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight);
+    }
+
+    var edge = document.createElement("g");
+    edge.id = nodeId1 + "-" + nodeId2;
+
+    edge.appendChild(line);
+    if (text) {
+        edge.appendChild(text);  
+    }
+    
+    edge.classList.add("node" + nodeId1);      
+    edge.classList.add("node" + nodeId2);   
+    edge.classList.add(edgeClass);
+    edge.classList.add(graphComponent);
+
+    return edge;
+}
+
+function createSVGDirectedPath(nodeId1, nodeId2, d, markerId = null, 
+                               stroke = colors.buildEdge, 
+                               strokeWidth = sizes.edgeWidth) {
+    var path = document.createElement("path");
+
+    path.id = "line" + nodeId1 + "-" + nodeId2;
+
+    path.setAttribute("d", d);
+    
+    path.style.stroke = stroke;
+
+    path.style.strokeWidth = strokeWidth;
+    path.style.fill= "transparent";
+
+    path.classList.add(edgeComponent);
+    path.classList.add("line");
+    
+    if (markerId !== null) {
+        path.setAttribute("marker-end", 'url(#' + markerId + ')');
+    }
+
+    return path;
+}
+
+function createSVGMarker(nodeId1, nodeId2, w = 5, h = 5, vb = "-10 -4 12 12", x = -2, y = 0,
+                        pts = sizes.stdPolygonPoints, fill = colors.buildEdge, 
+                        stroke = colors.buildEdge, strokeWidth = "1px") {
+    var marker = document.createElement("marker");
+
+    marker.id = "arrow" + nodeId1 + "-" + nodeId2;
+    marker.setAttribute("markerWidth", w);
+    marker.setAttribute("markerHeight", h);
+    marker.setAttribute("viewBox", vb);
+    marker.setAttribute("refX", x);
+    marker.setAttribute("refY", y);
+    marker.setAttribute("orient", "auto");
+    marker.setAttribute("markerUnits", "strokeWidth");
+    
+    var polygon = document.createElement("polygon");
+    polygon.id = "polygon" + nodeId1 + "-" + nodeId2;
+    polygon.setAttribute("points", pts);
+    polygon.setAttribute("fill", fill);
+    polygon.setAttribute("stroke", stroke);
+    polygon.setAttribute("stroke-width", strokeWidth);
+    polygon.classList.add("line");
+
+    marker.innerHTML = polygon.outerHTML;
+
+    return marker;
+}
+
+function createSVGArrow(marker) {
+    var arrow = document.createElement("defs");
+
+    arrow.appendChild(marker);
+
+    return arrow;
+}
+
+// Make sure it works
+function createSVGDirectedEdge(nodeId1, nodeId2, p1, p2, weighted = false, weight = 0) {
+
+    var x1 = p1.x, y1 = p1.y;
+    var x2 = p2.x, y2 = p2.y;
+
+    var d = computeD(nodeId1, nodeId2, x1, y1, x2, y2);
+
+    var marker = createSVGMarker(nodeId1, nodeId2);
+    var arrow = createSVGArrow(marker);
+    var path = createSVGDirectedPath(nodeId1, nodeId2, d, marker.id);
+
+    var text = undefined;
+    if (weighted === true) {
+        var xp1 = parseFloat(d.split('M')[1].split(' ')[1]);
+        var yp1 = parseFloat(d.split('M')[1].split(' ')[2]);
+
+        var l = d.split(' ').length;
+        var xp2 = parseFloat(d.split(' ')[l - 2]);
+        var yp2 = parseFloat(d.split(' ')[l - 1]);
+
+        var p1 = {"x": xp1, "y": yp1};
+        var p2 = {"x": xp2, "y": yp2};
+
+        text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight, false);
+    }
+
+    var edge = document.createElement("g");
+    edge.id = nodeId1 + "-" + nodeId2;
+
+    edge.appendChild(arrow);
+    edge.appendChild(path);
+
+    if (text) {
+        edge.appendChild(text);
+    }
+            
+    edge.classList.add("node" + nodeId1);      
+    edge.classList.add("node" + nodeId2);   
+
+    edge.classList.add(edgeClass);
+    edge.classList.add(graphComponent);
+
+    return edge;
+}
+
+function createSVGOption(name, value) {
+    var option = document.createElement("option");
+    
+    option.setAttribute("value", value);
+    option.innerHTML = name;
+
+    return option
+}
+
+function createSVGOptions(id, nodes) {
+
+    var options = document.createElement("select");
+    options.id = id;
+    var optionsHTML = "";
+    var option;
+    for (var it = 0; it < nodes.length; ++it) {
+
+        option = createSVGOption(nodes[it].name, nodes[it].id)
+
+        optionsHTML += option.outerHTML + "\n";
+	}
+	options.innerHTML = optionsHTML;
+    return options;
+}
+
+
+/////////////////////////////////////////////////////// 
+////////////////      SVG-Getters     /////////////////
+///////////////////////////////////////////////////////
+
+function getSVGCirclePoint(circleId) {
+
+    if (circleId.indexOf("circle") < 0) {
+        circleId = arrayToString(["circle", circleId]);
+    }
+    var circle = document.getElementById(circleId);
+    
+    var p = {x: null, y: null};
+    p.x = parseFloat(circle.getAttribute("cx"));
+    p.y = parseFloat(circle.getAttribute("cy"));
+
+    return p;
+}
+
+function getSVGEdgeColor(edgeId) {
+
+    if (edgeId.indexOf("line") < 0) {
+        edgeId = arrayToString(["line", edgeId]);
+    }
+    
+    var edge = document.getElementById(edgeId);
+    if (!edge) {
+        edgeId = edgeId.split("line")[1];
+        edgeId = arrayToString(["line", edgeId.split("-")[1], "-", edgeId.split("-")[0]]);
+
+        edge = document.getElementById(edgeId);
+    }
+
+    return edge.style.stroke;
+}
+
+// TODO: Consider naming SVG-Setters.
+////////////////////////////////////////////////////// 
+////////////////      SVG-Update     /////////////////
+//////////////////////////////////////////////////////
+
+function setSVGLineP1(lineId, p) {
+    var line = document.getElementById(lineId);
+
+    if (line) {
+        line.setAttribute("x1", p.x);
+        line.setAttribute("y1", p.y);
+    }
+}
+function setSVGLineP2(lineId, p) {
+    var line = document.getElementById(lineId);
+    
+    if (line) {
+        line.setAttribute("x2", p.x);
+        line.setAttribute("y2", p.y);
+    }
+}
+
+function setSVGCircleFill(circleId, color) {
+    var circle = document.getElementById(circleId);
+
+    if (circle) {
+        circle.style.fill = color;
+    }
+}
+function setSVGCircleStroke(circleId, color) {
+    var circle = document.getElementById(circleId);
+
+    if (circle) {
+        circle.style.stroke = color;
+    }
+}
+
 function updatePolygonColor(polygonId, color) {
     var polygon = document.getElementById(polygonId);
 
-    polygon.style.stroke = color;
-    polygon.style.fill = color;
+    if (polygon) {
+        polygon.style.stroke = color;
+        polygon.style.fill = color;
+    }
 }
 
 function updateLineColor(lineId, color) {
     var line = document.getElementById(lineId);
 
     line.style.stroke = color;
+}
+
+function setSVGEdgeColor(svg, edgeId, newColor = colors.buildEdge) {
+    var line = svg.getElementById(arrayToString(["line", edgeId]));
+    var polygon = svg.getElementById(arrayToString(["polygon", edgeId]));
+
+    if (polygon) {
+        polygon.style.stroke = newColor;
+        polygon.style.fill = newColor;
+    }
+    if (line) {
+        line.style.stroke = newColor;
+    }
+
 }
 
 function updateSVGEdgesColor(svg, newColor = colors.buildEdge, lineClass = "line") {
@@ -1258,6 +992,322 @@ function updateSVGGraphNodesColor(svg, nodeColor = colors.unselectedNode,
     svg.innerHTML = svg.innerHTML; 
 }
 
+
+////////////////////////////////////////////////////// 
+////////////////      Graph--SVG     /////////////////
+//////////////////////////////////////////////////////
+
+function graphToSVG(graph) {
+    var svg = document.createElement("svg");
+
+    var gZero = createSVGGroupZero();
+    svg.appendChild(gZero);
+    console.log("called");
+
+    var circle, text, node;
+    var nodeId, node, x, y, r, w; 
+    var nodesNo = graph.allNodes.length;
+
+    for (var i = 0; i < nodesNo; ++i) {
+        node = graph.allNodes[i];
+
+        nodeId = node.id;
+        x = node.x;
+        y = node.y;
+        r = node.r;
+        w = node.outlineWidth;
+      
+        circle = createSVGCirlce(nodeId, x, y, r, w);
+        text = createSVGText(nodeId, x, y);
+        node = createSVGNode(nodeId, circle, text);
+
+        svg.appendChild(node);      
+    }
+
+    if (graph.directed === true) {
+        var adjList;
+        var outNeighbours, outNeighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var d, path, marker, arrow, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            outNeighbours = adjList.outNeighbours;
+            outNeighboursNo = outNeighbours.length;
+            nodeId = adjList.id;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < outNeighboursNo; ++j) {
+                neighbourId = outNeighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+                p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                var edge = createSVGDirectedEdge(nodeId, neighbourId, p1, p2);
+
+                var groupZero = state.svg.getElementById("groupZero");
+                state.svg.insertBefore(edge, groupZero);
+            }
+        }
+    }
+    else {
+        var adjList;
+        var neighbours, neighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var line, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            neighbours = adjList.neighbours;
+            neighboursNo = neighbours.length;
+            nodeId = adjList.id;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                neighbourId = neighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+                if (parseInt(nodeId) < parseInt(neighbourId)) {
+
+                    p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                    p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                    var edge = createSVGUndirectedEdge(nodeId, neighbourId, p1, p2);
+
+                    var groupZero = state.svg.getElementById("groupZero");
+                    state.svg.insertBefore(edge, groupZero);
+                }
+            }
+        }
+    }
+    return svg;
+}
+
+function graphToDirSVG(graph) {
+    var svg = document.createElement("svg");
+
+    var circle, text, node;
+    var nodeId, node, x, y, r, w; 
+    var nodesNo = graph.allNodes.length;
+
+    for (var i = 0; i < nodesNo; ++i) {
+        node = graph.allNodes[i];
+
+        nodeId = node.id;
+        nodeId = "0" + nodeId;
+        x = node.x;
+        y = node.y;
+        r = node.r;
+        w = node.outlineWidth;
+      
+        circle = createSVGCirlce(nodeId, x, y, r, w);
+        text = createSVGText(node.id, x, y);
+        node = createSVGNode(nodeId, circle, text);
+
+        svg.appendChild(node);      
+    }
+
+    if (graph.directed === true) {
+        var adjList;
+        var outNeighbours, outNeighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var d, path, marker, arrow, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            outNeighbours = adjList.outNeighbours;
+            outNeighboursNo = outNeighbours.length;
+            nodeId = adjList.id;
+            nodeId = "0" + nodeId;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < outNeighboursNo; ++j) {
+                neighbourId = outNeighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+
+                p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                var edge = createSVGDirectedEdge(nodeId, neighbourId, p1, p2, 
+                            graph.weighted, graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId)));
+
+
+                svg.insertBefore(edge, svg.firstChild);
+            }
+        }
+
+        var lines = svg.getElementsByTagName("path");
+        var len = lines.length;
+
+        for (var i = 0; i < len; ++i) {
+            lines[i].classList.add("edgeOff");
+        }
+    }
+    else {
+        var adjList;
+        var neighbours, neighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var line, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            neighbours = adjList.neighbours;
+            neighboursNo = neighbours.length;
+            nodeId = adjList.id;
+            nodeId = "0" + nodeId;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                neighbourId = neighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+                if (parseInt(nodeId) < parseInt(neighbourId)) {
+
+                    p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                    p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                    var edge = createSVGUndirectedEdge(nodeId, neighbourId, p1, p2, 
+                            graph.weighted, graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId)));
+
+
+                    svg.insertBefore(edge, svg.firstChild);
+                }
+            }
+        }
+
+        var lines = svg.getElementsByTagName("line");
+        var len = lines.length;
+
+        for (var i = 0; i < len; ++i) {
+            lines[i].classList.add("edgeOff");
+        }
+    }
+
+    return svg;
+}
+
+// TODO: Consider this!! Is this the right place to be for this?
+function updateGraphToState(graph, state) {
+
+    state.svg.innerHTML = "";
+
+    var gZero = createSVGGroupZero();
+    state.svg.appendChild(gZero);
+    console.log("Called");
+
+    // Including this part?
+    state.createPreviewCircle();
+    state.createForbiddenCircle();
+    state.createPreviewLine();
+    state.createForbiddenLine();
+    state.createPreviewPath();
+    state.createForbiddenPath();
+
+    var circle, text, node;
+    var nodeId, node, x, y, r, w; 
+    var nodesNo = graph.allNodes.length;
+
+    for (var i = 0; i < nodesNo; ++i) {
+        node = graph.allNodes[i];
+
+        nodeId = node.id;
+        x = node.x;
+        y = node.y;
+        r = node.r;
+        w = node.outlineWidth;
+      
+        circle = createSVGCirlce(nodeId, x, y, r, w);
+        text = createSVGText(nodeId, x, y);
+        node = createSVGNode(nodeId, circle, text);
+
+        state.svg.appendChild(node);      
+    }
+
+    if (graph.directed === true) {
+        var adjList;
+        var outNeighbours, outNeighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var d, path, marker, arrow, edge;
+        // TODO: Consider weight.
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            outNeighbours = adjList.outNeighbours;
+            outNeighboursNo = outNeighbours.length;
+            nodeId = adjList.id;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < outNeighboursNo; ++j) {
+                neighbourId = outNeighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+                p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                var edge = createSVGDirectedEdge(nodeId, neighbourId, p1, p2, 
+                            graph.weighted, graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId)));
+
+                var groupZero = state.svg.getElementById("groupZero");
+                state.svg.insertBefore(edge, groupZero);
+            }
+        }
+    }
+    else {
+        var adjList;
+        var neighbours, neighboursNo, neighbourId;
+        var nodeIndex, neighbourIndex;
+        var p1, p2;
+
+        var line, edge;
+
+        for (var i = 0; i < nodesNo; ++i) {
+            adjList = graph.adjacencyLists[i];
+
+            neighbours = adjList.neighbours;
+            neighboursNo = neighbours.length;
+            nodeId = adjList.id;
+            nodeIndex = graph.getNodeIndexFromId(nodeId);
+
+            for (var j = 0; j < neighboursNo; ++j) {
+                neighbourId = neighbours[j];
+                neighbourIndex = graph.getNodeIndexFromId(neighbourId);
+
+                if (parseInt(nodeId) < parseInt(neighbourId)) {
+
+                    p1 = {x: graph.allNodes[nodeIndex].x, y: graph.allNodes[nodeIndex].y};
+                    p2 = {x: graph.allNodes[neighbourIndex].x, y: graph.allNodes[neighbourIndex].y};
+
+                    var edge = createSVGUndirectedEdge(nodeId, neighbourId, p1, p2, 
+                                graph.weighted, graph.getEdgeWeight(parseInt(nodeId), parseInt(neighbourId)));
+
+                    var groupZero = state.svg.getElementById("groupZero");
+                    state.svg.insertBefore(edge, groupZero);
+                }
+            }
+        }
+    }
+
+    state.graph = graph;
+    return state;
+}
+
 //////////////////////////////////////////////////////// 
 /////////////////// CREATE HTML HERE ///////////////////
 ////////////////////////////////////////////////////////
@@ -1278,4 +1328,53 @@ function algorithmOptionsHTML(state) {
     }
 
     return optionsHTML;
+}
+
+///////////////////////////////////////////////////// 
+////////////////      Forbidden     /////////////////
+/////////////////////////////////////////////////////
+
+
+function runForbiddenCircle(svg, forbiddenCircleId, x, y, ms = 200) {
+
+    var forbiddenCircle = svg.getElementById(forbiddenCircleId);
+    forbiddenCircle.setAttribute("cx", x);
+    forbiddenCircle.setAttribute("cy", y);
+    forbiddenCircle.setAttribute("visibility", "visible");
+
+    setTimeout(function() {
+        var forbiddenCircle = svg.getElementById(forbiddenCircleId);
+        forbiddenCircle.setAttribute("visibility", "hidden");
+        svg.innerHTML = svg.innerHTML;
+    }, ms);
+}
+
+function runForbiddenLine(svg, forbiddenLineId, x1, y1, x2, y2, ms = 200) {
+
+    var forbiddenLine = svg.getElementById(forbiddenLineId);
+    forbiddenLine.setAttribute("x1", x1);
+    forbiddenLine.setAttribute("y1", y1);
+    forbiddenLine.setAttribute("x2", x2);
+    forbiddenLine.setAttribute("y2", y2);
+    forbiddenLine.setAttribute("visibility", "visible");
+
+    setTimeout(function() {
+        var forbiddenLine = svg.getElementById(forbiddenLineId);
+        forbiddenLine.setAttribute("visibility", "hidden");
+        svg.innerHTML = svg.innerHTML;
+    }, ms);
+}
+
+function runForbiddenPath(svg, forbiddenPathId, d, ms = 200) {
+
+    var forbiddenPath = svg.getElementById(forbiddenPathId);
+
+    forbiddenPath.setAttribute("d", d);
+    forbiddenPath.setAttribute("visibility", "visible");
+    
+    setTimeout(function() {
+        var forbiddenPath = svg.getElementById(forbiddenPathId);
+        forbiddenPath.setAttribute("visibility", "hidden");
+        svg.innerHTML = svg.innerHTML;
+    }, ms);
 }

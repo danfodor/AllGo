@@ -81,14 +81,6 @@ function State() {
     this.previewMode = false;
 
 
-    this.nodeIdToCircleId = function() {
-
-    	if (this.selectedNodeId !== false) {
-        	return "circle" + this.selectedNodeId;
-    	}
-    	return false;
-    }
-
     // TODO: REVIEW THE FUNCTION
     this.reset = function(directed = false) {
         this.svg.innerHTML = newSVGInnerHTML;

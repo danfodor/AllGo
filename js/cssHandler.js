@@ -18,6 +18,15 @@ function removeClassesFromId(id, classes = []) {
     }
 }
 
+function setDisplay(elementId, display = "block") {
+	var element = document.getElementById(elementId);
+
+	if (element) {
+		element.style.display = display;
+	}
+}
+
+
 function turnButton(buttonId, on = 'on', onClasses = ['on'], offClasses = ['off', 'hoverShadow']) {
 
     switch(on) {
@@ -35,15 +44,15 @@ function turnButton(buttonId, on = 'on', onClasses = ['on'], offClasses = ['off'
     addClassesToId(buttonId)
 }
 
-function changeElementDisplay(elementId, display = "block") {
-	var element = document.getElementById(elementId);
+function pressButton(buttonId, msTime = 100) {
+    turnButton(buttonId, "on");
 
-	if (element) {
-		element.style.display = display;
-	}
+    setTimeout(function() {
+        turnButton(buttonId, "off");
+    }, msTime);
 }
 
-function buttonNotAllowed(elementId, notAllowed = true) {
+function disableButton(elementId, notAllowed = true) {
 
     if (notAllowed === true) {
         removeClassesFromId(elementId, ['hoverShadow']);
@@ -55,16 +64,39 @@ function buttonNotAllowed(elementId, notAllowed = true) {
     }
 }
 
+
 function cssSetUp() {
        
     switchMode("build");
     
     state.graph.directed = false;
     switchDirButtons(false);
-    buttonNotAllowed("algorithm");
+    disableButton("algorithm");
     
     state.graph.weighted = false;
     switchWeighted(false);
     
     resetButtonSetUp();
+}
+
+function playerMenuDefaultCSS(noEdge, nodesNo) {
+
+    turnButton("restart", "off");
+    turnButton("next", "off");
+    turnButton("start", "off");
+    disableButton("restart", false);
+    disableButton("next", false);
+    disableButton("start", false);
+
+    turnButton("back", "off");
+    turnButton("stop", "off");
+    disableButton("back", true);
+    disableButton("stop");
+
+    if (noEdge) {
+        if (nodesNo < 1) {
+            disableButton("next");
+            disableButton("start");
+        }
+    }
 }

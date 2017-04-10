@@ -9,7 +9,9 @@
 // Uses external js file ./svgHandler.js
 // Uses external js file ./values.js
 
-// REFACTOR
+///////////////////////////////////////////////////// 
+///////////////// Click interpreter /////////////////
+/////////////////////////////////////////////////////
 function clickInterpret(e) {
     
     var button = e.which || e.button;
@@ -56,7 +58,6 @@ function clickInterpret(e) {
 
                     handleSelect(nodeElement);
                 }
-                // TODO: Else edge weight probably
                 break;
             default: 
                 break;
@@ -83,17 +84,17 @@ function clickInterpret(e) {
         if (state.isComponentSelected === true) {
             
             if (addedNode !== false) {
-                var svgCircle = document.getElementById(state.nodeIdToCircleId());
                 state.isComponentSelected = false;
                 addEdge(state.selectedNodeId, addedNode.id);
-                svgCircle.style.fill = colors.unselectedNode;
+            
+                var circleId = arrayToString(["circle", state.selectedNodeId]);
+                setSVGCircleFill(circleId, colors.unselectedNode);
             }
         }
         state.svg.innerHTML = state.svg.innerHTML;
     }
 }
 
-// REFACTOR
 function addNode(x, y) {
     var intersectsNode = state.graph.intersectsNode(x, y);
     if (intersectsNode !== false) {
@@ -116,25 +117,64 @@ function addNode(x, y) {
     state.svg.appendChild(node);   
     state.svg.innerHTML = state.svg.innerHTML;
 
-    buttonNotAllowed("algorithm", false);
+    disableButton("algorithm", false);
 
     return node;
 }
 
-// CONTINUEHERE: TODO: REFACTOR handleSelect
+function addEdge(nodeId1, nodeId2) {
+    if (state.graph.directed === true) {
+
+        if (state.graph.addEdge(nodeId1, nodeId2)) {
+            var p1 = getSVGCirclePoint(nodeId1);
+            var p2 = getSVGCirclePoint(nodeId2);
+
+            var edge = createSVGDirectedEdge(nodeId1, nodeId2, p1, p2, state.graph.weighted, 
+                            state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2)));
+
+            var groupZero = state.svg.getElementById("groupZero");
+            state.svg.insertBefore(edge, groupZero);
+        }
+        else {
+            var d = document.getElementById(arrayToString(["line", nodeId1, "-", nodeId2])).getAttribute("d");
+            runForbiddenPath(state.svg, "forbiddenPath", d);
+            return false;    
+        }
+    }
+    else {
+        var p1 = getSVGCirclePoint(nodeId1);
+        var p2 = getSVGCirclePoint(nodeId2);
+
+        if (state.graph.addEdge(nodeId1, nodeId2)) {
+
+            var edge = createSVGUndirectedEdge(nodeId1, nodeId2, p1, p2, state.graph.weighted, 
+                            state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2)));
+
+            var groupZero = state.svg.getElementById("groupZero");
+            state.svg.insertBefore(edge, groupZero);
+        }
+        else {
+            runForbiddenLine(state.svg, "forbiddenLine", p1.x, p1.y, p2.x, p2.y);
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Refactored - Needs logic check
 function handleSelect(node) {
     
     state.isComponentSelected = !state.isComponentSelected;
 
     if (state.isComponentSelected == true) {
-        var circleId = "circle" + node.id;
-        var svgCircle = document.getElementById(circleId);
-        
-        var previewLine = document.getElementById("previewLine");
-        previewLine.setAttribute("x1", svgCircle.getAttribute("cx"));
-        previewLine.setAttribute("y1", svgCircle.getAttribute("cy"));
 
-        svgCircle.style.fill = colors.selectedNode;
+        var circleId = arrayToString(["circle", node.id]);
+        setSVGCircleFill(circleId, colors.selectedNode);
+
+        var p = getSVGCirclePoint(circleId);
+        setSVGLineP1("previewLine", p);
 
         state.svg.innerHTML = state.svg.innerHTML;
         state.selectedNodeId = node.id;
@@ -142,15 +182,14 @@ function handleSelect(node) {
     else {
 
         var addedEdge;
-
         if (state.selectedNodeId !== node.id)
         {
             addedEdge = addEdge(state.selectedNodeId, node.id);
         }
 
         if (addedEdge !== false) {
-            var svgCircle = document.getElementById(state.nodeIdToCircleId());
-            svgCircle.style.fill = colors.unselectedNode;
+            var circleId = arrayToString(["circle" + state.selectedNodeId]);
+            setSVGCircleFill(circleId, colors.unselectedNode);
         }
         else {
             state.isComponentSelected = !state.isComponentSelected;
@@ -160,113 +199,27 @@ function handleSelect(node) {
     }
 }
 
-function addEdge(nodeId1, nodeId2) {
-    if (state.graph.directed === true) {
-
-        var circle1 = document.getElementById("circle" + nodeId1);
-        var circle2 = document.getElementById("circle" + nodeId2);
-
-        var x1 = circle1.cx.baseVal.value;
-        var y1 = circle1.cy.baseVal.value;
-
-        var x2 = circle2.cx.baseVal.value;
-        var y2 = circle2.cy.baseVal.value;
-
-
-        var d = computeD(nodeId1, nodeId2, x1, y1, x2, y2);
-
-        if (state.graph.addEdge(nodeId1, nodeId2)) {
-
-            var marker = createSVGMarker(nodeId1, nodeId2);
-            var arrow = createSVGArrow(marker);
-            var path = createSVGDirectedPath(nodeId1, nodeId2, d, marker.id);
-
-            var text = undefined;
-            if (state.graph.weighted === true) {
-                var xp1 = parseFloat(d.split('M')[1].split(' ')[1]);
-                var yp1 = parseFloat(d.split('M')[1].split(' ')[2]);
-
-                var l = d.split(' ').length;
-                var xp2 = parseFloat(d.split(' ')[l - 2]);
-                var yp2 = parseFloat(d.split(' ')[l - 1]);
-
-                var p1 = {"x": xp1, "y": yp1};
-                var p2 = {"x": xp2, "y": yp2};
-
-                var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
-
-                text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight, false);
-            }
-
-            var edge = createSVGDirectedEdge(nodeId1, nodeId2, path, arrow, text);
-
-            var groupZero = state.svg.getElementById("groupZero");
-            state.svg.insertBefore(edge, groupZero);
-        }
-        else {
-            runForbiddenPath(state.svg, "forbiddenPath", d);
-            return false;
-        }
-    }
-    else {
-        var circle1 = document.getElementById("circle" + nodeId1);
-        var circle2 = document.getElementById("circle" + nodeId2);
-
-        var x1 = circle1.cx.baseVal.value;
-        var y1 = circle1.cy.baseVal.value;
-
-        var x2 = circle2.cx.baseVal.value;
-        var y2 = circle2.cy.baseVal.value;
-
-        var p1 = {"x": x1, "y": y1};
-        var p2 = {"x": x2, "y": y2};
-
-        if (state.graph.addEdge(nodeId1, nodeId2)) {
-
-            var line = createSVGLine(nodeId1, nodeId2, x1, y1, x2, y2);
-            var text = undefined;
-            if (state.graph.weighted === true) {
-                var weight = state.graph.getEdgeWeight(parseInt(nodeId1), parseInt(nodeId2));
-
-                text = createSVGWeight(nodeId1, nodeId2, p1, p2, weight);
-            }
-            
-            var edge = createSVGUndirectedEdge(nodeId1, nodeId2, line, text);
-
-            var groupZero = state.svg.getElementById("groupZero");
-            state.svg.insertBefore(edge, groupZero);
-        }
-        else {
-            runForbiddenLine(state.svg, "forbiddenLine", x1, y1, x2, y2);
-
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function min(array) {
-    var minVal = null;
-
-    if (array.length > 0) {
-        minVal = array[0];
-
-        for (var i = 1; i < array.length; ++i) {
-            if (minVal > array[i]) {
-                minVal = array[i];
-            }
-        }
-    }
-
-    return minVal;
-}
+////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// UNDER CONSTRUCTION //////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
 function switchMode(mode) {
 
+    // Logic:
+    // if mode is BUILD
+    //     asda
+    // else (if mode is ALGORITHMS)
+    //     update state.mode
+    //     update graph colors
+    //     generate options for algorithms.
+    //     generate options for starting nodes.
+    //     update options in menu
+    //     update buttons css
+
     if (mode === "build") {
-        // TODO: CLEAN UP. 
+
         cleanSVGGraphColors();
+
         document.getElementById("algMode").style.display = "none";
         document.getElementById("code").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
@@ -281,7 +234,6 @@ function switchMode(mode) {
         }
         turnButton("algorithm", "off");
 
-        // HIDE SAVE
         document.getElementById("file").style.display = "block";
 
         state.mode = "build";
@@ -290,16 +242,20 @@ function switchMode(mode) {
         if (state.graph.allNodes.length === 0) {
             return;
         }
+        
+        // Changing the state mode
+        state.mode = "algorithm";
 
         updateSVGEdgesColor(state.svg, colors.unvisitedEdge);
         updateSVGNodesBorderColor(state.svg, colors.unvisitedNodeBorder);
 
-
+        // Generating algorithm options:
         var algorithmsOptions = document.getElementById("algorithmsOptions");
         var optionsHTML = algorithmOptionsHTML(state);
 
         algorithmsOptions.innerHTML = optionsHTML;
         
+        // Generating options for starting node: 
         var len = state.graph.allNodes.length;
         var nodes = [];
         for (var it = 0; it < len; ++it) {
@@ -309,26 +265,33 @@ function switchMode(mode) {
         var options = createSVGOptions("", nodes);
         document.getElementById("nodeOptions"). innerHTML = options.innerHTML;
 
+        // Display Algorithms menu instead of build one:
         document.getElementById("algMode").style.display = "block";
         document.getElementById("code").style.display = "block";
-        document.getElementById("buildMode").style.display = "none";
+        document.getElementById("buttons").style.display = "block";
 
+        document.getElementById("buildMode").style.display = "none";
+        document.getElementById("file").style.display = "none";
+
+        // Turn buttons off-on
         turnButton("build", "off");
         turnButton("algorithm", "on");
 
+
+
+        // FINE UNTIL HERE. THIS NEEDS CAREFUL CONSIDERATION:
+
+        // TODO: Who are you? This should do the set up for the control menu.
+        // Is it still needed?
         seqControlMenuSetUp();
-        
-        document.getElementById("file").style.display = "none";
 
-        state.mode = "algorithm";
-
-        algorithmSelect();
-        selectStartNode();
-
+        // Triggering initial steps for algorithm:
+        triggerAlgorithm();
     }
 }
 
-function seqControlMenuSetUp() {        
+// TODO: Make sure this is not used anymore!!! And remove it...
+function seqControlMenuSetUp() {
 
     stop();
 
@@ -343,138 +306,300 @@ function seqControlMenuSetUp() {
     removeClassesFromId("next", ["disabled", "on"]);
     removeClassesFromId("start", ["disabled", "on"]);
 
+    // TODO: Check if this is up to date!!
     if (state.graph.noEdge() === true) {
         if (state.graph.allNodes.length <= 1) {
-            console.log("baai");
             document.getElementById("next").classList.remove("hoverShadow");
             document.getElementById("next").classList.add("disabled");
-
         }
     }
 }
 
-function algorithmSelect() {
+////////////////////////////////////
+/// CODE REFACTORING STARTS HERE ///
+////////////////////////////////////
 
-    var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
-    if (algorithm !== null) {
+
+function triggerAlgorithm() {
+    // More steps: stop()
+    // Something else which I can't remember...
+
+
+    var algorithm = document.getElementById("algorithmsOptions").value;
+    var algorithmId = state.algorithms.algorithmId(algorithm);
+    
+    // Steps: 
+    // 1. Update startData HTML div: updateStartData(algorithm)
+    updateStartData(algorithmId);
+
+    // 2. Collect startData
+    var startData = getStartData(algorithmId);
+
+    // 3. Run the algorithm on Data Structures:
+    runDTAlgorithm(algorithmId, state.graph, startData);
+
+    // 4. reset CSS for buttons
+    // TODO: PAY ATTENTION HERE: NEEDS TO STOP IF CONTINUOUS MENU PLAYS.
+    // Take a look at the stop function before using it
+    // stop();
+    var noEdge = state.graph.noEdge();
+    var nodesNo = state.graph.allNodes.length;
+    playerMenuDefaultCSS(noEdge, nodesNo);
+
+    // 5. reset SVG to default
+    updateSVGEdgesColor(state.svg, colors.unvisitedEdge);
+    updateSVGNodesBorderColor(state.svg, colors.unvisitedNodeBorder);
+
+    // 6. run first step
+    runNextStep(false);
+
+}
+
+function triggerStartNode() {
+
+    triggerAlgorithm();
+}
+
+
+function updateStartData(algorithmId) {
+
+    var startNodeDiv = document.getElementById("startNode");
+
+    switch(algorithmId) {
+        case "Kruskal":
+            startNodeDiv.style.display = "none";
+            break;
+        case "MaxFlow":
+            startNodeDiv.style.display = "none";
+            break;
+        default:
+            startNodeDiv.style.display = "block";
+            break;
+    }
+
+}
+
+function getStartData(algorithmId) {
+    var startData = null;
+
+    switch(algorithmId) {
+        case "Kruskal":
+            break;
+        case "MaxFlow":
+            break;
+        default:
+            var startNode = document.getElementById("nodeOptions").value;
+            startData = {startNode: startNode};
+            break;
+    }
+
+    return startData;
+}
+
+function runDTAlgorithm(algorithmId, graph, startData, fullExecution = true) {
+
+    state.runningAlgorithm = algorithmId;
+    
+    state.nextSteps = state.algorithms.run(algorithmId, graph, startData, fullExecution);
+    state.executedSteps = [];
+    
+    state.algorithmRuns = true;
+
+}
+
+
+function runNextStep(buttonPressed = true) {
+
+    // The code should follow the steps: 
+    // 1. Run next step if possible.
+    if (state.nextSteps.length > 0) {
+        var updates = [];
+        var executeStep = state.nextSteps.shift();
+
+        // 1.1 Make next button pressed
+        if (buttonPressed === true) {
+            pressButton("next");
+        }
+        // 1.2 Make back button available
+        disableButton("back", false);
+
+        // 1.3 Color next step
+        // TODO: decide: perhabs add a switch here??
+
+        var node, nodeInfo, colorNodes = executeStep.nodes;
+        var len = colorNodes.length;
+        for (var i = 0; i < len; ++i) {
+            var oldColor, newColor, id;
+
+            nodeInfo = colorNodes[i];
+            
+            id = arrayToString(["circle", nodeInfo.id]);
+            newColor = {fill: null, stroke: null};
+            oldColor = {fill: null, stroke: null};
+            
+            node = document.getElementById(id);
+
+            if (nodeInfo.fill) {
+                oldColor.fill = node.style.fill;
+                newColor.fill = nodeInfo.fill;
+
+                node.style.fill = nodeInfo.fill;
+            }
+            if (nodeInfo.stroke) {
+                oldColor.stroke = node.style.stroke;
+                newColor.stroke = nodeInfo.stroke;
+
+                node.style.stroke = nodeInfo.stroke;
+            }
+            updates.push({id: id, oldColor: oldColor, newColor: newColor, type: "node"});
+        }
+
+        var edgeId, edgeInfo, colorEdges = executeStep.edges;
+        len = colorEdges.length;
         
-        // TODO: ADD-UTILS - Replace this with a function from a new js file called utils that has a 
-        // generate-html part
-        var len = state.graph.allNodes.length;
+        for (var i = 0; i < len; ++i) {
+            var oldColor, newColor, id; 
 
-        if (len <= 0) {
-            alert("Nodes should be in. Handler for this case under construction.");
-        }
-        else {
-            var algorithmId = algorithm.id;
+            edgeInfo = colorEdges[i];
 
-            cleanSVGGraphColors();
+            if (edgeInfo.stroke) {
+                if (state.graph.directed) {
+                    id = edgeInfo.id;
+                    oldColor = getSVGEdgeColor(id);
+                    newColor = edgeInfo.stroke;
 
-            var startNodeDiv = document.getElementById("startNode");
-            if (algorithmId !== "Kruskal") {
-                if (startNode.style.display === "none") {
-                    startNode.style.display = "block";
+                    setSVGEdgeColor(state.svg, edgeInfo.id, edgeInfo.stroke);
                 }
-                selectStartNode();
+                else {
+                    edgeId = edgeInfo.id;
+                    if (!state.svg.getElementById(edgeId)) {
+                        edgeId = arrayToString([edgeId.split("-")[1], "-", edgeId.split("-")[0]]);
+                    }
+
+                    id = edgeId;
+                    oldColor = getSVGEdgeColor(id);
+                    newColor = edgeInfo.stroke;
+
+                    setSVGEdgeColor(state.svg, edgeId, edgeInfo.stroke);
+                }
+
+                updates.push({id: id, newColor: newColor, oldColor: oldColor, type: "edge"});
             }
-            else {
-                startNode.style.display = "none";
-            }
-
-            state.visitedNodes = [];
-            switch (algorithmId) {
-                case "BFS": 
-                    var code = document.getElementById("code");
-                    var node = document.getElementById("selectStartNode");
-
-                    var nodeName = document.getElementById("nodeOptions").value; 
-                    
-                    state.visitedNodes.push(nodeName);
-                    code.innerHTML = "Visited nodes: "  + nodeName;
-
-                    break;
-                case "DFS": 
-                    var code = document.getElementById("code");
-                    var node = document.getElementById("selectStartNode");
-
-                    var nodeName = document.getElementById("nodeOptions").value; 
-                    
-                    state.visitedNodes.push(nodeName);
-                    code.innerHTML = "Visited nodes: "  + nodeName;
-                    break;
-                default:
-                    var code = document.getElementById("code");
-                    code.innerHTML = "";
-                    break;
-            }
-
-            seqControlMenuSetUp();
-
-            // TODO: REFACTOR: THIS SHOULD NOT BE HERE.
-            document.getElementById("buttons").style.display = "block";
         }
 
+        // 1.4 Store the back step. TODO: WILL NEED REFACTORING:
+        // Should have smarter updates, talking about how things have changed.
+        state.executedSteps.push({step: executeStep, updates: updates});
+    }
+
+    // 2. If runned out of next steps:
+    if (state.nextSteps.length === 0) {
+        state.algorithmFinished = true;
+        // 2.1 stop() -- TODO : CHECK AFTER REFACTORING stop()
+        stop(false);
+        
+        // 2.2 turn buttons disabled
+        disableButton("next", true);
+        turnButton("start", "off");
+        disableButton("start", true);
+        disableButton("stop");
+
+        // 2.3 Make sure that, after pressed, this will not become hoverable again.
+        setTimeout(function() {
+            document.getElementById("next").classList.remove("hoverShadow"); 
+        }, 120); 
+    }
+}
+
+// THIS DOES NOT stop(). It is just the tool to move back one step.
+function runBackStep(buttonPressed = true) {
+
+    // CONTINUEHERE: Look at runNextStep as a model for this.
+    // The code should follow the steps: 
+    // 1. This works only when there is at least one step to revert.
+    if (state.executedSteps.length > 0) {
+        // 1.1 Button pressed
+        if (buttonPressed === true) {
+            pressButton("back");
+        }
+        // 1.2 Make next button available.
+        disableButton("next", false);
+        
+        // 1.2.1 Update other buttons CSS. Not sure if this should be here or inside buttonPressed
+        turnButton("start", "off");
+        disableButton("start", false);
+        turnButton("stop", "off");
+        disableButton("stop", true);
+
+
+        // 1.3 Undo the execution step. 
+        var backStep = state.executedSteps.splice(-1,1)[0]; 
+        var updates= backStep.updates;
+
+        backStep = backStep.step;
+        state.nextSteps.unshift(backStep);
+        
+        // 1.4 Color back all the changes nodes and edges .
+        var update, len = updates.length;
+
+        console.log(updates.length);
+        console.log(updates);
+
+        for (var i = 0; i < len; ++i) {
+            update = updates[i];
+            switch (update.type) {
+                case "node":
+                    var node = document.getElementById(update.id);
+
+                    if (update.newColor.fill) {
+                        node.style.fill = update.oldColor.fill;
+                    }
+                    if (update.newColor.stroke) {
+                        node.style.stroke = update.oldColor.stroke;
+                    }
+                    break;
+                case "edge":
+                    if (update.newColor) {
+                        setSVGEdgeColor(state.svg, update.id, update.oldColor);
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
+    }
+
+    if (state.executedSteps.length === 0) { 
+        disableButton("back");
+
+        setTimeout(function() {
+            disableButton("back");
+        }, 120);             
+    }
+}
+
+function loopNextStep(argument) {
+
+    if (state.nextSteps.length > 0) {
+        runNextStep(false);
     }
     else {
-        // Remove algorithm
-        document.getElementById("buttons").style.display = "none";
+        stop();
     }
 }
 
-function selectStartNode() {
-    if (state.algorithmRuns === true) {
-        // TOOD: Add confirm box.
-        restart(false);
-    }
-    var nodeName = document.getElementById("nodeOptions").value; 
-    var nodeId = state.graph.nodeIdFromName(nodeName);
-    
-    var pastNode;
-    if (state.pastStartingNode !== null && state.algorithmRuns === false) {
 
-        pastNode = document.getElementById(state.pastStartingNode)
-        if (pastNode !== null) {
-            pastNode.style.stroke = colors.unvisitedNodeBorder;
-        }
-    }
-
-    state.algorithmRuns = false;
-    state.pastStartingNode = "circle" + nodeId;
-    var circle = document.getElementById("circle" + nodeId);
-    circle.style.stroke = colors.visitedNodeBorder;
+//////////////////////////////////
+/// CODE REFACTORING ENDS HERE ///
+//////////////////////////////////
 
 
-    var algorithm = state.algorithms.getAlgorithmByName(document.getElementById("algorithmsOptions").value);
-    var algorithmId = algorithm.id;
-    state.visitedNodes = [];
-    switch (algorithmId) {
-    case "BFS": 
-        var code = document.getElementById("code");
-        var node = document.getElementById("selectStartNode");
 
-        var nodeName = document.getElementById("nodeOptions").value; 
-        
-        state.visitedNodes.push(nodeName);
-        code.innerHTML = "Visited nodes: "  + nodeName;
+//////////////////////////////////////////////////////
+///////////// THIS PART WILL BE REPLACED /////////////
+//////////////////////////////////////////////////////
 
-        break;
-    case "DFS": 
-        var code = document.getElementById("code");
-        var node = document.getElementById("selectStartNode");
-
-        var nodeName = document.getElementById("nodeOptions").value; 
-        
-        state.visitedNodes.push(nodeName);
-        code.innerHTML = "Visited nodes: "  + nodeName;
-        break;
-    default:
-        var code = document.getElementById("code");
-        code.innerHTML = "";
-        break;
-    }
-}
-
-function nextStep(withButtonPress = true) {
+function nextStep(buttonPressed = true) {
     var algorithm = document.getElementById("algorithmsOptions").value;
 
     if (state.algorithmRuns === false) {
@@ -508,8 +633,8 @@ function nextStep(withButtonPress = true) {
         document.getElementById("back").classList.remove("disabled");
         document.getElementById("back").classList.add("hoverShadow");
 
-        if (withButtonPress === true) {
-            nextButtonPress();
+        if (buttonPressed === true) {
+            pressButton("next");
         }
 
         var algorithmId = state.algorithms.algorithmId(algorithm);
@@ -664,18 +789,6 @@ function nextStep(withButtonPress = true) {
     }
 }
 
-function nextButtonPress() {
-    document.getElementById("next").classList.add("on");
-    document.getElementById("next").classList.remove("off");
-    document.getElementById("next").classList.remove("hoverShadow");
-
-    setTimeout(function() {
-        document.getElementById("next").classList.remove("on");
-        document.getElementById("next").classList.add("off");
-        document.getElementById("next").classList.add("hoverShadow"); 
-    }, 100); 
-}
-
 function backStep() {
     if (state.algorithmRuns === true) {
         if (state.nextSteps.length === 0 && state.executedSteps.length > 0) {
@@ -801,7 +914,15 @@ function backStep() {
     } 
 }
 
-function restart(withButtonPress = true) {
+//////////////////////////////////////////////////////
+////////////////// UP TO THIS POINT //////////////////
+//////////////////////////////////////////////////////
+
+
+// TODO #CONTMENU: RECONSIDER THIS BIT:
+
+// #REFACTORED
+function restart(buttonPressed = true) {
     // // --- Pseudocode ---
     // clean all the colouring
     // make select algorithm available again
@@ -809,85 +930,74 @@ function restart(withButtonPress = true) {
     // color the starting node 
     // consider that algorithm does not run
 
-    state.algorithmFinished = false;
+    // 1.1 stop
+    stop(false);
 
-    cleanSVGGraphColors();
-    seqControlMenuSetUp();
-
-    if (withButtonPress) {
-        document.getElementById("restart").classList.add("on");
-        document.getElementById("restart").classList.remove("off");
-        document.getElementById("restart").classList.remove("hoverShadow");
-
-        setTimeout(function() {
-            document.getElementById("restart").classList.remove("on");
-            document.getElementById("restart").classList.add("off");
-            document.getElementById("restart").classList.add("hoverShadow"); 
-        }, 100); 
+    var delay = 0;
+    if (buttonPressed) {
+        pressButton("restart", 80);
+        delay = 85;
     }
 
-    state.visitedNodes = [];
-
-    state.nextSteps = state.executedSteps;
-    state.executedSteps = [];
-
-    selectStartNode();
+    setTimeout(function() {
+        triggerAlgorithm();
+    }, delay);
 }
 
+
+// #REFACTORED - will need recheck though
 function next() {
     if (state.runsContinuously) {
         stop();
     }
-    nextStep();
+    runNextStep();
 }
 
 function back(argument) {
     if (state.runsContinuously) {
         stop();
     }
-    backStep();
+    runBackStep();
 }
 
-function start(withButtonPress = true) {
+function start(buttonPressed = true) {
 
     if (!state.algorithmFinished) {
         var timeInterval = document.getElementById("range").value;
-        timeInterval = parseFloat(timeInterval);
-        timeInterval =timeInterval * 1000;
+        timeInterval = parseFloat(timeInterval) * 1000;
         
-        nextStep(false);
+        runNextStep(false);
         state.runsContinuously = true;
 
-        if (withButtonPress) {
+        if (buttonPressed) {
             if (!state.algorithmFinished) {
                 turnButton("start", "on");
             }
 
-            removeClassesFromId("stop", ["disabled", "on"]);
-            addClassesToId("stop", ["off", "hoverShadow"]);
+            turnButton("stop", "off");
+            disableButton("stop", false);
         }
+
         if (!state.algorithmFinished) {
-            state.intervalIds.push(window.setInterval(runNextStep, timeInterval));
+            state.intervalIds.push(window.setInterval(loopNextStep, timeInterval));
         }
         else {
-            addClassesToId("stop", ["disabled", "off"]);
-            removeClassesFromId("stop", ["on", "hoverShadow"]);
+            turnButton("stop", "off");
+            disableButton("stop", true);
         }
     }
 }
 
-function runNextStep() {
+function runNextSteps() {
     if (state.nextSteps.length > 0) {
         nextStep(false);
-        if (state.nextSteps.length <= 0) {
-        }
     }
     else {
         stop();
     }
 }
 
-function stop(withButtonPress = true) {
+function stop(buttonPressed = true) {
 
     state.runsContinuously = false;
     for (var i = 0; i < state.intervalIds.length; ++i) {
@@ -909,13 +1019,15 @@ function stop(withButtonPress = true) {
     }
 
     var disabled = document.getElementById("stop").classList.contains("disabled")
-    if (withButtonPress && !disabled) {
+    if (buttonPressed && !disabled) {
         turnButton("start", "off");
 
         addClassesToId("stop", ["disabled", "on"]);
         removeClassesFromId("stop", ["off", "hoverShadow"]);
     }
 }
+// #CONTMENU: UP TO THIS POINT
+
 
 function rangeInput() {
     var value = parseFloat(document.getElementById("range").value).toFixed(2);
@@ -942,6 +1054,7 @@ function speedInput() {
     }
 }
 
+// TODO: Refactor this. It does more than it the name requires!!
 function cleanSVGGraphColors() {
     var nodes = state.graph.allNodes, len = nodes.length;
     if (len > 0) {
@@ -987,6 +1100,14 @@ function cleanSVGGraphColors() {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// RECONSTRUCTION ENDS HERE ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+// TODO: Use cssHandler.js!!!
 function switchDirButtons(directed) {
 
     if (directed === true) {
@@ -1047,7 +1168,7 @@ function switchWeighted(weighted) {
     }
 }
 
-
+// TODO: Use cssHandler.js instead of manually doing this:
 function switchWeightButtons(weighted) {
 
     if (weighted === true) {
@@ -1073,11 +1194,6 @@ function switchWeightButtons(weighted) {
 
 function openSettingsModal() {
     var settingsModal = document.getElementById('settingsModal');
-
-    // TODO: MAKE IT MORE FORMAL -- Temporary solution to make it work
-    // var def = document.getElementById("defaultGraphsButton");
-    // def.classList.add("off");
-    // displayGraphs('default');
 
     document.getElementById("radiusSize").value = sizes.radius;
     state.currentRadius = sizes.radius;
@@ -1625,7 +1741,7 @@ function applyLoadModal() {
     loadModal.style.display = "none";
 
     turnButton('load', 'off');
-    buttonNotAllowed("algorithm", false);
+    disableButton("algorithm", false);
 }
 
 function rearrangeCircular(random = false) {
@@ -1888,7 +2004,7 @@ function resetButtonSetUp() {
 function reset(orientation = false) {
     cssSetUp();
     state.reset(orientation);
-    buttonNotAllowed("algorithm");
+    disableButton("algorithm");
 
     document.getElementById("reset").classList.add("on");
     document.getElementById("reset").classList.remove("off");
@@ -2024,11 +2140,12 @@ function contextListener() {
             e.preventDefault();
 
             if (state.isComponentSelected === true) {
-                state.isComponentSelected = false;         
-                state.contextMenuOn = false;  
+                state.isComponentSelected = false;
+                state.contextMenuOn = false;
 
-                var svgCircle = document.getElementById(state.nodeIdToCircleId());
-                svgCircle.style.fill = colors.unselectedNode;
+                var circleId = arrayToString(["circle", state.selectedNodeId]);
+                setSVGCircleFill(circleId, colors.unselectedNode);
+
                 state.svg.innerHTML = state.svg.innerHTML;
             }
             else {
@@ -2054,14 +2171,16 @@ function contextListener() {
             }
         }
 
-        // Eliminates element
-        if (state.isComponentSelected === true) {
-            state.isComponentSelected = false;
+        // TODOSOON: Do testing to make sure this is not really needed...
+        // // Eliminates element
+        // if (state.isComponentSelected === true) {
+        //     state.isComponentSelected = false;
 
-            var svgCircle = document.getElementById(state.nodeIdToCircleId());
-            svgCircle.style.fill = colors.unselectedNode;
-            state.svg.innerHTML = state.svg.innerHTML;
-        }
+        //     var circleId = arrayToString(["circle", state.selectedNodeId]);
+        //     setSVGCircleFill(circleId, colors.unselectedNode);
+
+        //     state.svg.innerHTML = state.svg.innerHTML;
+        // }
     });
 }
 
@@ -2129,7 +2248,7 @@ function menuItemListener(linkElement) {
                     if (element.classList.contains("node")) {
                         state.remove("node", element.id);
                         if (state.graph.allNodes.length === 0) {
-                            buttonNotAllowed("algorithm");
+                            disableButton("algorithm");
                         }
                     }
                     else if (element.classList.contains("edge")) {
@@ -2697,8 +2816,10 @@ function mouseUp(e) {
     }
     else {
         if (state.isComponentSelected === true) {
-            var svgCircle = document.getElementById(state.nodeIdToCircleId());
-            svgCircle.style.fill = colors.unselectedNode;
+
+            var circleId = arrayToString(["circle", state.selectedNodeId]);
+            setSVGCircleFill(circleId, colors.unselectedNode);
+            
             state.isComponentSelected = !state.isComponentSelected;
         } 
         var button = e.which || e.button;
@@ -2828,7 +2949,7 @@ function hireListeners() {
 
 // Event managing 
 window.onload = function() {
-    presentationSetUp();
+    // presentationSetUp();
     state = new State();
     createSVGGroupZero(state.svg);
     hireListeners();

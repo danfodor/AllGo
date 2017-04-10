@@ -169,6 +169,69 @@ function TestModule () {
 
         return goodMapping;
     }
+
+    this.utils = {
+        min: function () {
+            var result, worksFine = true;
+
+            result = min([1, 2, 3, 4, 5]);
+            if (result !== 1) {
+                worksFine = false;
+            }
+
+            result = min([10, 4, 6, 8, 2]);
+            if (result !== 2) {
+                worksFine = false;
+            }
+
+            result = min([]);
+            if (result) {
+                worksFine = false;
+            }
+
+            result = min(["Ada Milea", "Mark Zuckerberg"]);
+            if (result !== "Ada Milea") {
+                worksFine = false;
+            }
+
+            result = min(["ada", "Ada"]);
+            if (result !== "Ada") {
+                worksFine = false;
+            }
+
+            return worksFine;
+        },
+        arrayToString: function () {
+            var result, worksFine = true;
+
+            result = arrayToString([1, 2, 3, 4, 5]);
+            if (result !== "12345") {
+                worksFine = false;
+            }
+
+            result = arrayToString([10, 4, 6, 8, 2]);
+            if (result !== "104682") {
+                worksFine = false;
+            }
+
+            result = arrayToString([]);
+            if (result) {
+                worksFine = false;
+            }
+
+            result = arrayToString(["Ada Milea", "Mark Zuckerberg"]);
+            if (result !== "Ada MileaMark Zuckerberg") {
+                worksFine = false;
+            }
+
+            result = arrayToString(["ada", "Ada"]);
+            if (result !== "adaAda") {
+                worksFine = false;
+            }
+
+            return worksFine;
+        }
+    }
 }
 
 var test = new TestModule();

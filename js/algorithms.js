@@ -10,78 +10,122 @@ function Algorithms() {
                 weighted: true,
                 unweighted: true
             },
-            run: function(graph, startNode, fullList = true) {
+            run: function(graph, startData, full = true) {
                 
+                var startNode = startData.startNode;
+
                 var nodes = graph.allNodes;
                 var adjLists = graph.adjacencyLists;
-                
-                var sequenceExec = [];
-                var fullSequenceExec = [];
                 var len = graph.allNodes.length;
+                
+                var briefSteps = [];
+                var fullSteps = [];
+                
+                var queue = [];
                 var visitedEdges = [];
                 var visitedNodes = [];
+                var visitedNodesNo = 0;
 
                 for (var it = 0; it < len; ++it) {
                     visitedEdges.push([]);
                     visitedNodes.push(false);
                 }
-                var visitedNodesNo = 0;
 
                 if (graph.getNodeIndexFromId(startNode) >= 0) {
                     visitedNodes[graph.getNodeIndexFromId(startNode)] = true;
                     ++visitedNodesNo;
                                         
-                    var queue = [startNode + "-" + startNode];
+                    queue = [startNode + "-" + startNode];
+
+                    var currentNode, currentNodeIndex;
+                    var neighbours, nLen;
+
+                    briefSteps.push({type: "nodeVisited", nodes: [{id: startNode, fill: null, 
+                                     stroke: colors.visitedNodeBorder}], 
+                                     edges: [], updates: []});
+                    fullSteps.push({type: "nodeActive", nodes: [{id: startNode, fill: null, 
+                                    stroke: colors.activeNodeBorder}], 
+                                    edges: [], updates: []});
 
                     if (graph.directed === false) {
-                        var currentNode;
-                        var currentNodeIndex;
 
                         while (visitedNodesNo < len) {
 
                             while (queue.length > 0) {
+
                                 currentNode = queue.shift().split("-")[1];
                                 currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+
+                                // If making current node "currently active", this would be needed:
+                                // fullSteps.push({nodes: [{id: currentNode, fill: null, 
+                                //                 stroke: CURRENTLY_ACTIVE_COLOR}], 
+                                //                 edges: [], updates: []});
                             
-                                var neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
-                                
-                                var nLen = neighbours.length;
+                                neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+                                nLen = neighbours.length;
 
                                 for (var it = 0; it < nLen; ++it) {
                                     var ind = graph.getNodeIndexFromId(neighbours[it]);
 
-                                    if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
-
+                                    if (!visitedNodes[ind]) {
+                                    // && !visitedEdges[currentNodeIndex].includes(parseInt(ind))
                                         visitedEdges[currentNodeIndex].push(parseInt(ind));
-                                        // BECAUSE IT IS UNDIRECTED
                                         visitedEdges[ind].push(currentNodeIndex);
+                                        
                                         queue.push(currentNode + "-" + graph.allNodes[ind].id);
 
-                                        if (visitedNodes[ind] !== true) {
-                                            ++visitedNodesNo;
-                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
-                                        }
-                                        else {
-                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-                                        }
+                                        ++visitedNodesNo;
                                         visitedNodes[ind] = true;
+
+                                        briefSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+                                                        fill: null, stroke: colors.visitedNodeBorder}], 
+                                                        edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+                                                                stroke: colors.extendedEdge}], 
+                                                        updates: []});
+                                        fullSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+                                                        fill: null, stroke: colors.activeNodeBorder}], 
+                                                        edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+                                                                stroke: colors.extendedEdge}], 
+                                                        updates: []});
 
                                     }
                                     else {
-                                        //if (extended[graph.allNodes[ind].id] === false) {
-                                            // fullSequenceExec.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-                                        //} 
+                                        if (!visitedEdges[currentNodeIndex].includes(parseInt(ind))) {
+
+                                            visitedEdges[currentNodeIndex].push(parseInt(ind));
+                                            visitedEdges[ind].push(currentNodeIndex);
+                                            
+                                            briefSteps.push({type: "edge", nodes: [], 
+                                                            edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+                                                                    stroke: colors.unextendedEdge}], 
+                                                            updates: []});
+                                            fullSteps.push({type: "edge", nodes: [], 
+                                                            edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+                                                                    stroke: colors.unextendedEdge}], 
+                                                            updates: []});
+                                        }
                                     }
                                 }
+
+                                fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, fill: null, 
+                                                stroke: colors.visitedNodeBorder}], 
+                                                edges: [], updates: []});
                             }
 
                             if (visitedNodesNo < len) {
                                 for (var it = 0; it < len; ++it) {
                                     if (visitedNodes[it] === false) {
-                                        queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
-                                        fullSequenceExec.push({"type": "node", 
-                                                               "id": graph.allNodes[it].id, 
-                                                               "extended": true});
+                                        var nodeId = graph.allNodes[it].id; 
+                                        queue.push(nodeId + "-" + nodeId);
+
+                                        briefSteps.push({type: "nodeVisited", nodes: [{id: nodeId, fill: null, 
+                                                         stroke: colors.visitedNodeBorder}], 
+                                                         edges: [], updates: []});
+                                        fullSteps.push({type: "nodeActive", nodes: [{id: nodeId, fill: null, 
+                                                        stroke: colors.activeNodeBorder}], 
+                                                        edges: [], updates: []});
+
+
                                         visitedNodes[it] = true;
                                         ++visitedNodesNo;
                                         break;
@@ -90,72 +134,71 @@ function Algorithms() {
                             }
                         }
                     }
-                    else {
-                        var currentNode;
-                        var currentNodeIndex;
+                    // else {
 
-                        while (visitedNodesNo < len || queue.length > 0) {
+                    //     while (visitedNodesNo < len || queue.length > 0) {
 
-                            while (queue.length > 0) {
-                                currentNode = queue.shift().split("-")[1];
-                                currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+                    //         while (queue.length > 0) {
+                    //             currentNode = queue.shift().split("-")[1];
+                    //             currentNodeIndex = graph.getNodeIndexFromId(currentNode);
                             
-                                var neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+                    //             var neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
                                 
-                                var nLen = neighbours.length;
+                    //             var nLen = neighbours.length;
 
-                                for (var it = 0; it < nLen; ++it) {
-                                    // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
-                                    var ind = graph.getNodeIndexFromId(neighbours[it]);
+                    //             for (var it = 0; it < nLen; ++it) {
+                    //                 // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
+                    //                 var ind = graph.getNodeIndexFromId(neighbours[it]);
 
-                                    if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
+                    //                 if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
 
-                                        visitedEdges[currentNodeIndex].push(parseInt(ind));
-                                        queue.push(currentNode + "-" + graph.allNodes[ind].id);
+                    //                     visitedEdges[currentNodeIndex].push(parseInt(ind));
+                    //                     queue.push(currentNode + "-" + graph.allNodes[ind].id);
 
-                                        if (visitedNodes[ind] !== true) {
-                                            ++visitedNodesNo;
-                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
-                                        }
-                                        else {
-                                            fullSequenceExec.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-                                        }
-                                        visitedNodes[ind] = true;
-                                    }
-                                    else {
-                                    }
-                                }
-                            }
+                    //                     if (visitedNodes[ind] !== true) {
+                    //                         ++visitedNodesNo;
+                    //                         fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+                    //                     }
+                    //                     else {
+                    //                         fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+                    //                     }
+                    //                     visitedNodes[ind] = true;
+                    //                 }
+                    //                 else {
+                    //                 }
+                    //             }
+                    //         }
 
-                            if (visitedNodesNo < len) {
-                                for (var it = 0; it < len; ++it) {
-                                    if (visitedNodes[it] === false) {
-                                        queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
-                                        fullSequenceExec.push({"type": "node", 
-                                                               "id": graph.allNodes[it].id, 
-                                                               "extended": true});
-                                        visitedNodes[it] = true;
-                                        ++visitedNodesNo;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // RECONSIDER THIS
-                    console.log(visitedEdges);
-                    if (fullList === false) {
-                        return sequenceExec;
+                    //         if (visitedNodesNo < len) {
+                    //             for (var it = 0; it < len; ++it) {
+                    //                 if (visitedNodes[it] === false) {
+                    //                     queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
+                    //                     fullSteps.push({"type": "node", 
+                    //                                            "id": graph.allNodes[it].id, 
+                    //                                            "extended": true});
+                    //                     visitedNodes[it] = true;
+                    //                     ++visitedNodesNo;
+                    //                     break;
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    
+                    if (full) {
+                        return fullSteps;
                     }
                     else {
-                        return fullSequenceExec;
+                        return briefSteps;
                     }
 
                 }
                 return null;
             }
-            // run: function(graph, startNode, full = true) {
+            // run: function(graph, startData, full = true) {
                 
+            //     var startNode = startData.startNode;
+
             //     var nodes = graph.allNodes;
             //     var adjLists = graph.adjacencyLists;
             //     var len = graph.allNodes.length;
@@ -179,55 +222,94 @@ function Algorithms() {
                                         
             //         queue = [startNode + "-" + startNode];
 
-            //         var currentNode;
-            //         var currentNodeIndex;
+            //         var currentNode, currentNodeIndex;
+            //         var neighbours, nLen;
+
+            //         briefSteps.push({type: "nodeVisited", nodes: [{id: startNode, fill: null, 
+            //                          stroke: colors.visitedNodeBorder}], 
+            //                          edges: [], updates: []});
+            //         fullSteps.push({type: "nodeActive", nodes: [{id: startNode, fill: null, 
+            //                         stroke: colors.activeNodeBorder}], 
+            //                         edges: [], updates: []});
 
             //         if (graph.directed === false) {
 
             //             while (visitedNodesNo < len) {
 
             //                 while (queue.length > 0) {
+
             //                     currentNode = queue.shift().split("-")[1];
             //                     currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+
+            //                     // If making current node "currently active", this would be needed:
+            //                     // fullSteps.push({nodes: [{id: currentNode, fill: null, 
+            //                     //                 stroke: CURRENTLY_ACTIVE_COLOR}], 
+            //                     //                 edges: [], updates: []});
                             
-            //                     var neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
-            //                     var nLen = neighbours.length;
+            //                     neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+            //                     nLen = neighbours.length;
 
             //                     for (var it = 0; it < nLen; ++it) {
             //                         var ind = graph.getNodeIndexFromId(neighbours[it]);
 
-            //                         if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
-
+            //                         if (!visitedNodes[ind]) {
+            //                         // && !visitedEdges[currentNodeIndex].includes(parseInt(ind))
             //                             visitedEdges[currentNodeIndex].push(parseInt(ind));
-            //                             // BECAUSE IT IS UNDIRECTED
             //                             visitedEdges[ind].push(currentNodeIndex);
+                                        
             //                             queue.push(currentNode + "-" + graph.allNodes[ind].id);
 
             //                             if (visitedNodes[ind] !== true) {
             //                                 ++visitedNodesNo;
-            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+
+            //                                 briefSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+            //                                                 fill: null, stroke: colors.visitedNodeBorder}], 
+            //                                                 edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                         stroke: colors.extendedEdge}], 
+            //                                                 updates: []});
+            //                                 fullSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+            //                                                 fill: null, stroke: colors.activeNodeBorder}], 
+            //                                                 edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                         stroke: colors.extendedEdge}], 
+            //                                                 updates: []});
             //                             }
             //                             else {
-            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+            //                                 briefSteps.push({type: "edge", nodes: [], 
+            //                                                 edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                         stroke: colors.unextendedEdge}], 
+            //                                                 updates: []});
+            //                                 fullSteps.push({type: "edge", nodes: [], 
+            //                                                 edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                         stroke: colors.unextendedEdge}], 
+            //                                                 updates: []});
             //                             }
             //                             visitedNodes[ind] = true;
 
             //                         }
             //                         else {
-            //                             //if (extended[graph.allNodes[ind].id] === false) {
-            //                                 // fullSteps.push({"edge": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-            //                             //} 
             //                         }
             //                     }
+
+            //                     fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, fill: null, 
+            //                                     stroke: colors.visitedNodeBorder}], 
+            //                                     edges: [], updates: []});
             //                 }
 
             //                 if (visitedNodesNo < len) {
             //                     for (var it = 0; it < len; ++it) {
             //                         if (visitedNodes[it] === false) {
-            //                             queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
-            //                             fullSteps.push({"type": "node", 
-            //                                                    "id": graph.allNodes[it].id, 
-            //                                                    "extended": true});
+            //                             var nodeId = graph.allNodes[it].id; 
+            //                             queue.push(nodeId + "-" + nodeId);
+            //                             // fullSteps.push({"type": "node", "id": graph.allNodes[it].id, 
+            //                             //                        "extended": true});
+            //                             briefSteps.push({type: "nodeVisited", nodes: [{id: nodeId, fill: null, 
+            //                                              stroke: colors.visitedNodeBorder}], 
+            //                                              edges: [], updates: []});
+            //                             fullSteps.push({type: "nodeActive", nodes: [{id: nodeId, fill: null, 
+            //                                             stroke: colors.activeNodeBorder}], 
+            //                                             edges: [], updates: []});
+
+
             //                             visitedNodes[it] = true;
             //                             ++visitedNodesNo;
             //                             break;
@@ -236,63 +318,61 @@ function Algorithms() {
             //                 }
             //             }
             //         }
-            //         else {
+            //         // else {
 
-            //             while (visitedNodesNo < len || queue.length > 0) {
+            //         //     while (visitedNodesNo < len || queue.length > 0) {
 
-            //                 while (queue.length > 0) {
-            //                     currentNode = queue.shift().split("-")[1];
-            //                     currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+            //         //         while (queue.length > 0) {
+            //         //             currentNode = queue.shift().split("-")[1];
+            //         //             currentNodeIndex = graph.getNodeIndexFromId(currentNode);
                             
-            //                     var neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+            //         //             var neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
                                 
-            //                     var nLen = neighbours.length;
+            //         //             var nLen = neighbours.length;
 
-            //                     for (var it = 0; it < nLen; ++it) {
-            //                         // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
-            //                         var ind = graph.getNodeIndexFromId(neighbours[it]);
+            //         //             for (var it = 0; it < nLen; ++it) {
+            //         //                 // ADD ALL EDGES THAT HAVE NOT YET BEEN VISITED
+            //         //                 var ind = graph.getNodeIndexFromId(neighbours[it]);
 
-            //                         if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
+            //         //                 if (visitedEdges[currentNodeIndex].includes(parseInt(ind)) === false) {
 
-            //                             visitedEdges[currentNodeIndex].push(parseInt(ind));
-            //                             queue.push(currentNode + "-" + graph.allNodes[ind].id);
+            //         //                     visitedEdges[currentNodeIndex].push(parseInt(ind));
+            //         //                     queue.push(currentNode + "-" + graph.allNodes[ind].id);
 
-            //                             if (visitedNodes[ind] !== true) {
-            //                                 ++visitedNodesNo;
-            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
-            //                             }
-            //                             else {
-            //                                 fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
-            //                             }
-            //                             visitedNodes[ind] = true;
-            //                         }
-            //                         else {
-            //                         }
-            //                     }
-            //                 }
+            //         //                     if (visitedNodes[ind] !== true) {
+            //         //                         ++visitedNodesNo;
+            //         //                         fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": true})
+            //         //                     }
+            //         //                     else {
+            //         //                         fullSteps.push({"type": "edge", "id": currentNode + "-" + graph.allNodes[ind].id, "extended": false})
+            //         //                     }
+            //         //                     visitedNodes[ind] = true;
+            //         //                 }
+            //         //                 else {
+            //         //                 }
+            //         //             }
+            //         //         }
 
-            //                 if (visitedNodesNo < len) {
-            //                     for (var it = 0; it < len; ++it) {
-            //                         if (visitedNodes[it] === false) {
-            //                             queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
-            //                             fullSteps.push({"type": "node", 
-            //                                                    "id": graph.allNodes[it].id, 
-            //                                                    "extended": true});
-            //                             visitedNodes[it] = true;
-            //                             ++visitedNodesNo;
-            //                             break;
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //         // RECONSIDER THIS
-            //         console.log(visitedEdges);
-            //         if (full === false) {
-            //             return sequenceExec;
+            //         //         if (visitedNodesNo < len) {
+            //         //             for (var it = 0; it < len; ++it) {
+            //         //                 if (visitedNodes[it] === false) {
+            //         //                     queue.push(graph.allNodes[it].id + "-" + graph.allNodes[it].id);
+            //         //                     fullSteps.push({"type": "node", 
+            //         //                                            "id": graph.allNodes[it].id, 
+            //         //                                            "extended": true});
+            //         //                     visitedNodes[it] = true;
+            //         //                     ++visitedNodesNo;
+            //         //                     break;
+            //         //                 }
+            //         //             }
+            //         //         }
+            //         //     }
+            //         // }
+            //         if (full) {
+            //             return fullSteps;
             //         }
             //         else {
-            //             return fullSteps;
+            //             return briefSteps;
             //         }
 
             //     }
@@ -309,8 +389,10 @@ function Algorithms() {
                 weighted: true,
                 unweighted: true
             },
-            run: function(graph, startNode, fullList = true) {
+            run: function(graph, startData, fullList = true) {
                 
+                var startNode = startData.startNode;
+
                 var fullSequenceExec = [];
                 var visited = [];
                 var grLen = graph.allNodes.length;
@@ -765,14 +847,14 @@ function Algorithms() {
         return options;
     };
 
-    this.run = function(algorithm, graph, startNode, fullList = true) {
+    this.run = function(algorithm, graph, startData, fullList = true) {
 
         var len = this.algorithms.length;
         for (var it = 0; it < len; ++it) {
             var alg = this.algorithms[it];
             
             if (alg.id === algorithm || alg.dataValue === algorithm || alg.name === algorithm) {
-                return alg.run(graph, startNode, fullList);
+                return alg.run(graph, startData, fullList);
             }
         }
     };
