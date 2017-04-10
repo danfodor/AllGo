@@ -218,8 +218,6 @@ function switchMode(mode) {
 
     if (mode === "build") {
 
-        cleanSVGGraphColors();
-
         document.getElementById("algMode").style.display = "none";
         document.getElementById("code").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
@@ -594,333 +592,6 @@ function loopNextStep(argument) {
 //////////////////////////////////
 
 
-
-//////////////////////////////////////////////////////
-///////////// THIS PART WILL BE REPLACED /////////////
-//////////////////////////////////////////////////////
-
-function nextStep(buttonPressed = true) {
-    var algorithm = document.getElementById("algorithmsOptions").value;
-
-    if (state.algorithmRuns === false) {
-
-        state.startNode = document.getElementById("nodeOptions").value;
-
-        state.nextSteps = state.algorithms.run(algorithm, state.graph, state.startNode, true);
-        
-        var algorithmId = state.algorithms.algorithmId(algorithm);
-
-        switch (algorithmId) {
-            case "Prim": 
-                state.nextSteps = state.nextSteps.steps;
-                break;
-            case "Kruskal":
-                state.nextSteps = state.nextSteps.steps;
-                break;
-            default:
-                break;
-        }
-
-        state.runningAlgorithm = algorithm;
-
-        state.algorithmRuns = true;
-        state.executedSteps = [];
-    }
-
-    if (state.nextSteps.length > 0) {
-        var executeStep = state.nextSteps.shift();
-
-        document.getElementById("back").classList.remove("disabled");
-        document.getElementById("back").classList.add("hoverShadow");
-
-        if (buttonPressed === true) {
-            pressButton("next");
-        }
-
-        var algorithmId = state.algorithms.algorithmId(algorithm);
-        switch (algorithmId) {
-            case "BFS":
-                var len = state.visitedNodes.length;
-                var nodes = [];
-                var id = executeStep.id;
-
-                if (executeStep.type === "edge") {
-                    var node1 = id.split('-')[0];
-                    var node2 = id.split('-')[1];
-
-                    nodes.push(parseInt(node1));
-                    nodes.push(parseInt(node2));
-                }
-                if (executeStep.type === "node") {
-                    var node = id;
-                    nodes.push(parseInt(node));
-                }
-                
-                var addNodes = [];
-                var dontAdd;
-
-                for (var j = 0; j < nodes.length; ++j) { 
-                    dontAdd = false;
-                    
-                    for (var i = 0; i < len; ++i) {
-                        if (parseInt(nodes[j]) === parseInt(state.visitedNodes[i])) {
-                            dontAdd = true;
-                        }
-                    }
-                    
-                    if (!dontAdd) {
-                        addNodes.push(nodes[j]);
-                    }
-                }
-
-                var code = document.getElementById("code");
-                for (var i = 0; i < addNodes.length; ++i) {
-                    state.visitedNodes.push(addNodes[i]);
-                    code.innerHTML += " "  + addNodes[i];
-                }
-
-                break;
-            case "DFS": 
-                var len = state.visitedNodes.length;
-                var nodes = [];
-                var id = executeStep.id;
-
-                if (executeStep.type === "edge") {
-                    var node1 = id.split('-')[0];
-                    var node2 = id.split('-')[1];
-
-                    nodes.push(parseInt(node1));
-                    nodes.push(parseInt(node2));
-                }
-                if (executeStep.type === "node") {
-                    var node = id;
-                    nodes.push(parseInt(node));
-                }
-                
-                var addNodes = [];
-                var dontAdd;
-
-                for (var j = 0; j < nodes.length; ++j) { 
-                    dontAdd = false;
-                    
-                    for (var i = 0; i < len; ++i) {
-                        if (parseInt(nodes[j]) === parseInt(state.visitedNodes[i])) {
-                            dontAdd = true;
-                        }
-                    }
-                    
-                    if (!dontAdd) {
-                        addNodes.push(nodes[j]);
-                    }
-                }
-
-                var code = document.getElementById("code");
-                for (var i = 0; i < addNodes.length; ++i) {
-                    state.visitedNodes.push(addNodes[i]);
-                    code.innerHTML += " "  + addNodes[i];
-                }
-                break;
-            default: 
-                break;
-        }
-
-        // EXECUTE IT
-        switch(executeStep.type) {
-            case "edge":
-                var node = executeStep.id.split('-')[1];
-                var edgeId = executeStep.id;
-                var edge = document.getElementById("line" + executeStep.id);
-                if (edge === null) {
-                    edgeId = executeStep.id.split('-')[1] + "-" + executeStep.id.split('-')[0];
-                    edge = document.getElementById("line" + edgeId);
-                }
-                
-                node = document.getElementById("circle" + node);
-                var color = colors.extendedEdge;
-                if (executeStep.extended === false) {
-                    color = colors.unextendedEdge;
-                }
-                
-                edge.style.stroke = color;
-                node.style.stroke = colors.visitedNodeBorder;
-
-                if (state.algorithms.algorithmId(algorithm) === "Kruskal") {
-                    var node2 = executeStep.id.split('-')[0];
-                    node2 = document.getElementById("circle" + node2);
-                    node2.style.stroke = colors.visitedNodeBorder;
-                    
-                }
-
-                if (state.graph.directed === true) {
-                    updatePolygonColor("polygon" + edgeId, color);
-                }
-
-                state.executedSteps.push(executeStep);
-                break;
-            case "node": 
-                var nodeId = executeStep.id;
-                
-                document.getElementById("circle" + nodeId).style.stroke = colors.selectedNode;
-                
-                state.executedSteps.push(executeStep);
-                break; 
-            default:
-                break;
-        }
-
-
-    }
-
-    if (state.nextSteps.length === 0) {
-        state.algorithmFinished = true;
-
-        document.getElementById("next").classList.add("disabled");
-
-        turnButton("start", "on");
-        addClassesToId("start", ["disabled", "hoverShadow"]);
-        stop(false);
-
-        document.getElementById("stop").classList.add("disabled");
-        document.getElementById("stop").classList.remove("hoverShadow"); 
-        
-        setTimeout(function() {
-            document.getElementById("next").classList.remove("hoverShadow"); 
-        }, 120); 
-    }
-}
-
-function backStep() {
-    if (state.algorithmRuns === true) {
-        if (state.nextSteps.length === 0 && state.executedSteps.length > 0) {
-            document.getElementById("next").classList.add("hoverShadow");        
-            document.getElementById("next").classList.remove("disabled");
-            document.getElementById("start").classList.add("hoverShadow");
-            document.getElementById("start").classList.remove("disabled");
-        }
-        if (state.executedSteps.length > 0) {
-
-            document.getElementById("back").classList.add("on");
-            document.getElementById("back").classList.remove("off");
-            document.getElementById("back").classList.remove("hoverShadow");
-
-            setTimeout(function() {
-                document.getElementById("back").classList.remove("on");
-                document.getElementById("back").classList.add("off");
-                document.getElementById("back").classList.add("hoverShadow"); 
-            }, 100);             
-
-            var backStep = state.executedSteps.splice(-1,1)[0];
-
-            state.algorithmFinished = false;
-            state.nextSteps.unshift(backStep);
-            // EXECUTE IT
-            console.log(backStep);
-            switch(backStep.type) {
-                case "edge":
-                    var node = document.getElementById("circle" + backStep.id.split('-')[1]);
-
-                    var edgeId = backStep.id;
-                    var edge = document.getElementById("line" + edgeId);
-                    if (edge === null) {
-                        edgeId = backStep.id.split('-')[1] + "-" + backStep.id.split('-')[0]
-                        edge = document.getElementById("line" + edgeId);
-                    }
-
-                    if (state.graph.directed === true) {
-                        updatePolygonColor("polygon" + edgeId, colors.unvisitedEdge);
-                    }
-                    
-                    if (backStep.extended === true) {
-                        node.style.stroke = colors.unselectedNodeOutline;
-                        
-                        var algorithm = document.getElementById("algorithmsOptions").value;
-                        var algorithmId = state.algorithms.algorithmId(algorithm);
-                        switch (algorithmId) {
-                            case "BFS":
-                                var code = document.getElementById("code");
-                                var v = state.visitedNodes[state.visitedNodes.length - 1];
-                                v = v.toString().length;
-                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
-                                console.log(v);
-                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
-                                state.visitedNodes.pop();
-                                break;
-                            case "DFS":
-                                var code = document.getElementById("code");
-                                var v = state.visitedNodes[state.visitedNodes.length - 1];
-                                v = v.toString().length;
-                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
-                                console.log(v);
-                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
-                                state.visitedNodes.pop();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    edge.style.stroke = colors.unvisitedEdge;
-
-                    break;
-                case "node": 
-                    var nodeId = backStep.id;
-                    
-                    if (backStep.extended === true) {
-                        
-                        var algorithm = document.getElementById("algorithmsOptions").value;
-                        var algorithmId = state.algorithms.algorithmId(algorithm);
-                        switch (algorithmId) {
-                            case "BFS":
-                                var code = document.getElementById("code");
-                                var v = state.visitedNodes[state.visitedNodes.length - 1];
-                                v = v.toString().length;
-                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
-                                console.log(v);
-                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
-                                state.visitedNodes.pop();
-                                break;
-                            case "DFS":
-                                var code = document.getElementById("code");
-                                var v = state.visitedNodes[state.visitedNodes.length - 1];
-                                v = v.toString().length;
-                                console.log(state.visitedNodes[state.visitedNodes.length - 1]);
-                                console.log(v);
-                                code.innerHTML = code.innerHTML.slice(0, - (v + 1));
-                                state.visitedNodes.pop();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    document.getElementById("circle" + nodeId).style.stroke = colors.unselectedNodeOutline;
-                    break; 
-                default:
-                    break;
-            }
-        }
-        else {
-            document.getElementById("back").classList.remove("hoverShadow");
-            document.getElementById("back").classList.add("disabled");
-        }
-        if (state.executedSteps.length === 0) { 
-            setTimeout(function() {
-                document.getElementById("back").classList.remove("hoverShadow"); 
-            }, 120);             
-            
-            document.getElementById("back").classList.add("disabled");
-
-        }
-    } 
-}
-
-//////////////////////////////////////////////////////
-////////////////// UP TO THIS POINT //////////////////
-//////////////////////////////////////////////////////
-
-
-// TODO #CONTMENU: RECONSIDER THIS BIT:
-
 // #REFACTORED
 function restart(buttonPressed = true) {
     // // --- Pseudocode ---
@@ -988,15 +659,6 @@ function start(buttonPressed = true) {
     }
 }
 
-function runNextSteps() {
-    if (state.nextSteps.length > 0) {
-        nextStep(false);
-    }
-    else {
-        stop();
-    }
-}
-
 function stop(buttonPressed = true) {
 
     state.runsContinuously = false;
@@ -1026,7 +688,6 @@ function stop(buttonPressed = true) {
         removeClassesFromId("stop", ["off", "hoverShadow"]);
     }
 }
-// #CONTMENU: UP TO THIS POINT
 
 
 function rangeInput() {
@@ -1054,80 +715,21 @@ function speedInput() {
     }
 }
 
-// TODO: Refactor this. It does more than it the name requires!!
-function cleanSVGGraphColors() {
-    var nodes = state.graph.allNodes, len = nodes.length;
-    if (len > 0) {
-
-        state.startNode = document.getElementById("nodeOptions").value;
-        state.algorithmRuns = false;
-
-        // color back:
-        var node;
-        var circle;
-
-        for (var i = 0; i < len; ++i) {
-            node = nodes[i];
-            circle = document.getElementById("circle" + node.id);
-
-            // TODO: Use node colour instead of default colour
-            circle.style.stroke = colors.unvisitedNodeBorder;
-        }
-
-        if (state.executedSteps) {
-            var edgeType = "line", line, step;
-            var len = state.executedSteps.length, edgeId;
-
-            for (var i = 0; i < len; ++i) {
-                step = state.executedSteps[i];
-                if (step.type === "edge") {
-
-                    edgeId = step.id;
-                    line = document.getElementById(edgeType + edgeId);
-                    if (line === null) {
-                        edgeId = step.id.split('-')[1] + "-" + step.id.split('-')[0];
-                        line = document.getElementById("line" + edgeId);
-                    }
-                    if (line) {
-                        line.style.stroke = colors.unextendedEdge;
-                        if (state.graph.directed) {
-                            updatePolygonColor("polygon" + edgeId, colors.unextendedEdge);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// RECONSTRUCTION ENDS HERE ///////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 // TODO: Use cssHandler.js!!!
 function switchDirButtons(directed) {
 
     if (directed === true) {
-
-        document.getElementById("undirected").classList.add("off");
-        document.getElementById("undirected").classList.remove("on");
-        document.getElementById("undirected").classList.add("hoverShadow");
-        document.getElementById("directed").classList.remove("hoverShadow");
-        document.getElementById("directed").classList.add("on");
-        document.getElementById("directed").classList.remove("off");
-
+        turnButton("directed", "on");
+        turnButton("undirected", "off");
     }
     else {
-
-        document.getElementById("directed").classList.add("off");
-        document.getElementById("directed").classList.remove("on");
-        document.getElementById("undirected").classList.remove("hoverShadow");
-        document.getElementById("directed").classList.add("hoverShadow");
-        document.getElementById("undirected").classList.add("on");
-        document.getElementById("undirected").classList.remove("off");
+        turnButton("directed", "off");
+        turnButton("undirected", "on");
     }
 }
 
@@ -1148,7 +750,6 @@ function switchDirected(directed) {
         }
     }    
 }
-
 
 function switchWeighted(weighted) {
 
@@ -1172,23 +773,12 @@ function switchWeighted(weighted) {
 function switchWeightButtons(weighted) {
 
     if (weighted === true) {
-
-        document.getElementById("unweighted").classList.add("off");
-        document.getElementById("unweighted").classList.remove("on");
-        document.getElementById("unweighted").classList.add("hoverShadow");
-        document.getElementById("weighted").classList.remove("hoverShadow");
-        document.getElementById("weighted").classList.add("on");
-        document.getElementById("weighted").classList.remove("off");
-
+        turnButton("weighted", "on");
+        turnButton("unweighted", "off");
     }
     else {
-
-        document.getElementById("unweighted").classList.add("on");
-        document.getElementById("unweighted").classList.remove("off");
-        document.getElementById("unweighted").classList.remove("hoverShadow");
-        document.getElementById("weighted").classList.add("hoverShadow");
-        document.getElementById("weighted").classList.add("off");
-        document.getElementById("weighted").classList.remove("on");
+        turnButton("unweighted", "on");
+        turnButton("weighted", "off");
     }
 }
 

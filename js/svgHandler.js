@@ -624,7 +624,7 @@ function createSVGWeight(nodeId1, nodeId2, p1, p2, weight, sorted = true,
     return text;
 }
 
-function createSVGUndirectedEdge(nodeId1, nodeId2, p1, p2, weighted = false, wieght = 0) {
+function createSVGUndirectedEdge(nodeId1, nodeId2, p1, p2, weighted = false, weight = 0) {
 
     var x1 = p1.x;
     var y1 = p1.y;
