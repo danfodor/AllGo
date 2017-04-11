@@ -218,6 +218,11 @@ function switchMode(mode) {
 
     if (mode === "build") {
 
+        if (state.runsContinuously) {
+            state.runsContinuously = false;
+            stop();
+        }
+
         document.getElementById("algMode").style.display = "none";
         document.getElementById("code").style.display = "none";
         document.getElementById("buildMode").style.display = "block";
@@ -275,48 +280,14 @@ function switchMode(mode) {
         turnButton("build", "off");
         turnButton("algorithm", "on");
 
-
-
-        // FINE UNTIL HERE. THIS NEEDS CAREFUL CONSIDERATION:
-
-        // TODO: Who are you? This should do the set up for the control menu.
-        // Is it still needed?
-        seqControlMenuSetUp();
-
         // Triggering initial steps for algorithm:
         triggerAlgorithm();
-    }
-}
-
-// TODO: Make sure this is not used anymore!!! And remove it...
-function seqControlMenuSetUp() {
-
-    stop();
-
-    addClassesToId("restart", ["off", "hoverShadow"]);
-
-    addClassesToId("back", ["off", "disabled"]);
-    removeClassesFromId("back", ["on", "hoverShadow"]);
-
-
-    addClassesToId("next", ["off", "hoverShadow"]);
-    addClassesToId("start", ["off", "hoverShadow"]);
-    removeClassesFromId("next", ["disabled", "on"]);
-    removeClassesFromId("start", ["disabled", "on"]);
-
-    // TODO: Check if this is up to date!!
-    if (state.graph.noEdge() === true) {
-        if (state.graph.allNodes.length <= 1) {
-            document.getElementById("next").classList.remove("hoverShadow");
-            document.getElementById("next").classList.add("disabled");
-        }
     }
 }
 
 ////////////////////////////////////
 /// CODE REFACTORING STARTS HERE ///
 ////////////////////////////////////
-
 
 function triggerAlgorithm() {
     // More steps: stop()
@@ -348,9 +319,11 @@ function triggerAlgorithm() {
     updateSVGEdgesColor(state.svg, colors.unvisitedEdge);
     updateSVGNodesBorderColor(state.svg, colors.unvisitedNodeBorder);
 
-    // 6. run first step
-    runNextStep(false);
+    // 6. Set up necessary flags
+    state.algorithmFinished = false;
 
+    // 7. run first step
+    runNextStep(false);
 }
 
 function triggerStartNode() {
@@ -400,9 +373,6 @@ function runDTAlgorithm(algorithmId, graph, startData, fullExecution = true) {
     
     state.nextSteps = state.algorithms.run(algorithmId, graph, startData, fullExecution);
     state.executedSteps = [];
-    
-    state.algorithmRuns = true;
-
 }
 
 
@@ -540,9 +510,6 @@ function runBackStep(buttonPressed = true) {
         // 1.4 Color back all the changes nodes and edges .
         var update, len = updates.length;
 
-        console.log(updates.length);
-        console.log(updates);
-
         for (var i = 0; i < len; ++i) {
             update = updates[i];
             switch (update.type) {
@@ -565,6 +532,9 @@ function runBackStep(buttonPressed = true) {
                     break;
             }
         }
+
+        // 1.5 Set up necessary flags
+        state.algorithmFinished = false;
     }
 
     if (state.executedSteps.length === 0) { 
@@ -1596,15 +1566,7 @@ function reset(orientation = false) {
     state.reset(orientation);
     disableButton("algorithm");
 
-    document.getElementById("reset").classList.add("on");
-    document.getElementById("reset").classList.remove("off");
-    document.getElementById("reset").classList.remove("hoverShadow");
-
-    setTimeout(function() {
-        document.getElementById("reset").classList.remove("on");
-        document.getElementById("reset").classList.add("off");
-        document.getElementById("reset").classList.add("hoverShadow"); 
-    }, 100);     
+    pressButton("reset", 100)
 };
 
 function edit(element) {
@@ -2539,26 +2501,11 @@ function hireListeners() {
 
 // Event managing 
 window.onload = function() {
-    // presentationSetUp();
+
     state = new State();
     createSVGGroupZero(state.svg);
     hireListeners();
 
     cssSetUp();
 
-}
-
-function presentationSetUp() {
-    sizes.radius = 30;
-    sizes.edgeWidth = 6;
-    sizes.nodeOutlineWidth = 6;
-    sizes.stdPolygonPoints = "-4,0 -8,-4 -1,0 -8,4";
-    sizes.stdFontSize = "30px";
-    sizes.weightDistance = 18;
-
-    graphExamples = graphExamplesForPresentation;
-
-    // stdPolygonPoints: "-4,0 -8,-4 -1,0 -8,4",
-    // defPolygonPoints: "-2,0 -5,5 5,0 -5,-5",
-    // angleDev: 12
 }

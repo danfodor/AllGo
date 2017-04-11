@@ -61,7 +61,6 @@ function State() {
     this.modalTransform = null;
     
     this.algorithms = new Algorithms();
-    this.algorithmRuns = false;
     this.runningAlgorithm = null;
     this.startNode = null;
     this.nextSteps = [];
@@ -94,7 +93,6 @@ function State() {
         this.rearrangeSelectedId = null;
 
         this.algorithms = new Algorithms();
-        this.algorithmRuns = false;
         this.runningAlgorithm = null;
         this.nextSteps = [];
         this.executedSteps = [];
