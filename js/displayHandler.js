@@ -1411,6 +1411,17 @@ function setDisplay(elementId, display = "block") {
     }
 }
 
+function setInnerHTML(elementId, text) {
+    var success = false, element = document.getElementById(elementId);
+
+    if (element) {
+        element.innerHTML = text;
+        success = true;
+    }
+
+    return success;
+}
+
 
 function turnButton(buttonId, on = 'on', onClasses = ['on'], offClasses = ['off', 'hoverShadow']) {
 

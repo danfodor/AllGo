@@ -952,7 +952,6 @@ function applyRearrangeModal() {
 }
 
 function openSaveModal() {
-    var saveModal = document.getElementById('saveModal');
 
     // DELETE THIS LINE AND CHECK CONTINUE HERE. FIX BUTTONS FOR SAVE DIV
     // state.savedGraphs = [{id: "id1", graphJSON: "none"}, {id: "id2", graphJSON: "none2"}]
@@ -984,7 +983,10 @@ function openSaveModal() {
 
     document.getElementById("saveGraphName").value = "";
 
-    saveModal.style.display = "block";
+    setDisplay("saveAlert", "none");
+    setDisplay("saveModal", "block");
+
+    // saveModal.style.display = "block";
 }
 
 function applySaveModal() {
@@ -993,48 +995,55 @@ function applySaveModal() {
 
     var graphNameExists = false;
 
-    var len = state.savedGraphs.length;
-    for (var i = 0; i < len; ++i) {
-        if (id === state.savedGraphs[i].id) {
+    if (id) {
+        var len = state.savedGraphs.length;
+        for (var i = 0; i < len; ++i) {
+            if (id === state.savedGraphs[i].id) {
 
-            state.savedGraphs[i].graphJSON = graphToJSON(state.graph);
-            
-            graphNameExists = true;
-            break;
+                state.savedGraphs[i].graphJSON = graphToJSON(state.graph);
+                
+                graphNameExists = true;
+                break;
+            }
         }
+        if (!graphNameExists) {
+            state.savedGraphs.push({id: id, graphJSON: graphToJSON(state.graph)});
+        }
+
+        var saveModal = document.getElementById('saveModal');
+        saveModal.style.display = "none";  
     }
-    if (!graphNameExists) {
-        state.savedGraphs.push({id: id, graphJSON: graphToJSON(state.graph)});
+    else {
+        setDisplay("saveAlert", "inline");
+        setInnerHTML("saveAlert", "Please type in a name for the graph!!");
     }
 
-    var saveModal = document.getElementById('saveModal');
-    saveModal.style.display = "none";
 }
 
-function savedOnInputCheck(shouldWork = true) {
-    console.log("shout");
-    if (shouldWork) {
-        var input = document.getElementById("saveGraphName");
-        var value = input.value;
+function savedOnInputCheck() {
 
-        var len = state.savedGraphs.length;
+    setDisplay("saveAlert", "none");
 
-        if (state.savedInputJustMatched === true) {
-            state.savedInputJustMatched = false;
+    var input = document.getElementById("saveGraphName");
+    var value = input.value;
 
-            var graphSpan = document.getElementById(state.savedInputJustMatchedId);
-            graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0)";
-        }
+    var len = state.savedGraphs.length;
 
-        for (var i = 0; i < len; ++i) {
-            if (value === state.savedGraphs[i].id) {
-                state.savedInputJustMatched = true;
-                state.savedInputJustMatchedId = state.savedGraphs[i].id;
+    if (state.savedInputJustMatched === true) {
+        state.savedInputJustMatched = false;
 
-                var graphSpan = document.getElementById(state.savedGraphs[i].id);
-                graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0.5)";
-                // alert("Shout");
-            }
+        var graphSpan = document.getElementById(state.savedInputJustMatchedId);
+        graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0)";
+    }
+
+    for (var i = 0; i < len; ++i) {
+        if (value === state.savedGraphs[i].id) {
+            state.savedInputJustMatched = true;
+            state.savedInputJustMatchedId = state.savedGraphs[i].id;
+
+            var graphSpan = document.getElementById(state.savedGraphs[i].id);
+            graphSpan.style.backgroundColor = "rgba(135, 206, 235, 0.5)";
+            // alert("Shout");
         }
     }
 }

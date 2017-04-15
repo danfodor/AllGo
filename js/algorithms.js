@@ -163,92 +163,369 @@ function Algorithms() {
                 weighted: true,
                 unweighted: true
             },
+            // run: function(graph, startData, full = true) {
+                
+            //     var startNode = startData.startNode;
+
+            //     var nodes = graph.allNodes;
+            //     var adjLists = graph.adjacencyLists;
+            //     var len = graph.allNodes.length;
+                
+            //     var briefSteps = [];
+            //     var fullSteps = [];
+                
+            //     var queue = [];
+            //     var visitedEdges = [];
+            //     var visitedNodes = [];
+            //     var visitedNodesNo = 0;
+
+            //     for (var it = 0; it < len; ++it) {
+            //         visitedEdges.push([]);
+            //         visitedNodes.push(false);
+            //     }
+
+            //     function DFS(currentEdge)
+
+            //     if (graph.getNodeIndexFromId(startNode) >= 0) {
+            //         visitedNodes[graph.getNodeIndexFromId(startNode)] = true;
+            //         ++visitedNodesNo;
+                                        
+            //         queue = [startNode + "-" + startNode];
+
+            //         var currentNode, currentNodeIndex;
+            //         var neighbours, nLen;
+
+            //         briefSteps.push({type: "nodeVisited", nodes: [{id: startNode, fill: null, 
+            //                          stroke: colors.visitedNodeBorder}], 
+            //                          edges: [], updates: []});
+            //         fullSteps.push({type: "nodeActive", nodes: [{id: startNode, fill: null, 
+            //                         stroke: colors.activeNodeBorder}], 
+            //                         edges: [], updates: []});
+
+
+            //         while (visitedNodesNo < len) {
+
+            //             while (queue.length > 0) {
+
+            //                 currentNode = queue.shift().split("-")[1];
+            //                 currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+
+            //                 // If making current node "currently active", this would be needed:
+            //                 // fullSteps.push({nodes: [{id: currentNode, fill: null, 
+            //                 //                 stroke: CURRENTLY_ACTIVE_COLOR}], 
+            //                 //                 edges: [], updates: []});
+                        
+            //                 if (graph.directed === true) {
+            //                     neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+            //                 }
+            //                 else {
+            //                     neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+            //                 }
+            //                 nLen = neighbours.length;
+
+            //                 for (var it = 0; it < nLen; ++it) {
+            //                     var ind = graph.getNodeIndexFromId(neighbours[it]);
+
+            //                     if (!visitedNodes[ind]) {
+
+            //                         visitedEdges[currentNodeIndex].push(parseInt(ind));
+            //                         if (!graph.directed) {
+            //                             visitedEdges[ind].push(currentNodeIndex);
+            //                         }
+                                    
+            //                         queue.push(currentNode + "-" + graph.allNodes[ind].id);
+
+            //                         ++visitedNodesNo;
+            //                         visitedNodes[ind] = true;
+
+            //                         briefSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+            //                                         fill: null, stroke: colors.visitedNodeBorder}], 
+            //                                         edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                 stroke: colors.extendedEdge}], 
+            //                                         updates: []});
+            //                         fullSteps.push({type: "edge", nodes: [{id: graph.allNodes[ind].id, 
+            //                                         fill: null, stroke: colors.activeNodeBorder}], 
+            //                                         edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                 stroke: colors.extendedEdge}], 
+            //                                         updates: []});
+
+            //                     }
+            //                     else {
+            //                         if (!visitedEdges[currentNodeIndex].includes(parseInt(ind))) {
+
+            //                             visitedEdges[currentNodeIndex].push(parseInt(ind));
+            //                             if (!graph.directed) {
+            //                                 visitedEdges[ind].push(currentNodeIndex);
+            //                             }
+                                        
+            //                             briefSteps.push({type: "edge", nodes: [], 
+            //                                             edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                     stroke: colors.unextendedEdge}], 
+            //                                             updates: []});
+            //                             fullSteps.push({type: "edge", nodes: [], 
+            //                                             edges: [{id: currentNode + "-" + graph.allNodes[ind].id, 
+            //                                                     stroke: colors.unextendedEdge}], 
+            //                                             updates: []});
+            //                         }
+            //                     }
+            //                 }
+
+            //                 fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, fill: null, 
+            //                                 stroke: colors.visitedNodeBorder}], 
+            //                                 edges: [], updates: []});
+            //             }
+
+            //             if (visitedNodesNo < len) {
+            //                 for (var it = 0; it < len; ++it) {
+            //                     if (visitedNodes[it] === false) {
+            //                         var nodeId = graph.allNodes[it].id; 
+            //                         queue.push(nodeId + "-" + nodeId);
+
+            //                         briefSteps.push({type: "nodeVisited", nodes: [{id: nodeId, fill: null, 
+            //                                          stroke: colors.visitedNodeBorder}], 
+            //                                          edges: [], updates: []});
+            //                         fullSteps.push({type: "nodeActive", nodes: [{id: nodeId, fill: null, 
+            //                                         stroke: colors.activeNodeBorder}], 
+            //                                         edges: [], updates: []});
+
+
+            //                         visitedNodes[it] = true;
+            //                         ++visitedNodesNo;
+            //                         break;
+            //                     }
+            //                 }
+            //             }
+            //         }
+
+            //         if (full) {
+            //             return fullSteps;
+            //         }
+            //         else {
+            //             return briefSteps;
+            //         }
+
+            //     }
+            //     return null;
+            // }
             run: function(graph, startData, fullList = true) {
                 
                 var startNode = startData.startNode;
 
-                var fullSequenceExec = [];
-                var visited = [];
-                var grLen = graph.allNodes.length;
+                var visitedNodes = [];
                 var visitedEdges = [];
                 var visitedNodesNo = 0;
+                var nodesNo = graph.allNodes.length;
 
-                for (var i = 0; i < grLen; ++i) {
+                var briefSteps = [];
+                var fullSteps = [];
+
+                for (var i = 0; i < nodesNo; ++i) {
                     visitedEdges.push([]);
-                    visited.push(false);
+                    visitedNodes.push(false);
                 }
 
-                function recursiveDFS(currentEdge) {
-
-                    var currentNode = currentEdge.split('-')[1];
-                    var nodeIndex = graph.getNodeIndexFromId(currentNode);
-
-                    if (visited[nodeIndex] === false) {
-                        visited[nodeIndex] = true;
-                        visitedNodesNo++;
-
-                        var neighbours;
-                        if (graph.directed === true) {
-                            neighbours = graph.adjacencyLists[nodeIndex].outNeighbours;
-                        }
-                        else {
-                            neighbours = graph.adjacencyLists[nodeIndex].neighbours;
-                        }
-                        var len = neighbours.length;
-
-                        var goAhead;
-                        var edgeId, ind2;
-                        for (var i = 0; i < len; ++i) {
-                            goAhead = true;
-                            edgeId = currentNode + "-" + neighbours[i];
-                            console.log(edgeId);
-                            ind2 = graph.getNodeIndexFromId(neighbours[i]);
-
-                            if (graph.directed === false) {
-                                if (visitedEdges[nodeIndex].includes(parseInt(neighbours[i])) || 
-                                    visitedEdges[ind2].includes(parseInt(currentNode))) {
-
-                                    goAhead = false;
-                                }
-                                else {
-                                    visitedEdges[nodeIndex].push(parseInt(neighbours[i])); 
-                                    visitedEdges[ind2].push(parseInt(currentNode));
-                                }
-                            }
-
-                            if (goAhead) {
-                                if (visited[graph.getNodeIndexFromId(neighbours[i])]) {
-                                    fullSequenceExec.push({"type": "edge", "id": edgeId, 
-                                        "extended": false})
-                                }
-                                else {
-                                    fullSequenceExec.push({"type": "edge", "id": edgeId, 
-                                        "extended": true})
-                                    recursiveDFS(edgeId)
-                                }
-                            }
-                        }
-                    }
-                }
-
+                briefSteps.push({type: "nodeVisited", nodes: [{id: startNode, 
+                                 fill: null, stroke: colors.visitedNodeBorder}], 
+                                 edges: [], updates: []});
+                fullSteps.push({type: "nodeActive", nodes: [{id: startNode, 
+                                fill: null, stroke: colors.activeNodeBorder}], 
+                                edges: [], updates: []});
 
                 recursiveDFS(startNode + "-" + startNode);
 
                 // CONTINUEHERE ALL NODES SHOULD BE VISITED
-                while (visitedNodesNo < grLen) {
-                    for (var it = 0; it < grLen; ++it) {
-                        if (visited[it] === false) {
-                            fullSequenceExec.push({"type": "node", 
-                                                   "id": graph.allNodes[it].id, 
-                                                   "extended": true});
-                            recursiveDFS(graph.allNodes[it].id + "-" + graph.allNodes[it].id)
+                while (visitedNodesNo < nodesNo) {
+                    for (var i = 0; i < nodesNo; ++i) {
+                        if (visitedNodes[i] === false) {
+
+                            briefSteps.push({type: "nodeVisited", nodes: [{id: graph.allNodes[i].id, 
+                                             fill: null, stroke: colors.visitedNodeBorder}], 
+                                             edges: [], updates: []});
+                            fullSteps.push({type: "nodeActive", nodes: [{id: graph.allNodes[i].id, 
+                                            fill: null, stroke: colors.activeNodeBorder}], 
+                                            edges: [], updates: []});
+
+                            recursiveDFS(graph.allNodes[i].id + "-" + graph.allNodes[i].id)
                             break;
                         }
                     }
                 }
 
-                return fullSequenceExec;
+                function recursiveDFS(currentEdge) {
+
+                    var previousNode = currentEdge.split('-')[0]; 
+                    var currentNode = currentEdge.split('-')[1];
+                    var currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+
+                    if (visitedNodes[currentNodeIndex] === false) {
+                        visitedNodes[currentNodeIndex] = true;
+                        visitedNodesNo++;
+
+                        var neighbours, len;
+                        if (graph.directed === true) {
+                            neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+                        }
+                        else {
+                            neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+                        }
+                        len = neighbours.length;
+
+
+                        if (len === 0) { // replace len === 0 with diff between neighbours and visited
+                            // CONTINUEHERE: THERE ARE NODES AVAILABLE.
+                            fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, 
+                                            fill: null, stroke: colors.visitedNodeBorder}], 
+                                            edges: [], updates: []});
+                        }
+
+                        var goAhead;
+                        var edgeId, nextNodeIndex;
+                        for (var i = 0; i < len; ++i) {
+                            goAhead = true;
+                            edgeId = currentNode + "-" + neighbours[i];
+                            nextNodeIndex = graph.getNodeIndexFromId(neighbours[i]);
+
+                            if (graph.directed === false) {
+                                if (visitedEdges[currentNodeIndex].includes(parseInt(neighbours[i])) || 
+                                    visitedEdges[nextNodeIndex].includes(parseInt(currentNode))) {
+
+                                    goAhead = false;
+                                }
+                                else {
+                                    visitedEdges[currentNodeIndex].push(parseInt(neighbours[i])); 
+                                    visitedEdges[nextNodeIndex].push(parseInt(currentNode));
+                                }
+                            }
+
+                            if (goAhead) {
+                                if (visitedNodes[graph.getNodeIndexFromId(neighbours[i])]) {
+                                    briefSteps.push({type: "edge", nodes: [], 
+                                                    edges: [{id: edgeId, 
+                                                            stroke: colors.unextendedEdge}], 
+                                                    updates: []});
+                                    fullSteps.push({type: "edge", nodes: [], 
+                                                    edges: [{id: edgeId, 
+                                                            stroke: colors.unextendedEdge}], 
+                                                    updates: []});
+                                }
+                                else {
+                                    briefSteps.push({type: "edge", nodes: [{id: graph.allNodes[nextNodeIndex].id, 
+                                                    fill: null, stroke: colors.visitedNodeBorder}], 
+                                                    edges: [{id: edgeId, stroke: colors.extendedEdge}], 
+                                                    updates: []});
+                                    fullSteps.push({type: "edge", nodes: [{id: graph.allNodes[nextNodeIndex].id, 
+                                                    fill: null, stroke: colors.activeNodeBorder}], 
+                                                    edges: [{id: edgeId, stroke: colors.extendedEdge}], 
+                                                    updates: []});
+                                    console.log("here", edgeId);
+                                    recursiveDFS(edgeId);
+                                }
+                            }
+                        }
+
+                        fullSteps.push({type: "nodeVisited", nodes: [{id: previousNode, 
+                                        fill: null, stroke: colors.visitedNodeBorder}], 
+                                        edges: [], updates: []});
+                    }
+                    else {
+                        // Think about bridges
+                    }
+
+                }
+
+                if (!fullList) {
+                    return briefSteps;
+                }
+
+                return fullSteps;
             }
+
+            // run: function(graph, startData, fullList = true) {
+                
+            //     var startNode = startData.startNode;
+
+            //     var fullSteps = [];
+            //     var visited = [];
+            //     var nodesNo = graph.allNodes.length;
+            //     var visitedEdges = [];
+            //     var visitedNodesNo = 0;
+
+            //     for (var i = 0; i < nodesNo; ++i) {
+            //         visitedEdges.push([]);
+            //         visited.push(false);
+            //     }
+
+            //     function recursiveDFS(currentEdge) {
+
+            //         var currentNode = currentEdge.split('-')[1];
+            //         var currentNodeIndex = graph.getNodeIndexFromId(currentNode);
+
+            //         if (visited[currentNodeIndex] === false) {
+            //             visited[currentNodeIndex] = true;
+            //             visitedNodesNo++;
+
+            //             var neighbours;
+            //             if (graph.directed === true) {
+            //                 neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
+            //             }
+            //             else {
+            //                 neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
+            //             }
+            //             var len = neighbours.length;
+
+            //             var goAhead;
+            //             var edgeId, nextNodeIndex;
+            //             for (var i = 0; i < len; ++i) {
+            //                 goAhead = true;
+            //                 edgeId = currentNode + "-" + neighbours[i];
+            //                 console.log(edgeId);
+            //                 nextNodeIndex = graph.getNodeIndexFromId(neighbours[i]);
+
+            //                 if (graph.directed === false) {
+            //                     if (visitedEdges[currentNodeIndex].includes(parseInt(neighbours[i])) || 
+            //                         visitedEdges[nextNodeIndex].includes(parseInt(currentNode))) {
+
+            //                         goAhead = false;
+            //                     }
+            //                     else {
+            //                         visitedEdges[currentNodeIndex].push(parseInt(neighbours[i])); 
+            //                         visitedEdges[nextNodeIndex].push(parseInt(currentNode));
+            //                     }
+            //                 }
+
+            //                 if (goAhead) {
+            //                     if (visited[graph.getNodeIndexFromId(neighbours[i])]) {
+            //                         fullSteps.push({"type": "edge", "id": edgeId, 
+            //                             "extended": false})
+            //                     }
+            //                     else {
+            //                         fullSteps.push({"type": "edge", "id": edgeId, 
+            //                             "extended": true})
+            //                         recursiveDFS(edgeId)
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+
+
+            //     recursiveDFS(startNode + "-" + startNode);
+
+            //     // CONTINUEHERE ALL NODES SHOULD BE VISITED
+            //     while (visitedNodesNo < nodesNo) {
+            //         for (var it = 0; it < nodesNo; ++it) {
+            //             if (visited[it] === false) {
+            //                 fullSteps.push({"type": "node", 
+            //                                        "id": graph.allNodes[it].id, 
+            //                                        "extended": true});
+            //                 recursiveDFS(graph.allNodes[it].id + "-" + graph.allNodes[it].id)
+            //                 break;
+            //             }
+            //         }
+            //     }
+
+            //     return fullSteps;
+            // }
         },
         {
             id: "Bridges",

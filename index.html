@@ -35,14 +35,11 @@
             <div class = "sided odd">
 
                 <div class="row">
-                    <div id="settingsDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                        <div id="settings" class="button off hoverShadow" onclick="openSettingsModal()">
-                            Settings
-                        </div>
+                    <div class="col-sm-6" style="text-align: right; padding-bottom: 10px;">
                     </div>
                     <div class="col-sm-6" style="text-align: right; padding-bottom: 10px;">
-                        <span class="glyphicon glyphicon-info-sign"></span>
-                        
+                        <span class="glyphicon glyphicon-info-sign">
+                        </span>
                     </div>
                 </div>
 
@@ -69,31 +66,7 @@
                                 Load Graph
                             </div>
                         </div>                    
-                    </div>                
-<!--                     <div class="row">
-                        <div class="col-sm-3"> 
-                        </div>
-                        <div id="saveDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                            <div id="save" class="button off hoverShadow" onclick="openSaveModal()"> 
-                                Save Graph
-                            </div>
-                        </div> 
-                        <div class="col-sm-3">
-                        </div>                    
                     </div>
-
-                    <div class="row">
-                        <div class="col-sm-3"> 
-                        </div>
-                        <div id="loadDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
-                            <div id="load" class="button off hoverShadow" onclick="openLoadModal()"> 
-                                Load Graph
-                            </div>
-                        </div>       
-                        <div class="col-sm-3">
-                        </div>                    
-                    </div> -->
-
                     <div class="row">
                         <div class="col-sm-3"> 
                         </div>
@@ -102,6 +75,17 @@
                                 Rearrange Graph
                             </div>
                         </div>   
+                        <div class="col-sm-3">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                        </div>
+                        <div id="settingsDiv" class="col-sm-6 buttonDiv" style="text-align: center;">
+                            <div id="settings" class="button off hoverShadow" onclick="openSettingsModal()">
+                                Settings
+                            </div>
+                        </div>
                         <div class="col-sm-3">
                         </div>
                     </div>
@@ -343,7 +327,7 @@ while (queue not empty or graph not fully visited)
             </div>
             <hr />
             <div class="row">
-                <div id="settignsOptions" class="col-sm-12" style="text-align: left;">
+                <div id="settingsOptions" class="col-sm-12" style="text-align: left;">
                     <div class="settingsOption">
                         Radius of the node (value between 12 and 60): <input id="radiusSize" type="number" 
                                                             name="radius" step="1.00" min="12.00" max="60.00">
@@ -370,58 +354,61 @@ while (queue not empty or graph not fully visited)
                     While running an algorithm:
                     </div>
                     <br>
-                    <div style="padding-bottom: 12px;">
-                    Choose colors for node borders:
-                    </div> 
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When unvisited:
-                        <input id="unvisitedNodeBorderColor" type="color" name="unvisitedNodeBorderColor">
-                    </div>
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When visited: 
-                        <input id="visitedNodeBorderColor" type="color" name="visitedNodeBorderColor">
-                    </div>
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When active: 
-                        <input id="activeNodeBorderColor" type="color" name="activeNodeBorderColor">
-                    </div> 
-                    <br>
 
-                    <div style="padding-bottom: 12px;">
-                    Choose colors for edges:
-                    </div> 
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When unvisited:
-                        <input id="unvisitedEdgeColor" type="color" name="unvisitedEdgeColor">
+                    <div class="row">
+                        <div class="col-sm-6">
+
+                            <div style="padding-bottom: 12px;">
+                            Choose colors for node borders:
+                            </div> 
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="unvisitedNodeBorderColor" type="color" name="unvisitedNodeBorderColor">
+                                 - when unvisited:
+                            </div>
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="visitedNodeBorderColor" type="color" name="visitedNodeBorderColor">
+                                 - when visited: 
+                            </div>
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="activeNodeBorderColor" type="color" name="activeNodeBorderColor">
+                                 - when active: 
+                            </div> 
+                            <br>
+                            
+                        </div>
+                        <div class="col-sm-6">
+
+                            <div style="padding-bottom: 12px;">
+                            Choose colors for edges:
+                            </div> 
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="unvisitedEdgeColor" type="color" name="unvisitedEdgeColor">
+                                - when unvisited.
+                            </div>
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="extendedEdgeColor" type="color" name="extendedEdgeColor">
+                                - when visited and extended. 
+                            </div>
+                            <br>
+                            <div class="settingsOption" style="padding-left: 24px;">
+                                <input id="unextendedEdgeColor" type="color" name="unextendedEdgeColor">
+                                - when visited and not extended.
+                            </div>
+
+                        </div>
                     </div>
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When visited and extended: 
-                        <input id="extendedEdgeColor" type="color" name="extendedEdgeColor">
-                    </div>
-                    <br>
-                    <div class="settingsOption" style="padding-left: 24px;">
-                        When visited and not extended: 
-                        <input id="unextendedEdgeColor" type="color" name="unextendedEdgeColor">
-                    </div>
-<!--                     <div class="settingsOption">
-                        Choose the color for visited nodes (for their borders):
-                        <input id="visitedNodeBorderColor" type="color" name="visitedNodeBorderColor">
-                    </div>
-                    <br>
-                    <div class="settingsOption">
-                        Choose the color for unvisited nodes (for their borders):
-                        <input id="unvisitedNodeBorderColor" type="color" name="unvisitedNodeBorderColor">
-                    </div>
-                    <br>
-                    <div class="settingsOption">
-                        Choose the color for active nodes (for their borders):
-                        <input id="activeNodeBorderColor" type="color" name="activeNodeBorderColor">
-                    </div> -->
+
+
+
+
+
+
+
                 </div>
             </div>
             <hr />
@@ -498,6 +485,7 @@ while (queue not empty or graph not fully visited)
                 <div id="graphName" class="col-sm-12">
                     Name: 
                     <input id="saveGraphName" type="text" value="" oninput="savedOnInputCheck()" placeholder="Enter graph name">
+                    <div id="saveAlert" style="color: red"></div>
                 </div>
             </div>
             <hr />
@@ -586,26 +574,6 @@ while (queue not empty or graph not fully visited)
             </div>
         </div>
     </div>
-
-<!-- http://codepen.io/erikterwan/pen/EVzeRP -->
-<!--     <nav role="navigation">
-        <div id="menuToggle">
-            <input type="checkbox" />
-            
-            <span></span>
-            <span></span>
-            <span></span>
-            
-            <ul id="menu">
-                <a href="#"><li>Home</li></a>
-                <a href="#"><li>About</li></a>
-                <a href="#"><li>Info</li></a>
-                <a href="#"><li>Contact</li></a>
-                <a href="https://erikterwan.com/" target="_blank"><li>Show me more</li></a>
-            </ul>
-        </div>
-    </nav> -->
-
 
 </div>
 

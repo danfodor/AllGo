@@ -69,6 +69,9 @@ function State() {
     this.algorithmFinished = false;
     this.visitedNodes = [];
 
+    // TODO: CONTINUEHERE -> To add enter activity.
+    // this.openedModal = [];
+
     this.mode = "build";
 
     this.mouse = {"downInsideSVG": null, "downX": -1, "downY": -1, "moved": false,
