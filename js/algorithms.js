@@ -370,14 +370,6 @@ function Algorithms() {
                         }
                         len = neighbours.length;
 
-
-                        if (len === 0) { // replace len === 0 with diff between neighbours and visited
-                            // CONTINUEHERE: THERE ARE NODES AVAILABLE.
-                            fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, 
-                                            fill: null, stroke: colors.visitedNodeBorder}], 
-                                            edges: [], updates: []});
-                        }
-
                         var goAhead;
                         var edgeId, nextNodeIndex;
                         for (var i = 0; i < len; ++i) {
@@ -423,9 +415,12 @@ function Algorithms() {
                             }
                         }
 
-                        fullSteps.push({type: "nodeVisited", nodes: [{id: previousNode, 
-                                        fill: null, stroke: colors.visitedNodeBorder}], 
-                                        edges: [], updates: []});
+                        var visitedNeighboursNo = visitedEdges[currentNodeIndex].length;
+                        if (len - visitedNeighboursNo === 0) {
+                            fullSteps.push({type: "nodeVisited", nodes: [{id: currentNode, 
+                                            fill: null, stroke: colors.visitedNodeBorder}], 
+                                            edges: [], updates: []});
+                        }
                     }
                     else {
                         // Think about bridges
@@ -439,93 +434,6 @@ function Algorithms() {
 
                 return fullSteps;
             }
-
-            // run: function(graph, startData, fullList = true) {
-                
-            //     var startNode = startData.startNode;
-
-            //     var fullSteps = [];
-            //     var visited = [];
-            //     var nodesNo = graph.allNodes.length;
-            //     var visitedEdges = [];
-            //     var visitedNodesNo = 0;
-
-            //     for (var i = 0; i < nodesNo; ++i) {
-            //         visitedEdges.push([]);
-            //         visited.push(false);
-            //     }
-
-            //     function recursiveDFS(currentEdge) {
-
-            //         var currentNode = currentEdge.split('-')[1];
-            //         var currentNodeIndex = graph.getNodeIndexFromId(currentNode);
-
-            //         if (visited[currentNodeIndex] === false) {
-            //             visited[currentNodeIndex] = true;
-            //             visitedNodesNo++;
-
-            //             var neighbours;
-            //             if (graph.directed === true) {
-            //                 neighbours = graph.adjacencyLists[currentNodeIndex].outNeighbours;
-            //             }
-            //             else {
-            //                 neighbours = graph.adjacencyLists[currentNodeIndex].neighbours;
-            //             }
-            //             var len = neighbours.length;
-
-            //             var goAhead;
-            //             var edgeId, nextNodeIndex;
-            //             for (var i = 0; i < len; ++i) {
-            //                 goAhead = true;
-            //                 edgeId = currentNode + "-" + neighbours[i];
-            //                 console.log(edgeId);
-            //                 nextNodeIndex = graph.getNodeIndexFromId(neighbours[i]);
-
-            //                 if (graph.directed === false) {
-            //                     if (visitedEdges[currentNodeIndex].includes(parseInt(neighbours[i])) || 
-            //                         visitedEdges[nextNodeIndex].includes(parseInt(currentNode))) {
-
-            //                         goAhead = false;
-            //                     }
-            //                     else {
-            //                         visitedEdges[currentNodeIndex].push(parseInt(neighbours[i])); 
-            //                         visitedEdges[nextNodeIndex].push(parseInt(currentNode));
-            //                     }
-            //                 }
-
-            //                 if (goAhead) {
-            //                     if (visited[graph.getNodeIndexFromId(neighbours[i])]) {
-            //                         fullSteps.push({"type": "edge", "id": edgeId, 
-            //                             "extended": false})
-            //                     }
-            //                     else {
-            //                         fullSteps.push({"type": "edge", "id": edgeId, 
-            //                             "extended": true})
-            //                         recursiveDFS(edgeId)
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-
-
-            //     recursiveDFS(startNode + "-" + startNode);
-
-            //     // CONTINUEHERE ALL NODES SHOULD BE VISITED
-            //     while (visitedNodesNo < nodesNo) {
-            //         for (var it = 0; it < nodesNo; ++it) {
-            //             if (visited[it] === false) {
-            //                 fullSteps.push({"type": "node", 
-            //                                        "id": graph.allNodes[it].id, 
-            //                                        "extended": true});
-            //                 recursiveDFS(graph.allNodes[it].id + "-" + graph.allNodes[it].id)
-            //                 break;
-            //             }
-            //         }
-            //     }
-
-            //     return fullSteps;
-            // }
         },
         {
             id: "Bridges",
@@ -570,7 +478,7 @@ function Algorithms() {
                 weighted: true,
                 unweighted: false
             },
-            run: function(graph, fullList = true) {
+            run: function(graph, startData, fullList = true) {
 
                 function min(a, b) {
                     if (parseFloat(a) < parseFloat(b)) {
@@ -593,7 +501,7 @@ function Algorithms() {
                 var steps = [];
                 if (graph.directed === false && graph.weighted === true) {
 
-                    function compare(a,b) {
+                    function compare(a, b) {
                         if (parseFloat(a.weight) < parseFloat(b.weight))
                             return -1;
                         if (parseFloat(a.weight) > parseFloat(b.weight))
